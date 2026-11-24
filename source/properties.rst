@@ -299,14 +299,14 @@ The Eddington tensor and the thin-limit face fluxes come from the rays, so radia
 far from isotropic keeps its direction: crossing beams pass through each other, a beam
 behind an opaque cloud leaves a sharp shadow, and the field around an emitting cylinder
 follows exact transport (an M1 closure merges crossing beams and fills shadows). Each beam
-stays straight, at its angle and 1-2 cells wide, but an oblique beam narrower than a cell
-carries about 1.8 x the exact energy density (1.4 x at twice the resolution; the cap of the
-streaming share at its edges), while its energy flux equals the injected flux to 3e-7. Around
+of the test, 4 cells wide, stays straight at its angle but carries 1.20 x the exact energy
+(1.79, 1.39, 1.20, 1.09 x at 1, 2, 4, 8 cells; the cap of the streaming share at its edges),
+while its energy flux equals the injected flux to 6e-8. Around
 the cylinder E and the energy flux Phi are within 1.1 % and 1.2 % of exact transport; the face
 momentum F there is about 20 % above it (an earlier study with other keys attributed this to
 the harmonic face opacity at the sharp edge; not re-measured here).
 
-Test: ``idort_beams`` (L1 of E and the beam energy within 5 % of 0.777 and 1.785), ``idort_shadow``, ``idort_shadow_gl`` (L1
+Test: ``idort_beams`` (L1 of E and the beam energy within 5 % of 0.2015 and 1.204), ``idort_shadow``, ``idort_shadow_gl`` (L1
 0.014 and 0.013), ``idort_cylinder`` (E and Phi outside 0.011 and 0.012), ``nlte_eps1e-1``, ``nlte_eps1e-4`` (J
 against exact transport, L1 1e-4 and 1.3e-3); ``idort_beams_mb`` (4 MeshBlocks: identical in
 tile mode); ``shadow`` (a clump lit by an isotropic bath: 0.6 % of the unshadowed radiation is
@@ -323,7 +323,7 @@ unchanged to 2 %).
    :alt: idort_beams
    :width: 100%
 
-   Two beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay 1-2 cells wide; an oblique sub-cell beam carries about 1.8 x the exact energy, at the exact energy flux. Pass: L1 of E and the beam energy within 5 % of 0.777 and 1.785; energy flux through every row within 1e-5 of the injected.
+   Two 4-cell-wide beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay straight and carry 1.20 x the exact energy, at the exact energy flux. Pass: L1 of E and the beam energy within 5 % of 0.2015 and 1.204; energy flux through every row within 1e-5 of the injected.
 
 .. figure:: figures/idort_shadow.png
    :alt: idort_shadow, idort_shadow_gl
