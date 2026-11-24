@@ -13,7 +13,9 @@ boundaries, opacities and units, the layout mode, and output. The production val
 of the star templates in ``inputs/rad_vet_clean/`` (``star_bsg``, ``star_m35mms``, ``star_t9l62``:
 3-D spherical-polar wedges, one MeshBlock along x1, fixed rays, problem generator
 ``he_star_vet``). Solver internals and keys without effect are listed only by name in the
-appendix.
+appendix. A full sphere with poles or a stretched theta under ``vet_gd``, and radiation with
+``<mhd>``, are in the code but no deck or test covers them
+(:doc:`scheme`, "In the code but not tested").
 
 Columns: **default** is the value the code uses when the key is absent; **production** is
 the value in the templates (``all:`` when the three agree); **read in** is the file and

@@ -232,7 +232,8 @@ Time integration, time step and retries
 +----------------------------------+-----------------------------------+------------------+-----------------+-------------------------------+
 | ``rad_vet/time2_tableau``        | Tableau of the two stages:        | ``hesdirk2``     | all: ``sdirk2`` | ``rad_vet/rad_vet_time2.cpp`` |
 |                                  | ``sdirk2`` (Alexander's L-stable  |                  |                 | (``Time2Init``)               |
-|                                  | SDIRK2, recommended),             |                  |                 |                               |
+|                                  | SDIRK2, recommended; FATAL with   |                  |                 |                               |
+|                                  | ``<mhd>`` and matter coupling),   |                  |                 |                               |
 |                                  | ``hesdirk2``, ``trbdf2``.         |                  |                 |                               |
 +----------------------------------+-----------------------------------+------------------+-----------------+-------------------------------+
 | ``rad_vet/time2_auto_be``        | After a step whose stages fell    | 16               | all: ``16``     | ``rad_vet/rad_vet_time2.cpp`` |
@@ -517,11 +518,15 @@ Layout and reproducibility
 |                                | need >= 3.        |                 |                 |                         |
 +--------------------------------+-------------------+-----------------+-----------------+-------------------------+
 | ``meshblock/nx1``, ``nx2``,    | MeshBlock size.   | = mesh          | per deck        | ``mesh/mesh.cpp``       |
-| ``nx3``                        | One MeshBlock     |                 |                 | (constructor)           |
-|                                | along x1 is       |                 |                 |                         |
-|                                | needed for the    |                 |                 |                         |
-|                                | ray cut and tile  |                 |                 |                         |
-|                                | mode.             |                 |                 |                         |
+| ``nx3``                        | On spherical      |                 |                 | (constructor)           |
+|                                | polar and the     |                 |                 |                         |
+|                                | cubed sphere nx1  |                 |                 |                         |
+|                                | must equal        |                 |                 |                         |
+|                                | ``<mesh>/nx1``    |                 |                 |                         |
+|                                | (FATAL            |                 |                 |                         |
+|                                | otherwise); tile  |                 |                 |                         |
+|                                | mode needs it on  |                 |                 |                         |
+|                                | every mesh.       |                 |                 |                         |
 +--------------------------------+-------------------+-----------------+-----------------+-------------------------+
 
 Changing the mode changes the round-off of the sums: switch at a fresh start, or accept a

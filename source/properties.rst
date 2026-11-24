@@ -288,11 +288,13 @@ behind an opaque cloud leaves a sharp shadow, and the field around an emitting c
 follows exact transport (an M1 closure merges crossing beams and fills shadows). Each beam
 stays straight, at its angle and 1-2 cells wide, but an oblique beam narrower than a cell
 carries about 1.8 x the exact energy density (1.4 x at twice the resolution; the cap of the
-streaming share at its edges). Around the cylinder E is within 1.1 % of exact transport and
-the moment flux in the vacuum about 20 % above it.
+streaming share at its edges), while its energy flux equals the injected flux to 3e-7. Around
+the cylinder E and the energy flux Phi are within 1.1 % and 1.2 % of exact transport; the face
+momentum F there is about 20 % above it (an earlier study with other keys attributed this to
+the harmonic face opacity at the sharp edge; not re-measured here).
 
 Test: ``idort_beams`` (L1 of E and the beam energy within 5 % of 0.777 and 1.785), ``idort_shadow``, ``idort_shadow_gl`` (L1
-0.014 and 0.013), ``idort_cylinder`` (E outside 0.011), ``nlte_eps1e-1``, ``nlte_eps1e-4`` (J
+0.014 and 0.013), ``idort_cylinder`` (E and Phi outside 0.011 and 0.012), ``nlte_eps1e-1``, ``nlte_eps1e-4`` (J
 against exact transport, L1 1e-4 and 1.3e-3); ``idort_beams_mb`` (4 MeshBlocks: identical in
 tile mode); ``shadow`` (a clump lit by an isotropic bath: 0.6 % of the unshadowed radiation is
 left in the geometric umbra behind it, bound 2 %; regions whose sight lines miss the clump
@@ -308,7 +310,7 @@ unchanged to 2 %).
    :alt: idort_beams
    :width: 100%
 
-   Two beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay 1-2 cells wide; an oblique sub-cell beam carries about 1.8 x the exact energy. Pass: L1 of E and the beam energy within 5 % of 0.777 and 1.785.
+   Two beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay 1-2 cells wide; an oblique sub-cell beam carries about 1.8 x the exact energy, at the exact energy flux. Pass: L1 of E and the beam energy within 5 % of 0.777 and 1.785; energy flux through every row within 1e-5 of the injected.
 
 .. figure:: figures/idort_shadow.png
    :alt: idort_shadow, idort_shadow_gl
@@ -320,7 +322,7 @@ unchanged to 2 %).
    :alt: idort_cylinder
    :width: 100%
 
-   Homogeneous emitting cylinder (r < 1): E and F_x/c along y = 0 against exact transport. Pass: L1 of E inside, E outside and F outside within 5 % of 5.3e-4, 0.011, 0.203.
+   Homogeneous emitting cylinder (r < 1): E, the energy flux Phi_x/c and the face momentum F_x/c along y = 0 against exact transport. Pass: L1 of E inside, E outside, Phi outside and F outside within 5 % of 5.3e-4, 0.011, 0.0116, 0.203.
 
 .. figure:: figures/shadow.png
    :alt: shadow
@@ -501,9 +503,47 @@ Cartesian, spherical-polar and cubed-sphere meshes, one implementation
 The face and cell kernels are written once in terms of cell volumes, face areas,
 centre-to-centre distances and each cell's local orthonormal frame, which each mesh supplies
 (the exact AthenaK volumes and areas on curved meshes). Supported: Cartesian 1-D to 3-D,
-spherical polar 1-D to 3-D (wedges, axisymmetric, full sphere; radial stretching allowed)
-and the cubed sphere. The mesh must be uniform (mesh refinement is FATAL). Two options are
-geometry-specific by construction: ``clean_stag_fwb_ring`` (3-D spherical polar with periodic
-phi) and the cubed-sphere torque redistribution.
+spherical polar 1-D to 3-D (wedges, axisymmetric, full sphere (not tested, below); radial
+stretching allowed) and the cubed sphere. The mesh must not be refined (FATAL). Two
+options are geometry-specific by construction: ``clean_stag_fwb_ring`` (3-D spherical polar with
+periodic phi) and the cubed-sphere torque redistribution.
 
 Tests: the ``*_sp`` and ``*_cs`` variants above; ``order_space`` on a Cartesian mesh.
+
+
+In the code but not tested
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+No deck in ``tests/vet_clean`` or ``inputs/rad_vet_clean`` and no test of the suite covers the
+following. The properties of this section are not verified there.
+
++-------------------------------------+------------------------------+------------------------------+
+| feature                             | state                        | what is tested instead       |
++=====================================+==============================+==============================+
+| spherical polar with the poles      | accepted, not tested         | wedges clear of the poles;   |
+| (full sphere,                       |                              | the full sphere on the cubed |
+| ``<mesh>/use_polar_boundary``)      |                              | sphere (``*_cs``)            |
+| under ``vet_gd``                    |                              |                              |
++-------------------------------------+------------------------------+------------------------------+
+| stretched theta                     | accepted, not tested         | uniform theta; radial        |
+| (``<mesh>/use_grid_stretch_theta``, |                              | stretching in the star decks |
+| ``theta_plateau``) under ``vet_gd`` |                              |                              |
++-------------------------------------+------------------------------+------------------------------+
+| several MeshBlocks along x1 under   | the sweep has the code, but  | one MeshBlock along x1;      |
+| ``vet_gd``                          | the start-up check stops     | several on a Cartesian mesh  |
+|                                     | with a FATAL error on        | with ``closure = vet_sc``    |
+|                                     | spherical polar and the      | (``idort_beams_mb``)         |
+|                                     | cubed sphere                 |                              |
+|                                     | (``meshblock/nx1`` must      |                              |
+|                                     | equal ``mesh/nx1``), so it   |                              |
+|                                     | cannot be reached            |                              |
++-------------------------------------+------------------------------+------------------------------+
+| radiation with MHD (``<mhd>`` in    | accepted with                | hydrodynamics only           |
+| place of ``<hydro>``;               | ``time2_tableau = hesdirk2`` |                              |
+| ``RadiationVet::EmagBuild`` takes   | (default) or ``trbdf2``, not |                              |
+| \|B|^2/2 out of the gas energy)     | tested; ``sdirk2``, the      |                              |
+|                                     | tableau of the star decks,   |                              |
+|                                     | is FATAL with MHD and matter |                              |
+|                                     | coupling; ``<hydro>`` and    |                              |
+|                                     | ``<mhd>`` together are FATAL |                              |
++-------------------------------------+------------------------------+------------------------------+

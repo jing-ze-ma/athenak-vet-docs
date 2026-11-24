@@ -212,7 +212,10 @@ fast-relaxation thermal equilibrium is ``thermal_eq``). L1 is sum \|q - q_exact\
 |                        |                       | ring of 4 rays): E vs the exact    | and 1.785            |
 |                        |                       | straight beams (cell averages);    | (regression          |
 |                        |                       | ``lum_top`` the energy of the row  | references, see      |
-|                        |                       | 3 cells below x1max vs exact       | below)               |
+|                        |                       | 3 cells below x1max vs exact;      | below); ``flux_err`` |
+|                        |                       | ``flux_err`` the x1 energy flux    | <= 1e-5              |
+|                        |                       | (``vet_phi1``) through every row   |                      |
+|                        |                       | vs the injected flux               |                      |
 +------------------------+-----------------------+------------------------------------+----------------------+
 | ``idort_beams_mb``     | ``idort_beams``       | the beams on 4 MeshBlocks vs 1:    | tile x2: identical;  |
 |                        |                       | along x2 in tile mode              | block x1: largest    |
@@ -228,9 +231,12 @@ fast-relaxation thermal equilibrium is ``thermal_eq``). L1 is sum \|q - q_exact\
 +------------------------+-----------------------+------------------------------------+----------------------+
 | ``idort_cylinder``     | ``idort_cylinder``    | homogeneous emitting cylinder (rho | each L1 within 5 %   |
 |                        |                       | kappa = 10, a T^4 = 1) in vacuum,  | of 5.3e-4, 0.011,    |
-|                        |                       | 128 x 128: E inside and outside    | 0.203                |
-|                        |                       | and F_x outside along y = 0 vs the |                      |
-|                        |                       | exact transport solution           |                      |
+|                        |                       | 128 x 128: E inside and outside,   | 0.0116, 0.203        |
+|                        |                       | the energy flux Phi_x              |                      |
+|                        |                       | (``vet_phi1``, ``F_out``) and the  |                      |
+|                        |                       | face momentum F_x (``vet_f1``,     |                      |
+|                        |                       | ``FH_out``) outside along y = 0 vs |                      |
+|                        |                       | the exact transport solution       |                      |
 |                        |                       | (``ref/idort_cylinder_exact.npz``) |                      |
 +------------------------+-----------------------+------------------------------------+----------------------+
 | ``idort_radshock_m2``, | ``idort_radshock_m*`` | Lowrie & Edwards (2008) radiative  | each L1 within 5 %   |
@@ -261,13 +267,17 @@ Gauss polar angles x 4096 azimuths and the cylinder's periodic images. Notes:
   interacting, but an oblique beam narrower than a cell carries about 1.8 x the exact energy
   density at this resolution (``lum_top``; 1.4 x at twice the resolution): the cap of the
   streaming share at the beam edges. This dominates L1 (0.78); both are regression
-  references.
-- **Cylinder flux.** E outside the cylinder is within 1.1 % of exact transport, the flux
-  ``F_out`` 20 % above it (the moment flux in the vacuum around the source); recorded as a
-  regression reference, an open item.
-- **Shocks.** With the v20.3 production keys of the method paper's bench table the L1 values
-  were 4-27 % lower (Mach 5 rho: 1.7e-3, here 2.2e-3); the shock stays at the semi-analytic
-  position (no shift needed).
+  references. The energy flux through every row equals the injected flux to 3e-7
+  (``flux_err``); the face momentum F (``vet_f1``) of such a beam is only 0.4-0.5 of the exact.
+- **Cylinder flux.** E outside the cylinder is within 1.1 % of exact transport and the
+  energy flux Phi (``F_out``, ``vet_phi1``, the flux the method paper measures) within 1.2 %
+  (r F at x = 2-3.5 is 0.989 of exact). The face momentum F (``vet_f1``, ``FH_out``) is 20 %
+  above exact, a regression reference. A study of 11-21 with other keys attributed it to the
+  harmonic face opacity at the cylinder's sharp edge; that is not re-measured on this code.
+- **Shocks.** The method paper's bench table (v20.3) ran the default tableau ``hesdirk2``; these
+  decks name the production ``time2_tableau = sdirk2``, whose L1 values are 4-27 % higher
+  (Mach 5 rho: 2.2e-3 vs 1.7e-3). With ``hesdirk2`` the release reproduces the table within
+  2 %; the shock stays at the semi-analytic position (no shift needed).
 
 Classic radiation tests
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -493,7 +503,7 @@ The key plot of each test, from its notebook (``docs/vet_clean/figures/``).
    :alt: idort_beams
    :width: 100%
 
-   Two beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay 1-2 cells wide; an oblique sub-cell beam carries about 1.8 x the exact energy. Pass: L1 of E and the beam energy within 5 % of 0.777 and 1.785.
+   Two beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay 1-2 cells wide; an oblique sub-cell beam carries about 1.8 x the exact energy, at the exact energy flux. Pass: L1 of E and the beam energy within 5 % of 0.777 and 1.785; energy flux through every row within 1e-5 of the injected.
 
 .. figure:: figures/idort_shadow.png
    :alt: idort_shadow, idort_shadow_gl
@@ -505,7 +515,7 @@ The key plot of each test, from its notebook (``docs/vet_clean/figures/``).
    :alt: idort_cylinder
    :width: 100%
 
-   Homogeneous emitting cylinder (r < 1): E and F_x/c along y = 0 against exact transport. Pass: L1 of E inside, E outside and F outside within 5 % of 5.3e-4, 0.011, 0.203.
+   Homogeneous emitting cylinder (r < 1): E, the energy flux Phi_x/c and the face momentum F_x/c along y = 0 against exact transport. Pass: L1 of E inside, E outside, Phi outside and F outside within 5 % of 5.3e-4, 0.011, 0.0116, 0.203.
 
 .. figure:: figures/idort_radshock.png
    :alt: idort_radshock_m2, idort_radshock_m5
