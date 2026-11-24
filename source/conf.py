@@ -19,5 +19,18 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_title = "AthenaK VET radiation documentation"
 
+# footer of every page: link to the release code
+RELEASE_URL = "https://github.com/jing-ze-ma/athenak/tree/vet-clean-release"
+html_theme_options = {
+    "footer_icons": [
+        {
+            "name": "Release code on GitHub",
+            "url": RELEASE_URL,
+            "html": "Release code: github.com/jing-ze-ma/athenak (vet-clean-release)",
+            "class": "",
+        },
+    ],
+}
+
 # links checked by `make linkcheck`: internal only (the code and gallery repos may be private)
 linkcheck_ignore = [r"https?://"]
