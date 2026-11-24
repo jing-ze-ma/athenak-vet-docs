@@ -1,0 +1,69 @@
+/* Copied from the IAS AthenaK documentation (github.com/IAS-Astrophysics/athenak-docs). */
+/* Hide Furo's right-hand "On this page" table of contents */
+.toc-drawer {
+  display: none !important;
+}
+
+/* Hide the toggles that open the right-hand TOC (header icon and mobile overlay) */
+.toc-header-icon,
+.toc-content-icon,
+.toc-overlay {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Softer, Alabaster-like typography: serif body/headings, slightly smaller
+   and lighter than Furo's default sans-serif.
+   -------------------------------------------------------------------------- */
+/* Furo declares these variables on `body`, so we override them there. */
+body {
+  --font-stack: Georgia, Charter, "Palatino Linotype", "Book Antiqua", serif;
+  --font-stack--headings: Georgia, Charter, "Palatino Linotype", "Book Antiqua", serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+/* Slightly smaller, more relaxed body text */
+.content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Keep code in a monospace stack regardless of the serif body font */
+code, pre, kbd, samp,
+.highlight,
+.sig,
+.pre {
+  font-family: var(--font-stack--monospace);
+}
+
+/* --------------------------------------------------------------------------
+   Tighter sidebar navigation: reduce the vertical space between links and,
+   especially, between the section (caption) groups.
+   -------------------------------------------------------------------------- */
+/* Space above each section caption (the gap between one group and the next) */
+.sidebar-tree .caption,
+.sidebar-tree p.caption {
+  margin-top: 0.6rem;
+  margin-bottom: 0.1rem;
+}
+
+/* First caption shouldn't add extra space at the very top */
+.sidebar-tree > .caption:first-child,
+.sidebar-tree > p.caption:first-child {
+  margin-top: 0;
+}
+
+/* Space between individual links */
+.sidebar-tree li {
+  margin: 0;
+}
+
+.sidebar-tree .toctree-l1 > .reference,
+.sidebar-tree .toctree-l2 > .reference,
+.sidebar-tree .toctree-l3 > .reference {
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
