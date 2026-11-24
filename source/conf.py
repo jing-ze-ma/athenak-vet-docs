@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 project = "AthenaK VET radiation"
-author = "Jingze Ma and AthenaK contributors"
-copyright = "2026, Jingze Ma and AthenaK contributors"
+author = "Jing-Ze Ma and AthenaK contributors"
+copyright = "2026, Jing-Ze Ma and AthenaK contributors"
 release = "vet-clean-release"
 
 extensions = [
