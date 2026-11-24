@@ -17,7 +17,7 @@ for stellar envelopes.
 Its properties, each with how it is achieved and the test that shows it, are on
 :doc:`properties`: energy and mass conserved to round-off; :math:`L_z` exact on the cubed
 sphere (on spherical polar exact except where the face-flux cone cut acts, booked in a
-ledger); positivity of the density by construction; well-balanced envelopes; second order;
+ledger); positivity of the density by construction; well-balanced envelopes; measured order of accuracy (see :doc:`properties`);
 bitwise restarts, dt retries and rank counts; CPU and GPU agreement to round-off;
 Cartesian, spherical-polar and cubed-sphere meshes with one implementation.
 

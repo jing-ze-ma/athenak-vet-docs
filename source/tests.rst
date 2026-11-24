@@ -134,12 +134,12 @@ What the tests check
 |                      |                      | ``hydro/rad_signal_speed_phase`` (full   |                       |
 |                      |                      | only, ~1 min)                            |                       |
 +----------------------+----------------------+------------------------------------------+-----------------------+
-| ``wedge_sym``        | ``shell_sp``         | the shell at rest, spherically           | fphi <= 1e-8, fth_rot |
-|                      |                      | symmetric, GL 7 x 18 rays, 8 cycles, on  | <= 1e-8 (fth          |
-|                      |                      | a 20 deg wedge and (with                 | reported); the runs   |
-|                      |                      | ``vet_gd_wall_sym = true``) 3.7 and 7.3  | without their key,    |
-|                      |                      | deg wedges: fphi = \|Σ F_phi\| / Σ       | and 10 x 12, stop     |
-|                      |                      | \|F_r\|; the 3.7 deg wedge without the   | with the FATAL        |
+| ``wedge_sym``        | ``shell_sp``         | the shell at rest, spherically           | fphi, fth, fth_rot <= |
+|                      |                      | symmetric, GL 7 x 18 rays, 8 cycles, on  | 1e-8; the runs        |
+|                      |                      | a 20 deg wedge and (with                 | without their key,    |
+|                      |                      | ``vet_gd_wall_sym = true``) 3.7 and 7.3  | and 10 x 12, stop     |
+|                      |                      | deg wedges: fphi = \|Σ F_phi\| / Σ       | with the FATAL        |
+|                      |                      | \|F_r\|; the 3.7 deg wedge without the   |                       |
 |                      |                      | key; the 20 deg shell made               |                       |
 |                      |                      | theta-periodic with                      |                       |
 |                      |                      | ``vet_gd_theta_seam_sym = true``: fth =  |                       |
@@ -360,9 +360,10 @@ Notes on the results of this release (465aff485):
   is its face momenta (``CleanLzTotal``; ~0.6 % of the radiation's L_z apart).
 - **Layout.** Tile mode gives bit-identical results for every layout of whole-tile
   MeshBlocks with one MeshBlock along x1 and x2 (theta): 1 x 2 (along phi) is identical.
-  2 x 2 differs after 8 cycles by 1.6e-10 of the largest value: splitting theta puts ray
-  walls (mirror or vacuum) inside the mesh, which is outside the tile guarantee, so the test
-  bounds that difference instead of requiring 0.
+  2 x 2 differs after 8 cycles by 7.8e-14 of the largest value with 4 OpenMP threads, 3.6e-14
+  with 8 (CPU, 89b05b1c7): splitting theta puts ray walls (mirror or vacuum) inside the mesh,
+  which is outside the tile guarantee, so the test bounds that difference instead of
+  requiring 0.
   The ``dfl`` pair covers the stage-2 outflow limiter: under ``time2_tableau = sdirk2`` the u0
   ghosts held the stage-2 flux state while the interior held the gas state, so the two
   MeshBlocks of a face limited with different donors (before the fix: 1 x 2 differed by
@@ -387,8 +388,9 @@ Notes on the results of this release (465aff485):
   cycle. ``momentum_box`` therefore reports dP (printed, and kept with ``--record``) and does
   not bound it; on spherical polar and cubed-sphere meshes Cartesian P is not a discrete
   invariant at all (local bases), so the test is Cartesian only.
-- **Order.** Deck D reaches second order only as dt -> 0: successive orders 1.57, 1.61,
-  1.84 (E) over the five time steps. The criterion is on the finest pair.
+- **Order.** Deck D's successive orders are 1.57, 1.61, 1.84 (E) over the five time steps:
+  below 2 on the whole ladder. The criterion is on the finest pair.
+  Neither order deck has stiff gas-radiation exchange, where the sdirk2 tableau is first order.
 
 The reference values and tolerances are in ``ref/references.json`` (measured with commit
 512cf768a, CPU, GCC 13, ``-ffp-contract=off``; reproduced to all printed digits on 465aff485 with

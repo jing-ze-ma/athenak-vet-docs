@@ -226,9 +226,13 @@ Time integration, time step and retries
 +----------------------------------+-----------------------------------+------------------+-----------------+-------------------------------+
 | ``rad_vet/time_scheme``          | ``hesdirk2``: two implicit stages | ``hesdirk2`` on  | all:            | ``rad_vet/rad_vet_init.cpp``  |
 |                                  | per step with the Heun hydro      | a fresh run that | ``hesdirk2``    | (``ImplicitInit``)            |
-|                                  | (second order); ``be``: one       | supports it;     |                 |                               |
-|                                  | backward-Euler solve per step     | ``be`` otherwise |                 |                               |
-|                                  | (first order).                    |                  |                 |                               |
+|                                  | (second order with                | supports it;     |                 |                               |
+|                                  | ``time2_tableau = hesdirk2``;     | ``be`` otherwise |                 |                               |
+|                                  | with the production ``sdirk2``    |                  |                 |                               |
+|                                  | first order in time where the     |                  |                 |                               |
+|                                  | gas-radiation exchange is stiff); |                  |                 |                               |
+|                                  | ``be``: one backward-Euler solve  |                  |                 |                               |
+|                                  | per step (first order).           |                  |                 |                               |
 +----------------------------------+-----------------------------------+------------------+-----------------+-------------------------------+
 | ``rad_vet/time2_tableau``        | Tableau of the two stages:        | ``hesdirk2``     | all: ``sdirk2`` | ``rad_vet/rad_vet_time2.cpp`` |
 |                                  | ``sdirk2`` (Alexander's L-stable  |                  |                 | (``Time2Init``)               |

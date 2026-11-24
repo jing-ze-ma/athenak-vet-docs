@@ -56,7 +56,8 @@ one normal component per face. The face flux of a stage is a blend of
 **Time integration.** IMEX. The hydrodynamics is AthenaK's explicit Heun (``rk2``) integrator,
 unchanged. Radiation transport and the gas-radiation exchange are implicit, with Alexander's
 two-stage L-stable SDIRK tableau (``time2_tableau = sdirk2``); each stage sees the gas at the
-same time as the explicit part, so the IMEX scheme is second order. Backward Euler is the
+same time as the explicit part, so the IMEX scheme is second order where the gas-radiation
+exchange is not stiff (see "Order of accuracy" in section 2). Backward Euler is the
 fallback (first step, or a step whose stage failed). The radiation does not limit the
 stability of the step; with ``<hydro>/rad_signal_speed_diff = true`` (production) it enters the
 hydro time step only where it is trapped: the radiation part of the signal speed is weighted by

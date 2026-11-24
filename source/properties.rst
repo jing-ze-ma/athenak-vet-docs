@@ -34,7 +34,9 @@ reason it holds, where it stops holding, and the test in ``tests/vet_clean`` tha
 | well-balance             | equilibrium envelopes stay at rest to about 1e-9 of the sound    |
 |                          | speed                                                            |
 +--------------------------+------------------------------------------------------------------+
-| order                    | second order in space and time, asymptotically                   |
+| order                    | successive orders of the finest pair: 1.8 (time ladder of deck   |
+|                          | D), 1.9-2.2 (grid + time ladder of a linear wave); first order   |
+|                          | in time where the gas-radiation exchange is stiff                |
 +--------------------------+------------------------------------------------------------------+
 | radiation-acoustic waves | phase speed and damping right in every trapping regime           |
 +--------------------------+------------------------------------------------------------------+
@@ -243,13 +245,24 @@ the rotating sets ``_rot`` 4.7e-9 and 9e-10).
    The spherical-polar envelope at t = 0 and t = 10: density, internal and radiation energy (left; the curves overlap) and the radial velocity, of order 1e-10 (right).
 
 
-Second order in space and time
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Order of accuracy in space and time
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The face terms are second order in space; the IMEX SDIRK2 pairing is second order in time.
-At the time steps of the test, deck D is still pre-asymptotic: the successive orders are 1.57,
-1.61 and 1.84 (E) as dt is halved, and finer ladders reach 2. A first-order defect would show
-as an order near 1.
+The face terms are second order in space by design. What the tests measure:
+
+- Time, deck D (spherical shell, kinematic gas, dt halved from 1/16 to 1/256 on a fixed
+  grid): the successive orders are 1.57, 1.61, 1.84 (E), 1.50, 1.52, 1.81 (F_r) and 1.34,
+  1.43, 1.83 (T), below 2 on the whole ladder. The finest pair differs by 3.15e-5 (E),
+  1.68e-4 (F_r) and 6.9e-6 (T). The loss is attributed to the weight 1/(1 + z), z = c dt/dx,
+  of the stage-2 closure line (an earlier study, not re-measured on this release).
+- Grid and time step together, a linear radiation-hydro wave (N = 16 ... 128): the orders are
+  1.79, 2.19 (E) and 1.50, 1.94 (v); the finest pair differs by 4.49e-3 (E) and 1.11e-2 (v).
+
+The exchange is not stiff in either deck. Where it is stiff, the production tableau
+(``time2_tableau = sdirk2``) is first order in time: on a radiation-acoustic wave (64 cells,
+dt halved) the successive orders of E are 1.08, 1.04 at x = 100 and fall 1.51, 1.34, 1.20 at
+x = 1 and at x = 10 (``time2_tableau = hesdirk2``: 2.0 in all three). These are from a study on
+this release, not a suite test.
 
 Test: ``order_time`` (order of the finest pair >= 1.7), ``order_space`` (linear
 radiation-hydro wave on a Cartesian mesh, finest pair >= 1.7).
@@ -425,8 +438,8 @@ removes the one-frame seam face's net :math:`F_\theta` (the 2.5e-2 mirror error 
 Test: ``wedge_sym`` (a spherically symmetric shell on 3.7 and 7.3 deg wedges with the key and a
 20 deg wedge without it: :math:`|\sum F_\phi|/\sum|F_r| \le 10^{-8}`, measured 2e-12 to 2e-9; the
 narrow wedge without the key stops with the FATAL; the shell made theta-periodic stops with
-the FATAL without ``vet_gd_theta_seam_sym``; with it the mean :math:`F_\theta` is reported, 1e-5 of
-:math:`\sum|F_r|` after 8 cycles, an open item).
+the FATAL without ``vet_gd_theta_seam_sym``; with it the mean :math:`F_\theta` is <= 1e-8 of
+:math:`\sum|F_r|` after 8 cycles, measured 1.6e-14).
 
 .. figure:: figures/wedge_sym.png
    :alt: wedge_sym
@@ -464,7 +477,8 @@ Reproducibility
   sums and the multigrid act on fixed N x N lateral tiles. Layouts made of whole tiles are
   bitwise identical when there is one MeshBlock along x1 and, if the theta boundaries are ray
   walls (mirror or vacuum), one MeshBlock along x2, as in the production templates. Splitting
-  across such walls gives a round-off difference (about 1e-10 after 8 cycles).
+  across such walls gives a round-off difference (below 1e-13 of the largest
+  value after 8 cycles, CPU, 89b05b1c7).
 - **Block mode** (default): the result depends on the MeshBlock size at the solver
   tolerance, because the preconditioner is MeshBlock-local.
 
