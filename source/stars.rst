@@ -27,11 +27,12 @@ run, and as starting points for your own star decks.
 +---------------------------------------------+-----------------+--------------+--------------+--------------+--------------+
 | ``inputs/rad_vet_clean/star3d_cs.athinput`` | cubed sphere,   | red          | 548 x 32 x   | 24 of 548 x  | 1200 cycles, |
 |                                             | full sphere: r  | supergiant   | 32 x 6 = 3.4 | 16 x 16      | 13.9 d       |
-|                                             | 25-2530 Rsun    | (25 Msun,    | M            |              |              |
-|                                             | (stretched;     | MESA         |              |              |              |
-|                                             | photosphere at  | profile; the |              |              |              |
-|                                             | 834 Rsun), 6    | RSG          |              |              |              |
-|                                             | faces x 32 x 32 | production   |              |              |              |
+|                                             | 25-2530 Rsun    | (20.5 Msun,  | M            |              |              |
+|                                             | (stretched;     | MESA profile |              |              |              |
+|                                             | photosphere at  | from a 22    |              |              |              |
+|                                             | 834 Rsun), 6    | Msun model;  |              |              |              |
+|                                             | faces x 32 x 32 | the RSG      |              |              |              |
+|                                             |                 | production   |              |              |              |
 |                                             |                 | deck at 1/4  |              |              |              |
 |                                             |                 | of its       |              |              |              |
 |                                             |                 | lateral      |              |              |              |
@@ -74,9 +75,9 @@ What you need
 |                       |        |         | 4.2 and Ferguson et al. (2005) below (blend      |
 |                       |        |         | 4.0-4.2), same grid and composition              |
 +-----------------------+--------+---------+--------------------------------------------------+
-| ``rsg_ic.txt``        | 2.6 MB | cs      | 1-D initial state of the 25 Msun RSG (MESA       |
-|                       |        |         | model, alpha_MLT 3), built for the code's EOS    |
-|                       |        |         | and opacities                                    |
+| ``rsg_ic.txt``        | 2.6 MB | cs      | 1-D initial state of the 20.5 Msun RSG (MESA     |
+|                       |        |         | model, 22 Msun initial, alpha_MLT 3), built for  |
+|                       |        |         | the code's EOS and opacities                     |
 +-----------------------+--------+---------+--------------------------------------------------+
 | ``rsg_rosseland.txt`` | 0.8 MB | cs      | Rosseland mean (OPAL / Ferguson via MESA         |
 |                       |        |         | ``kap``, X 0.654, Z 0.0198)                      |
