@@ -27,7 +27,7 @@ its plots. The test notebooks run their test through the suite of the code repos
      - a blue-supergiant envelope on a 60 deg wedge, 4 GPUs: luminosity, slices, profiles (:doc:`stars`)
    * - ``star3d-cs``
      - (3-D star, cubed sphere)
-     - a 25 Msun red supergiant on the full sphere, 4 GPUs (:doc:`stars`)
+     - a 20.5 Msun red supergiant on the full sphere, 4 GPUs (:doc:`stars`)
    * - ``conservation``
      - ``conservation_sp``, ``conservation_cs``
      - drift of total energy, mass and :math:`L_z` vs cycle
