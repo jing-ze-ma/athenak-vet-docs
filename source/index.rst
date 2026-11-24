@@ -21,6 +21,9 @@ ledger); positivity of the density by construction; well-balanced envelopes; sec
 bitwise restarts, dt retries and rank counts; CPU and GPU agreement to round-off;
 Cartesian, spherical-polar and cubed-sphere meshes with one implementation.
 
+The release code is the ``vet-clean-release`` branch of
+`github.com/jing-ze-ma/athenak <https://github.com/jing-ze-ma/athenak/tree/vet-clean-release>`_.
+
 This site covers how to obtain, build and run the code, the method and its tests. Worked
 problems with notebooks are in the companion repository
 `athenak-vet-gallery <https://github.com/jing-ze-ma/athenak-vet-gallery>`_ (:doc:`gallery`).
