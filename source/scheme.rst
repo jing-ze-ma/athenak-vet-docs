@@ -64,6 +64,15 @@ hydro time step only where it is trapped: the radiation part of the signal speed
 optical depth of a cell). Where :math:`x \ll 1` the radiation diffuses out of a cell faster than a
 sound wave crosses it and does not stiffen the gas, so dt is not limited by it. This is a
 matter of accuracy only (the scheme is IMEX, so stability does not depend on it).
+``<hydro>/rad_signal_speed_phase = true`` weights it by :math:`1 - e^{-x^2}` instead: for :math:`x \ll 1` the
+radiation-pressure perturbation lags the compression by about :math:`\pi/2`, so its restoring part is
+:math:`O(x^2)` and its :math:`O(x)` part only damps the wave; the linear root stays at the gas speed until
+the mode is overdamped (:math:`x \sim 0.3`). In thin gas (:math:`c_{\rm eq}^2 \propto 1/\rho`) the
+linear weight's term grows as :math:`\rho^{-1/2}`; this one stays far below :math:`c_g`.
+Floor gas (:math:`\rho` below ``rad_vet/floorcap_rho``) can be pinned at the floor-gas velocity cap;
+with ``<hydro>/dt_floor_courant = C`` (production 0.6) it takes one Courant bound on the sum of its
+signal rates, dt :math:`\le C/\sum_d(|v_d| + c_d)/h_d`, instead of ``cfl_number`` per direction, so the
+floor atmosphere does not set the step of the star (test: ``floor_dt``).
 
 **Implicit stage solve.** In each stage the face momentum equation is eliminated face by face,
 which leaves a scalar system for :math:`E`. It is solved by Newton passes: each pass is a
@@ -114,7 +123,7 @@ Paths relative to ``src/``.
 | dt retry checkpoint                  | ``driver/dt_retry.cpp``                              |
 +--------------------------------------+------------------------------------------------------+
 | layout-invariant sums                | ``utils/repro_sum.hpp``,                             |
-|                                      | ``rad_vet/rad_vet_layreduce.hpp``                    |
+|                                      | ``rad_vet/rad_vet_clean_solver.cpp``                 |
 +--------------------------------------+------------------------------------------------------+
 
 How to cite
@@ -123,6 +132,9 @@ How to cite
 - AthenaK: J. M. Stone et al. (2024), arXiv:2409.16053.
 - This radiation scheme: a method paper is in preparation; until it appears, cite this
   document with the commit hash of the code you ran.
+- The VET approach it follows: Jiang, Stone & Davis (2012), ApJS 199, 14 (Godunov radiation
+  MHD with a variable Eddington tensor in the mixed frame); Menon et al. (2022), MNRAS 512,
+  401 (VETTAM: VET from ray tracing, coupled implicitly to hydrodynamics).
 - Methods it builds on: Ma, Pakmor, Justham & de Mink (2025), arXiv:2503.16627 (mixed-frame
   β terms); Jiang (2021), ApJS 253, 49 (implicit discrete-ordinates radiation, level-symmetric
   sets, scattering split); Davis, Stone & Jiang (2012), ApJS 199, 9 (VET from short

@@ -22,8 +22,8 @@ Notebooks
 
 ``notebooks/`` has one Jupyter notebook per test (conservation, thermal equilibrium, order,
 well-balancing, non-LTE, momentum box, restart, radiation-acoustic waves, narrow wedges,
-floors): each runs its test through this suite (or loads
-an existing run) and plots the result against the exact solution or the criterion. Only numpy,
+floors; ``radiation.ipynb`` for all the classic radiation tests): each runs its test through
+this suite (or loads an existing run) and plots the result against the exact solution or the criterion. Only numpy,
 matplotlib and jupyter are needed; see :doc:`gallery`.
 
 .. code:: bash
@@ -50,10 +50,10 @@ Settings (environment variables, read by the first cell of each notebook):
   record ``WORKDIR/<test>.json`` exists is loaded, not rerun: delete ``WORKDIR/<test>*`` to rerun.
 - ``M1_NB_THREADS``: OpenMP threads per run (default 4).
 
-With 4 threads per run most notebooks take under a minute; ``order.ipynb`` and ``wb.ipynb``
-(the cubed-sphere ``wb_cs``) take 2-5 min.
+With 4 threads per run most notebooks take under a minute; ``order.ipynb``, ``wb.ipynb``
+(the cubed-sphere ``wb_cs``), ``idort.ipynb`` and ``radiation.ipynb`` take 2-5 min.
 ``nbutil.py`` holds the two shared helpers: ``suite()`` (runs ``run_tests.py --only TEST --keep --record``) and ``verdict()`` (the suite's PASS / FAIL check against ``ref/references.json``).
 The committed notebooks were executed with the CPU binary of commit 30d0e3461 (Python 3.13,
 numpy, matplotlib, nbconvert 7); their key plots are exported to ``docs/vet_clean/figures/``
-(``export_figures.py``). All ten also run with ``nbconvert`` on Python 3.6 (numpy 1.19, matplotlib 3.3, nbconvert 6.0). ``jupyter lab`` needs JupyterLab,
+(``export_figures.py``). All twelve also run with ``nbconvert`` on Python 3.6 (numpy 1.19, matplotlib 3.3, nbconvert 6.0). ``jupyter lab`` needs JupyterLab,
 which ``pip install jupyter`` does not install on Python 3.6; use ``jupyter notebook`` there.

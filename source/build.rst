@@ -147,14 +147,6 @@ A binary built with ``-D PROBLEM=<name>`` runs only that problem generator: a
 (the GPU blocks below name ``he_star_vet``; drop it, in a second build directory, for the
 test suite on a GPU).
 
-Debug build
------------
-
-``-D Athena_VET_DEBUG=ON`` compiles in debugging hooks: restart fingerprints
-(``<rad_vet>/dbg_rst_fp``, ``dbg_rst_fp_cycle``, ``dbg_rst_fp_dump``) and poison gates for
-uninitialised data. It is off by default; a build without it stops with a FATAL error when a
-``dbg_rst_fp`` key is named. Production builds leave it off.
-
 Build time
 ----------
 

@@ -205,7 +205,7 @@ def main(code):
     page('build', 'Build', [re.sub(r'\n~{3,}\n', lambda m: m.group(0).replace('~', '-'),
                             body(renumber(qs['Build'], keep_blocks=True))),
                             renumber(b['Options that matter for this scheme']),
-                            renumber(b['Debug build']), renumber(b['Build time']),
+                            renumber(b['Build time']),
                             '.. rubric:: Notes' + notes],
          'docs/vet_clean/QUICKSTART.md and BUILD.md')
     page('quickstart', 'Quickstart', [renumber(qs[k]) for k in

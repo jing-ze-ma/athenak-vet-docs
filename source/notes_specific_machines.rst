@@ -51,8 +51,10 @@ Known-good module sets:
 |                       |       | system cmake 3.28; configure checked for this release, build not re-run)              |              |
 +-----------------------+-------+---------------------------------------------------------------------------------------+--------------+
 
-At run time on the H200 cluster above, set ``UCX_TLS=^xpmem OMPI_MCA_io=romio321``. On the A100
-cluster, set ``UCX_IB_GPU_DIRECT_RDMA=0``.
+At run time on the H200 cluster above, set ``UCX_TLS=^xpmem OMPI_MCA_io=romio321``; on more than one
+H200 node also ``UCX_IB_GPU_DIRECT_RDMA=no UCX_RNDV_SCHEME=put_ppln``. Without them the first message
+between nodes fails with ``ib_mlx5 ... Local protection error`` (RDMA_WRITE). With ``put_ppln``, two nodes of
+4 H200 were bitwise from run to run. On the A100 cluster, set ``UCX_IB_GPU_DIRECT_RDMA=0``.
 
 AMD GPUs (HIP, MI300A)
 ----------------------

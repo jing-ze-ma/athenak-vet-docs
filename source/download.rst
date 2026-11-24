@@ -4,7 +4,7 @@
 Download
 ========
 
-This site documents release ``vet-clean-release`` (commit ``30d0e3461``; test figures from branch ``vet-docfigs`` ``a53a84ac9``).
+This site documents release ``vet-clean-release`` (commit ``a23a78794``).
 
 Clone the repository, switch to the release branch, and fetch Kokkos (a git submodule):
 

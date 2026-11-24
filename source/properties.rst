@@ -38,6 +38,12 @@ reason it holds, where it stops holding, and the test in ``tests/vet_clean`` tha
 +--------------------------+------------------------------------------------------------------+
 | radiation-acoustic waves | phase speed and damping right in every trapping regime           |
 +--------------------------+------------------------------------------------------------------+
+| diffusion limit          | the right diffusion coefficient at any cell optical depth        |
+|                          | (asymptotic preserving)                                          |
++--------------------------+------------------------------------------------------------------+
+| moving media             | radiation advected with the gas; comoving diffusion Galilean     |
+|                          | invariant                                                        |
++--------------------------+------------------------------------------------------------------+
 | restart, dt retry        | bitwise                                                          |
 +--------------------------+------------------------------------------------------------------+
 | reproducibility          | bitwise across rank counts; across tile layouts with the         |
@@ -64,13 +70,16 @@ sign. The positivity limiters scale a face's flux on both sides at once. The den
 pressure and radiation floors take the energy they need from the radiation of the same cell
 or its radial column (``<hydro>/floor_pay = rad_column``, ``implicit_pos_floor_cons``).
 With ``floor_pay_skip = true`` (production) the energy changed by the density floor and the
-velocity ceiling is paid as well.
+velocity ceiling is paid as well. The initial conversion's floors are paid before the t = 0 output.
+With ``<hydro>/floor_from_ekin`` (general EOS) a fast cell pays its floor deficit from its own
+r / theta kinetic energy instead (E kept, :math:`L_z` kept: the phi momentum is never scaled).
 Energy is created only when a column holds too little radiation to pay; each such event
 prints a ``CLEAN WARNING``.
 
 Test: ``conservation_sp``, ``conservation_cs`` (closed rotating shells, dE/E <= 1e-13; measured
 about 1e-15), ``thermal_eq``, and ``floor_pay`` (general EOS with a temperature floor that acts in
-most cells every cycle, paid from the radiation: dE/E <= 1e-13).
+most cells every cycle, paid from the radiation: dE/E <= 1e-13 from t = 0; and with
+``floor_from_ekin`` and a velocity ceiling below the shell's speeds: dE, dM, dLz <= 1e-13).
 
 .. figure:: figures/conservation.png
    :alt: conservation_sp, conservation_cs
@@ -99,6 +108,11 @@ which is in flux form.
 With ``<hydro>/dfloor_flux_limit`` the outflow of a nearly empty cell is scaled back so that its
 density cannot fall below the floor, and both neighbours see the same scaled flux; the density
 floor of the primitive-variable recovery stays as a backstop (counted in the event log). The
+held gas then also moves only as fast as its scaled flux: the cell's momentum, except its L_z
+part, is scaled by the same factor at fixed total energy (the kinetic energy becomes heat).
+Without this, gravity and pressure would keep accelerating gas whose work (carried by the mass
+flux under ``etotgrav``) never arrives, until its kinetic energy exceeds its energy. The removed
+x1 momentum and the heat are printed at the end of the run. The
 open stellar boundaries remove mass by design, and the history records it.
 
 Test: ``conservation_sp``, ``conservation_cs`` (dM/M <= 1e-13).
@@ -148,7 +162,8 @@ physical sources. Three things change gas + radiation momentum without being giv
 
 - the realisability cut of the face flux (``clean_stag_fcone``)
   unless ``clean_stag_fcone_gas = true``, which makes the cut momentum-neutral;
-- the well-balancing residual of ``clean_stag_fwb``;
+- the well-balancing residual of ``clean_stag_fwb`` (on a uniform Cartesian mesh
+  ``clean_stag_fwb_cart = true`` removes its line mean: no net momentum);
 - the floor-gas momentum removal (``floorcap``, ``dfloor_keep_velocity``, the velocity ceiling).
 
 Their unsigned sizes are printed (``CLEAN FCONE``, ``CLEAN FWB``, the ``floorcap`` line), but there
@@ -186,7 +201,9 @@ Positivity
 
 All such events are counted in the end-of-run ``vet-positivity`` line. Test: every suite deck
 runs with no floor raise, no energy created and no ``CLEAN WARNING`` (``floor_pay`` raises the gas
-temperature on purpose, and pays it from the radiation).
+temperature on purpose, and pays it from the radiation); ``diffusion`` (a top-hat in E at
+tau_cell = 1e4 stays within [background, background + amplitude] to round-off) and ``marshak``
+(a Marshak wave into a cold slab: E and T_gas positive and below the bath values).
 
 
 Well-balance: equilibrium envelopes stay at rest
@@ -199,7 +216,19 @@ flux rows are written about the rays' own steady state (``clean_stag_fwb``). The
 (``clean_init = steady``) begins from the scheme's own discrete equilibrium. The remaining
 motion is at the solver-tolerance level, not round-off.
 
-Test: ``wb_sp``, ``wb_cs`` (max \|v|/c_s <= 1e-8 over the run; measured about 5e-9 and 1e-9).
+A rotating ray set is a new angular discretisation at every turn, so its closure of the same
+static state differs by the set's pattern error (~1e-4 in F) and a static envelope has no
+discrete equilibrium to keep (v/c_s ~1e-4 - 1e-3). With ``vet_rotate_avg_ema_wb = true`` the
+EMA ring takes up the pattern change of a turn in its offsets (the boundary's same-state
+Delta, weight a = a_ch alone, a_ch the change test of one set at two times): a set change
+then moves the closure only where the state moved, so a static state keeps its closure, its
+force and its equilibrium for any turn and cross-fade weight. On the cubed sphere the ring
+also carries the cells' face half ranges (``CleanCellHalf``). The K-set
+window (``vet_rotate_avg`` without the EMA) has no such form: its window changes the closure of
+a static state at every turn.
+
+Test: ``wb_sp``, ``wb_cs`` (max \|v|/c_s <= 1e-8 over the run; measured about 5e-9 and 1e-9; with
+the rotating sets ``_rot`` 4.7e-9 and 9e-10).
 
 .. figure:: figures/wb.png
    :alt: wb_sp, wb_cs
@@ -250,6 +279,130 @@ Test: ``radwave`` (phase speed within 3e-3, damping within 5e-3 per radian, no g
    Left: decay of radiation-acoustic waves from the free-streaming (x = 0.01) to the trapped limit (x = 100); points code, lines the analytic root. Right: phase-speed and damping errors against x. Pass: phase speed within 3e-3 (dashed), damping within 5e-3 per radian (dotted).
 
 
+Closure accuracy: beams, shadows, emitting bodies, non-LTE atmospheres
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Eddington tensor and the thin-limit face fluxes come from the rays, so radiation that is
+far from isotropic keeps its direction: crossing beams pass through each other, a beam
+behind an opaque cloud leaves a sharp shadow, and the field around an emitting cylinder
+follows exact transport (an M1 closure merges crossing beams and fills shadows). Each beam
+stays straight, at its angle and 1-2 cells wide, but an oblique beam narrower than a cell
+carries about 1.8 x the exact energy density (1.4 x at twice the resolution; the cap of the
+streaming share at its edges). Around the cylinder E is within 1.1 % of exact transport and
+the moment flux in the vacuum about 20 % above it.
+
+Test: ``idort_beams`` (L1 of E and the beam energy within 5 % of 0.777 and 1.785), ``idort_shadow``, ``idort_shadow_gl`` (L1
+0.014 and 0.013), ``idort_cylinder`` (E outside 0.011), ``nlte_eps1e-1``, ``nlte_eps1e-4`` (J
+against exact transport, L1 1e-4 and 1.3e-3); ``idort_beams_mb`` (4 MeshBlocks: identical in
+tile mode); ``shadow`` (a clump lit by an isotropic bath: 0.6 % of the unshadowed radiation is
+left in the geometric umbra behind it, bound 2 %; regions whose sight lines miss the clump
+unchanged to 2 %).
+
+.. figure:: figures/nlte.png
+   :alt: nlte_eps1e-1, nlte_eps1e-4
+   :width: 100%
+
+   Mean intensity J against optical depth in a two-level-atom atmosphere (epsilon = 0.1 and 1e-4) with the exact transport solution (left) and the relative difference (right). Pass: L1 within 5 % of the reference value.
+
+.. figure:: figures/idort_beams.png
+   :alt: idort_beams
+   :width: 100%
+
+   Two beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay 1-2 cells wide; an oblique sub-cell beam carries about 1.8 x the exact energy. Pass: L1 of E and the beam energy within 5 % of 0.777 and 1.785.
+
+.. figure:: figures/idort_shadow.png
+   :alt: idort_shadow, idort_shadow_gl
+   :width: 100%
+
+   Two beams past an opaque ellipse: log E of the ring run (left) and cuts behind the ellipse for the ring and the general 8 x 32 ray set against the exact attenuated beams (right). Pass: L1 within 5 % of 0.0138 and 0.0126.
+
+.. figure:: figures/idort_cylinder.png
+   :alt: idort_cylinder
+   :width: 100%
+
+   Homogeneous emitting cylinder (r < 1): E and F_x/c along y = 0 against exact transport. Pass: L1 of E inside, E outside and F outside within 5 % of 5.3e-4, 0.011, 0.203.
+
+.. figure:: figures/shadow.png
+   :alt: shadow
+   :width: 100%
+
+   log10 E / E_bath with (top) and without (bottom) an opaque clump lit from the left by a 1740 K bath; white: the geometric umbra behind the clump, red dashed: the region whose sight lines miss the clump. Pass: <= 2 % of the radiation left in the umbra (measured 0.6 %), the lit region unchanged to 2 %.
+
+
+Radiation hydrodynamics: radiative shocks and stiff exchange
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The coupled scheme holds the Lowrie & Edwards (2008) non-equilibrium radiative shocks at their
+semi-analytic profiles, precursor, Zel'dovich spike and relaxation region included, without
+a shift of the shock (with ``clean_closure = eddington``, as the reference is grey
+non-equilibrium diffusion). The gas-radiation exchange is L-stable: at time steps of up to 1e5
+relaxation times the gas reaches the exact equilibrium temperature with the total energy
+conserved.
+
+Test: ``idort_radshock_m2``, ``idort_radshock_m5`` (L1 of rho, v, T_gas, T_rad 2.5e-4 to 2.2e-3,
+each within 5 % of the reference), ``idort_thermal_eq2`` (error of T within 5 % of 2e-3 after
+5 steps, energy drift <= 1e-13), ``thermal_eq``; ``radshock``, ``radshock_m5`` (the same shocks
+with the production closure: L1 of rho and T_rad about 0.5 % and 1 %, within 5 % of the
+reference values; the difference from the Eddington run is the closure in the thin
+precursor).
+
+.. figure:: figures/idort_radshock.png
+   :alt: idort_radshock_m2, idort_radshock_m5
+   :width: 100%
+
+   Lowrie & Edwards radiative shocks at Mach 2 and 5: density and gas and radiation temperatures against the semi-analytic profiles (dashed), no shift. Pass: L1 of rho, v, T_gas, T_rad each within 5 % of the reference.
+
+.. figure:: figures/idort_thermal_eq2.png
+   :alt: idort_thermal_eq2
+   :width: 100%
+
+   Hot gas cooling into radiation at dt = 5 to 1e5 relaxation times: T(t) against the exact ODE and the relative error. Pass: error within 5 % of 2.0e-3, energy drift below 1e-13.
+
+.. figure:: figures/radshock.png
+   :alt: radshock, radshock_m5
+   :width: 100%
+
+   Lowrie & Edwards radiative shocks at Mach 2 (left, subcritical) and Mach 5 (right, supercritical) after 2e-10 s on 256 cells: gas and radiation temperature and density (points) against the semi-analytic profile (lines). Pass: L1 of rho and T_rad within 5 % of the reference values (about 0.5 % and 1 %), every L1 below 1-2 %, no ``CLEAN WARNING``.
+
+
+Diffusion limit: asymptotic preserving
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In an optically thick medium the moment equations must reduce to diffusion with
+D = c/(3 rho kappa) however thick a single cell is; a scheme without this property is too
+diffusive by a factor ~tau_cell. In the thick limit the staggered face flux is the compact
+diffusion flux :math:`-(c/\chi_f)\,\partial_n(\mathsf D E)` with no added dissipation, so the
+diffusion coefficient is right at every tau_cell.
+
+Test: ``diffusion`` (a Gaussian pulse: variance growth within 2e-3 of 2 D t at tau_cell = 10,
+1e3, 1e5 and 1e-4 in 2-D; measured 8e-4, 8e-8, 1e-10, 9e-7).
+
+.. figure:: figures/diffusion.png
+   :alt: diffusion
+   :width: 100%
+
+   Left: a Gaussian pulse diffusing in a static scatterer at tau_cell = 1, 10 and 1e5 against the exact diffusion solution. Middle: error of the diffusion coefficient against tau_cell (1-D and 2-D). Right: a top-hat at tau_cell = 1e4. Pass: \|growth/(2 D t) - 1\| <= 2e-3 at tau_cell >= 10 (dashed), the top-hat within its initial bounds.
+
+
+Moving media
+~~~~~~~~~~~~
+
+The equations are mixed frame with the :math:`O(v/c)` and dynamic-diffusion :math:`O(\beta^2)` terms,
+and the face flux includes the advective flux of radiation carried by the gas, so radiation
+trapped in a moving gas moves with it and a uniform medium at the coupling's fixed point
+stays there.
+
+Test: ``advect_pulse`` (a diffusing pulse advected at v against the same pulse at rest shifted by
+v t: L1 <= 3e-3, measured 7e-4), ``advect_uniform`` (a uniform medium at 0.01 c: T changes by
+<= 1e-5, measured 1.4e-6).
+
+.. figure:: figures/advect_pulse.png
+   :alt: advect_pulse, advect_uniform
+   :width: 100%
+
+   Left: a diffusing radiation pulse advected at 3e7 cm/s (solid) against the same pulse at rest shifted by v t (dotted). Right: the largest change of T in a uniform medium moving at 0.01 c. Pass: L1 <= 3e-3; change <= 1e-5 (dashed).
+
+
 Phi mirror symmetry on narrow wedges
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -262,11 +415,16 @@ any other width stops the run with a FATAL error. A narrow wedge that cannot mee
 (e.g. 0.064 rad) names ``vet_gd_wall_sym = true`` with ``vet_gd_wall_interp = true``: the set is
 turned to have a mirror plane on the wedge centre, the two walls' maps are mirror images, and
 the seam face is computed in both frames. A mirror-symmetric state then has a wedge-mean
-:math:`F_\phi` of zero to round-off. A corresponding treatment of theta seams is not in this release.
+:math:`F_\phi` of zero to round-off. On a theta-periodic wedge the theta seam face is likewise computed
+from both sides, its other side being the exact equatorial mirror of this side
+(``vet_gd_theta_seam_sym = true``, required on theta-periodic meshes: FATAL otherwise), which
+removes the one-frame seam face's net :math:`F_\theta` (the 2.5e-2 mirror error of the 20-deg deck).
 
 Test: ``wedge_sym`` (a spherically symmetric shell on 3.7 and 7.3 deg wedges with the key and a
 20 deg wedge without it: :math:`|\sum F_\phi|/\sum|F_r| \le 10^{-8}`, measured 2e-12 to 2e-9; the
-narrow wedge without the key stops with the FATAL).
+narrow wedge without the key stops with the FATAL; the shell made theta-periodic stops with
+the FATAL without ``vet_gd_theta_seam_sym``; with it the mean :math:`F_\theta` is reported, 1e-5 of
+:math:`\sum|F_r|` after 8 cycles, an open item).
 
 .. figure:: figures/wedge_sym.png
    :alt: wedge_sym
