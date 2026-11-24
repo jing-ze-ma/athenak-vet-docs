@@ -67,3 +67,10 @@ code, pre, kbd, samp,
   padding-top: 0.15rem;
   padding-bottom: 0.15rem;
 }
+
+/* Plots: a white card behind the PNGs so they stay readable in the dark theme */
+figure img, .figure img {
+  background: #fff;
+  padding: 4px;
+  border-radius: 4px;
+}

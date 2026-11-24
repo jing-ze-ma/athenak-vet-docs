@@ -53,6 +53,7 @@ reason it holds, where it stops holding, and the test in ``tests/vet_clean`` tha
 | meshes                   | Cartesian, spherical polar, cubed sphere; one implementation     |
 +--------------------------+------------------------------------------------------------------+
 
+
 Energy (gas + radiation): exact
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -71,6 +72,25 @@ Test: ``conservation_sp``, ``conservation_cs`` (closed rotating shells, dE/E <= 
 about 1e-15), ``thermal_eq``, and ``floor_pay`` (general EOS with a temperature floor that acts in
 most cells every cycle, paid from the radiation: dE/E <= 1e-13).
 
+.. figure:: figures/conservation.png
+   :alt: conservation_sp, conservation_cs
+   :width: 100%
+
+   Relative drift of total energy, mass and ``Lz_tot`` from cycle 0 on the closed rotating shell (left spherical polar, right cubed sphere; grey: gas + radiation L_z without the ledger). Pass: energy, mass and ``Lz_tot`` below 1e-13 (dashed).
+
+.. figure:: figures/thermal_eq.png
+   :alt: thermal_eq
+   :width: 100%
+
+   Gas temperature and radiation energy relaxing to equilibrium against the exact ODE at two time steps (left), their relative errors (middle) and the total-energy drift (right). Pass: T error below 2e-4 (dashed), order >= 1.8, energy drift below 1e-13 (dashed).
+
+.. figure:: figures/floor_pay.png
+   :alt: floor_pay
+   :width: 100%
+
+   A temperature floor that acts in most cells every cycle, paid from the radiation: total-energy drift from cycle 1 on (left) and the floor energy paid per cycle (right). Pass: drift below 1e-13, energy paid > 0, unpaid 0, no ``CLEAN WARNING``.
+
+
 Mass: exact
 ~~~~~~~~~~~
 
@@ -82,6 +102,7 @@ floor of the primitive-variable recovery stays as a backstop (counted in the eve
 open stellar boundaries remove mass by design, and the history records it.
 
 Test: ``conservation_sp``, ``conservation_cs`` (dM/M <= 1e-13).
+
 
 Angular momentum :math:`L_z`: exact on the cubed sphere; on spherical polar exact except where the cone cut acts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,6 +137,7 @@ test output).
 Test: ``conservation_sp``, ``conservation_cs`` (drift of ``Lz_tot`` <= 1e-13, with ``dLz_gr``
 printed).
 
+
 Linear momentum: not conserved in general
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -139,6 +161,13 @@ momenta live in local bases), so only :math:`L_z` and the radial budget are mean
 Test: ``momentum_box`` (a periodic Cartesian box) reports the drift; it is a report, not a
 conservation claim (the shell decks have closed walls that exert forces).
 
+.. figure:: figures/momentum_box.png
+   :alt: momentum_box
+   :width: 100%
+
+   Linear-momentum drift max_k \|P_k - P_k,0\| / Σ\|p_gas\| per cycle in a periodic 3-D box (gas + radiation face momenta). A report, no criterion; here at round-off.
+
+
 Positivity
 ~~~~~~~~~~
 
@@ -159,6 +188,7 @@ All such events are counted in the end-of-run ``vet-positivity`` line. Test: eve
 runs with no floor raise, no energy created and no ``CLEAN WARNING`` (``floor_pay`` raises the gas
 temperature on purpose, and pays it from the radiation).
 
+
 Well-balance: equilibrium envelopes stay at rest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -171,6 +201,19 @@ motion is at the solver-tolerance level, not round-off.
 
 Test: ``wb_sp``, ``wb_cs`` (max \|v|/c_s <= 1e-8 over the run; measured about 5e-9 and 1e-9).
 
+.. figure:: figures/wb.png
+   :alt: wb_sp, wb_cs
+   :width: 100%
+
+   Largest \|v\|/c_s of an envelope in hydrostatic and radiative equilibrium against time (spherical polar to t = 10, cubed sphere to t = 2.5). Pass: below 1e-8 (dashed).
+
+.. figure:: figures/wb_2.png
+   :alt: wb_sp
+   :width: 100%
+
+   The spherical-polar envelope at t = 0 and t = 10: density, internal and radiation energy (left; the curves overlap) and the radial velocity, of order 1e-10 (right).
+
+
 Second order in space and time
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -182,6 +225,13 @@ as an order near 1.
 Test: ``order_time`` (order of the finest pair >= 1.7), ``order_space`` (linear
 radiation-hydro wave on a Cartesian mesh, finest pair >= 1.7).
 
+.. figure:: figures/order.png
+   :alt: order_time, order_space
+   :width: 100%
+
+   Relative L1 difference of successive levels against dt (left, deck D) and against N (right, linear wave), with a slope-2 line. Pass: order of the finest pair >= 1.7.
+
+
 Radiation-acoustic waves in every trapping regime
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -192,6 +242,13 @@ linear gas + moment system (with its own closure and exchange) from the free-str
 cfl 0.3 and the larger dt that ``rad_signal_speed_diff`` gives in thin gas (2.8 x at :math:`x = 0.01`).
 
 Test: ``radwave`` (phase speed within 3e-3, damping within 5e-3 per radian, no growth).
+
+.. figure:: figures/radwave.png
+   :alt: radwave
+   :width: 100%
+
+   Left: decay of radiation-acoustic waves from the free-streaming (x = 0.01) to the trapped limit (x = 100); points code, lines the analytic root. Right: phase-speed and damping errors against x. Pass: phase speed within 3e-3 (dashed), damping within 5e-3 per radian (dotted).
+
 
 Phi mirror symmetry on narrow wedges
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -211,6 +268,13 @@ Test: ``wedge_sym`` (a spherically symmetric shell on 3.7 and 7.3 deg wedges wit
 20 deg wedge without it: :math:`|\sum F_\phi|/\sum|F_r| \le 10^{-8}`, measured 2e-12 to 2e-9; the
 narrow wedge without the key stops with the FATAL).
 
+.. figure:: figures/wedge_sym.png
+   :alt: wedge_sym
+   :width: 100%
+
+   Left: F_phi per phi column on the 20, 3.7 and 7.3 deg wedges. Right: the wedge-mean \|ΣF_phi\| / Σ\|F_r\| of each wedge. Pass: below 1e-8 (dashed); the 3.7 deg wedge without ``vet_gd_wall_sym`` stops with the wedge FATAL.
+
+
 Restart and dt retry: bitwise
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -221,6 +285,13 @@ exactly. The restart file also records every key, and a restart uses the recorde
 (see the restart rule in :doc:`keys`).
 
 Test: ``restart_sp``, ``restart_cs``, ``dt_retry`` (difference 0).
+
+.. figure:: figures/restart.png
+   :alt: restart_sp, restart_cs
+   :width: 100%
+
+   Radiation energy per cycle of the straight run (dots) and of the run restarted half-way (crosses). Pass: every dump and history row identical (difference 0).
+
 
 Reproducibility
 ~~~~~~~~~~~~~~~
@@ -240,6 +311,7 @@ Reproducibility
 Test: ``layout_tile`` (1 x 2 MeshBlocks along phi vs one MeshBlock: identical; 2 x 2, which
 also splits theta across the ray walls: bounded at 1e-8).
 
+
 CPU / GPU consistency: round-off, not bitwise
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -252,6 +324,7 @@ toolchain that does not agree.
 
 Test: the suite on a GPU binary (:doc:`tests`, "GPU builds").
 
+
 No silent fallbacks
 ~~~~~~~~~~~~~~~~~~~
 
@@ -262,6 +335,7 @@ missing prerequisites) stops the run with a FATAL error naming the key. Some cou
 corrections (paid floor raises, limiter remnants, the automatic backward-Euler back-off of
 ``time2_auto_be``) are reported only in the end-of-run summary; the floor-gas cap prints every
 ``floorcap_report`` cycles. See :doc:`outputs`.
+
 
 Cartesian, spherical-polar and cubed-sphere meshes, one implementation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -219,6 +219,30 @@ What the curves look like (the notebook plots them):
 A run that departs from these values by much more than the oscillation amplitude, or
 that prints ``CLEAN WARNING`` lines, is worth a closer look (:doc:`outputs`).
 
+.. figure:: figures/star3d_sp_profiles.png
+   :alt: star3d_sp
+   :width: 100%
+
+   Spherical-polar BSG deck on 4 A100 GPUs: shell-averaged density and radiation energy density at t = 0 and at the end (9.8 d); the atmosphere's initial radiation has streamed out. (Its luminosity plot is dominated by the t = 0 burst, L_top = 1600 L_in; expected: L_top / L_in between 0.96 and 1.07 over the second half.)
+
+.. figure:: figures/star3d_cs_lum.png
+   :alt: star3d_cs
+   :width: 100%
+
+   Cubed-sphere RSG deck on 4 A100 GPUs: L_top, L_bot and L_in against time (left) and their ratios to L_in (right). Expected: L_top / L_in between 0.986 and 0.997 over the second half.
+
+.. figure:: figures/star3d_sp_slices.png
+   :alt: star3d_sp
+   :width: 100%
+
+   Spherical-polar deck at its last dump: density contrast rho/<rho>_shell - 1 and log10 E in a meridional and the equatorial plane.
+
+.. figure:: figures/star3d_cs_slices.png
+   :alt: star3d_cs
+   :width: 100%
+
+   Cubed-sphere deck at its last dump: the same in the planes z = 0 and y = 0.
+
 Notebook
 --------
 

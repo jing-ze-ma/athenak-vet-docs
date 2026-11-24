@@ -15,6 +15,7 @@ so a change of the Markdown is noticed instead of silently producing a broken pa
 """
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -115,6 +116,47 @@ def fix(text, subs, name):
             sys.exit('sync_from_code: fix for %s matches %d times: %r' % (name, n, old))
         text = text.replace(old, new)
     return text
+
+
+def figures(code):
+    """Rows of docs/vet_clean/figures/FIGURES.md as dicts; copies the PNGs to source/figures/."""
+    d = os.path.join(code, 'docs/vet_clean/figures')
+    out = os.path.join(OUT, 'figures')
+    shutil.rmtree(out, ignore_errors=True)
+    if not os.path.exists(os.path.join(d, 'FIGURES.md')):
+        return []
+    os.makedirs(out)
+    rows = []
+    for line in open(os.path.join(d, 'FIGURES.md'), encoding='utf-8'):
+        c = [x.strip() for x in line.strip().strip('|').replace('\\|', '\x00').split('|')]
+        if len(c) == 4 and c[0].endswith('.png'):
+            fig, _, tests, cap = (x.replace('\x00', '|') for x in c)
+            shutil.copy(os.path.join(d, fig), out)
+            rows.append({'fig': fig, 'tests': [t.strip() for t in tests.split(',')], 'cap': cap})
+    return rows
+
+
+def figure(r):
+    """A figure directive; the caption's Markdown code spans and bars made rst-safe."""
+    cap = re.sub(r'`([^`]+)`', r'``\1``', r['cap'].replace('|', '\\|'))
+    return ('.. figure:: figures/%s\n   :alt: %s\n   :width: 100%%\n\n   %s'
+            % (r['fig'], ', '.join(r['tests']), cap))
+
+
+def with_figures(text, rows):
+    """After each section whose 'Test:' / 'Tests:' paragraph names a test, its figures."""
+    hs = headings(text)
+    L = text.split('\n')
+    cuts = [h[0] for h in hs if h[1] >= 2] + [len(L)]
+    parts, done = ['\n'.join(L[:cuts[0]])], set()
+    for a, b in zip(cuts[:-1], cuts[1:]):
+        sec = '\n'.join(L[a:b]).rstrip('\n')
+        m = re.search(r'^Tests?:(.*?)(?:\n\n|\Z)', sec, re.S | re.M)
+        named = set(re.findall(r'``([A-Za-z0-9_\-]+)``', m.group(1))) if m else set()
+        figs = [figure(r) for r in rows if named & set(r['tests']) and r['fig'] not in done]
+        done.update(r['fig'] for r in rows if named & set(r['tests']))
+        parts.append('\n\n'.join([sec] + figs) + '\n')
+    return '\n\n'.join(parts)
 
 
 def page(name, title, parts, src, intro=''):
@@ -223,19 +265,25 @@ def main(code):
     page('scheme', 'The VET scheme', [s['_pre'], renumber(s['The method in brief']),
                                       renumber(s['Code map']), renumber(s['How to cite'])],
          'docs/vet_clean/SCHEME.md')
-    page('properties', 'Properties', [body(s['Properties'])],
+    figs = figures(code)
+    tfigs = [r for r in figs if not r['tests'][0].startswith('star3d')]
+    page('properties', 'Properties', [with_figures(body(s['Properties']), tfigs)],
          'docs/vet_clean/SCHEME.md',
          'What each property means, how the scheme achieves it, and the test that shows it\n'
          '(:doc:`tests`; worked notebooks in :doc:`gallery`).')
 
     page('tests', 'Tests', [ts['_pre']] + [renumber(ts[n]) for n in
-                                           ('What the tests check', 'GPU builds', 'Notebooks')],
+                                           ('What the tests check', 'GPU builds', 'Notebooks')] +
+         (['Plots\n-----\n\nThe key plot of each test, from its notebook (``docs/vet_clean/figures/``).']
+          + [figure(r) for r in tfigs] if tfigs else []),
          'tests/vet_clean/README.md')
     st = sections(fix(md['STARS.md'], [
         ('``clean_init_tol = 2.0e-7``, see section 3.', '``clean_init_tol = 2.0e-7``, see "What to look at".'),
         (':doc:`quickstart` section 3', ':doc:`build`')], 'STARS.md'))
     page('stars', '3-D stars: spherical polar and cubed sphere',
-         [st['_pre']] + [renumber(v) for n, v in st.items() if n != '_pre'],
+         [st['_pre']] + [renumber(v) + ('\n\n' + '\n\n'.join(
+             figure(r) for r in figs if r['tests'][0].startswith('star3d'))
+             if n == 'What to look at' else '') for n, v in st.items() if n != '_pre'],
          'docs/vet_clean/STARS.md',
          'Step-by-step versions with the decks and the executed notebook: the ``star3d-sp`` and\n'
          '``star3d-cs`` tutorials of the :doc:`gallery`.')

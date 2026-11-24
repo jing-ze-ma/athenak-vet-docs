@@ -197,3 +197,74 @@ matplotlib and jupyter are needed; see :doc:`gallery`.
 
    cd tests/vet_clean/notebooks && ATHENA_EXE=$PWD/../../../build_vettest/src/athena \
      jupyter nbconvert --to notebook --execute --inplace thermal_eq.ipynb
+
+Plots
+-----
+
+The key plot of each test, from its notebook (``docs/vet_clean/figures/``).
+
+.. figure:: figures/conservation.png
+   :alt: conservation_sp, conservation_cs
+   :width: 100%
+
+   Relative drift of total energy, mass and ``Lz_tot`` from cycle 0 on the closed rotating shell (left spherical polar, right cubed sphere; grey: gas + radiation L_z without the ledger). Pass: energy, mass and ``Lz_tot`` below 1e-13 (dashed).
+
+.. figure:: figures/restart.png
+   :alt: restart_sp, restart_cs
+   :width: 100%
+
+   Radiation energy per cycle of the straight run (dots) and of the run restarted half-way (crosses). Pass: every dump and history row identical (difference 0).
+
+.. figure:: figures/order.png
+   :alt: order_time, order_space
+   :width: 100%
+
+   Relative L1 difference of successive levels against dt (left, deck D) and against N (right, linear wave), with a slope-2 line. Pass: order of the finest pair >= 1.7.
+
+.. figure:: figures/radwave.png
+   :alt: radwave
+   :width: 100%
+
+   Left: decay of radiation-acoustic waves from the free-streaming (x = 0.01) to the trapped limit (x = 100); points code, lines the analytic root. Right: phase-speed and damping errors against x. Pass: phase speed within 3e-3 (dashed), damping within 5e-3 per radian (dotted).
+
+.. figure:: figures/wb.png
+   :alt: wb_sp, wb_cs
+   :width: 100%
+
+   Largest \|v\|/c_s of an envelope in hydrostatic and radiative equilibrium against time (spherical polar to t = 10, cubed sphere to t = 2.5). Pass: below 1e-8 (dashed).
+
+.. figure:: figures/wb_2.png
+   :alt: wb_sp
+   :width: 100%
+
+   The spherical-polar envelope at t = 0 and t = 10: density, internal and radiation energy (left; the curves overlap) and the radial velocity, of order 1e-10 (right).
+
+.. figure:: figures/wedge_sym.png
+   :alt: wedge_sym
+   :width: 100%
+
+   Left: F_phi per phi column on the 20, 3.7 and 7.3 deg wedges. Right: the wedge-mean \|ΣF_phi\| / Σ\|F_r\| of each wedge. Pass: below 1e-8 (dashed); the 3.7 deg wedge without ``vet_gd_wall_sym`` stops with the wedge FATAL.
+
+.. figure:: figures/nlte.png
+   :alt: nlte_eps1e-1, nlte_eps1e-4
+   :width: 100%
+
+   Mean intensity J against optical depth in a two-level-atom atmosphere (epsilon = 0.1 and 1e-4) with the exact transport solution (left) and the relative difference (right). Pass: L1 within 5 % of the reference value.
+
+.. figure:: figures/thermal_eq.png
+   :alt: thermal_eq
+   :width: 100%
+
+   Gas temperature and radiation energy relaxing to equilibrium against the exact ODE at two time steps (left), their relative errors (middle) and the total-energy drift (right). Pass: T error below 2e-4 (dashed), order >= 1.8, energy drift below 1e-13 (dashed).
+
+.. figure:: figures/floor_pay.png
+   :alt: floor_pay
+   :width: 100%
+
+   A temperature floor that acts in most cells every cycle, paid from the radiation: total-energy drift from cycle 1 on (left) and the floor energy paid per cycle (right). Pass: drift below 1e-13, energy paid > 0, unpaid 0, no ``CLEAN WARNING``.
+
+.. figure:: figures/momentum_box.png
+   :alt: momentum_box
+   :width: 100%
+
+   Linear-momentum drift max_k \|P_k - P_k,0\| / Σ\|p_gas\| per cycle in a periodic 3-D box (gas + radiation face momenta). A report, no criterion; here at round-off.
