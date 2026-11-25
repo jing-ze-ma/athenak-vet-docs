@@ -18,9 +18,9 @@ Axes are in solar radii and degrees. :math:`R_{\rm ph,IC}` is the photosphere ra
 bar on the maps is a length at the median photosphere radius of the dump shown, exact at the equator: 10
 :math:`R_\odot` for bsg, 1 for m35mms, 0.1 for m35zams, 100 for t9l62 and 10 for t9mlt.
 
-Two notes on the velocity maps. In the m35mms map, thin nested contour lines inside some cells of the flow are steps
-of the interpolation between radial cells or of the search for the photosphere; which of the two was not examined.
-The t9l62 map shows mostly outflow at the photosphere.
+Two notes on the velocity maps. Thin nested contour lines and small speckled patches inside some cells of the flow
+(most clearly in m35mms, also in bsg and t9mlt) may come from the interpolation between radial cells or the search for
+the photosphere; this was not examined. The t9l62 map shows mostly outflow at the photosphere.
 
 .. figure:: star_runs/doc_strip.png
    :alt: radial velocity and effective temperature of the five stars
