@@ -178,7 +178,7 @@ def performance(code):
     shutil.copytree(os.path.join(d, 'performance'), out, ignore=shutil.ignore_patterns('__pycache__'))
     rst = convert(os.path.join(d, 'PERFORMANCE.md')).split('\n', 2)[2].lstrip('\n')
     rst = re.sub(r'`([^`<\n]+)\s<(performance/[^>\s]+)>`__', r':download:`\1 <\2>`', rst)
-    page('performance', 'Performance', [renumber(rst)], 'docs/vet_clean/PERFORMANCE.md')
+    page('performance', 'Performance on 3-D wedges of stars', [renumber(rst)], 'docs/vet_clean/PERFORMANCE.md')
 
 
 def main(code):
