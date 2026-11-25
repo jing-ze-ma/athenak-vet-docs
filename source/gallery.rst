@@ -2,17 +2,17 @@ Notebooks
 =========
 
 Worked problems live in a separate repository,
-`athenak-vet-gallery <https://github.com/jing-ze-ma/athenak-vet-gallery>`_, one folder per
+`athenak-vet-notebooks <https://github.com/jing-ze-ma/athenak-vet-notebooks>`_, one folder per
 problem: a README with the steps, the input deck(s) and a Jupyter notebook, executed, with
 its plots. The test notebooks run their test through the suite of the code repository
 (``tests/vet_clean``), so they need a checkout and a CPU build (:doc:`build`, block 3a):
 
 .. code-block:: bash
 
-   git clone https://github.com/jing-ze-ma/athenak-vet-gallery.git
+   git clone https://github.com/jing-ze-ma/athenak-vet-notebooks.git
    export ATHENAK=$PWD/athenak                         # your athenak checkout
    export ATHENA_EXE=$ATHENAK/build_tests/src/athena   # its CPU build
-   cd athenak-vet-gallery/radwave
+   cd athenak-vet-notebooks/radwave
    jupyter nbconvert --to notebook --execute --inplace radwave.ipynb
 
 .. list-table::

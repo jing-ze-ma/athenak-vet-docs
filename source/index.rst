@@ -31,7 +31,7 @@ The release code is the ``vet-clean-release`` branch of
 
 This site covers how to obtain, build and run the code, the method and its tests. Worked
 problems with notebooks are in the companion repository
-`athenak-vet-gallery <https://github.com/jing-ze-ma/athenak-vet-gallery>`_ (:doc:`gallery`).
+`athenak-vet-notebooks <https://github.com/jing-ze-ma/athenak-vet-notebooks>`_ (:doc:`gallery`).
 
 .. toctree::
    :caption: Getting Started

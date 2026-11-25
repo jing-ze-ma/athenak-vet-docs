@@ -4,7 +4,7 @@ User documentation for the clean VET radiation scheme of
 [AthenaK](https://github.com/jing-ze-ma/athenak) (branch `vet-clean-release`), built with
 [Sphinx](https://www.sphinx-doc.org/) and the [Furo](https://pradyunsg.me/furo/) theme.
 Worked problems with notebooks are in
-[athenak-vet-gallery](https://github.com/jing-ze-ma/athenak-vet-gallery).
+[athenak-vet-notebooks](https://github.com/jing-ze-ma/athenak-vet-notebooks).
 
 The layout, theme, style sheet and workflow are those of the
 [IAS AthenaK documentation](https://github.com/IAS-Astrophysics/athenak-docs); we thank its authors.
