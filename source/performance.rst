@@ -112,7 +112,7 @@ Sources of the Athena++ numbers:
   cores took 4 days for 1 day of model time, for these simulations, not separated by star. We take
   40 cores per node (75 nodes): the Skylake nodes of NASA's Electra have two 20-core Xeon Gold 6148.
   The papers name NASA NAS and "Skylake cores" but not the machine; the same group used Electra's
-  Skylake nodes for other star runs (NASA@SC23 showcase), so this is an inference.
+  Skylake nodes for other star runs (`NASA at SC23 showcase <https://www.nas.nasa.gov/SC23/research/project45.html>`__), so this is an inference.
   10 d of model time is then 40 days = 960 h.
 - t9l62: Jiang et al. (2018) state 60 million CPU hours on Mira (INCITE award at Argonne), besides NASA and NERSC
   resources, for their three simulations (T9L6.2, T19L6.4, T19L6) together. We assume an equal third, 20 million
