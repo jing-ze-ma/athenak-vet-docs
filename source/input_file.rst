@@ -13,9 +13,8 @@ boundaries, opacities and units, the layout mode, and output. The production val
 of the star templates in ``inputs/stars/`` (``star_bsg``, ``star_m35mms``, ``star_t9l62``:
 3-D spherical-polar wedges, one MeshBlock along x1, fixed rays, problem generator
 ``star_vet``). Solver internals and keys without effect are listed only by name in the
-appendix. A full sphere with poles or a stretched theta under ``vet_gd``, and radiation with
-``<mhd>``, are in the code but no deck or test covers them
-(:doc:`scheme`, "In the code but not tested").
+appendix. A full sphere with poles or a stretched theta under ``vet_gd`` are in the
+code but no deck or test covers them (:doc:`scheme`, "In the code but not tested").
 
 Columns: **default** is the value the code uses when the key is absent; **production** is
 the value in the templates (``all:`` when the three agree); **read in** is the file and
@@ -25,8 +24,8 @@ Many defaults differ between a **fresh start** and a **restart** whose file does
 the key (the restart default keeps an old run unchanged). The start-up log prints every default
 it applied together with the reason, e.g. ``(default with vet_gd on a fresh start)``.
 
-The restart rule: name every production key
--------------------------------------------
+The restart rule
+----------------
 
 A restart is started with ``athena -r <file>.rst [-i <deck>] [block/key=value ...]``. The
 parameters are put together in this order (``main.cpp``):
@@ -42,17 +41,18 @@ parameters are put together in this order (``main.cpp``):
 stored in the restart file, not the code default.** If the file does not hold the key either,
 a key that corrects the scheme takes the fresh default, with a ``### NOTE: ... the fix applies``
 (name the old value to keep the old behaviour), and a stored old value of ``merge_lat_mom``,
-``merge_lat_blockend``, ``fofc_flag_exchange``, ``clean_cs_lat_wb``, ``time2_gtime_slope`` or
-``time2_gtime_pos`` prints a ``### NOTE`` with the name to switch; the other keys take their restart default. A restart from
-a file of an older scheme should name every key of the production deck (RUN.md, Restarts).
+``merge_lat_blockend``, ``fofc_flag_exchange``, ``clean_cs_lat_wb``, ``time2_gtime_slope``,
+``time2_gtime_pos`` or ``mlt_src_time`` prints a ``### NOTE`` with the name to switch; the other keys take their restart default. For a
+file of an older scheme use ``restart_old_files.txt`` (below).
 
 Example: a restart file had stored ``time2_k1_stiff = 1.0`` from an earlier deck. The code
 default is 0 (off), but the restart ran with 1.0, because the new deck did not name the key.
 
 Rules:
 
-- When you restart from a restart file written with other keys, restart with
-  ``-i <production deck>`` or name every production key on the command line. The grid keys
+- The decks name only what differs from the default, so ``-i <deck>`` does not replace the
+  other stored values: name on the command line each key a file stores differently. For a
+  file of older code see below. The grid keys
   (``<mesh>`` x1min..x3max, nx1..nx3, nghost, the stretch keys and ``<meshblock>`` nx1..nx3)
   must stay as the file was written: a change is FATAL.
 
@@ -67,68 +67,79 @@ Rules:
   ``tools/rename_star_keys.sh FILE ...`` renames the keys in decks and scripts. The problem
   generator ``-D PROBLEM=star_vet`` was ``he_star_vet``; CMake accepts the old name.
 
-Keys that must always be named
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Restart files of older code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Restart files of earlier runs may carry other values for these keys, so leaving one of them
-out of a restart deck changes the scheme silently. The templates name them all.
+Files of the old implicit solver, or of early versions of this scheme, store other values of
+some keys, or lack keys whose restart default is not the production value.
+``inputs/stars/restart_old_files.txt`` names them, with the reason (commented out: what depends
+on the star); use it as the ``-i`` file:
 
-+-------------------------------------+----------------+-------------------------------------+
-| key                                 | value          | why                                 |
-+=====================================+================+=====================================+
-| ``<rad_vet>/time2_k1_stiff``        | ``0``          | recorded; older files stored 1.0    |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_fwb_stage``  | ``false``      | older files stored true             |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_fwb_t2``     | ``false``      | older files stored true             |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_w_fse_tau``       | ``true``       | older files may store false         |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/time2_gtime_mom``       | ``true``       | older files may store false         |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_pred_stage``      | ``false``      | production value                    |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_central``    | ``true``       | the fresh default; a restart file   |
-|                                     |                | without it takes it too (NOTE)      |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_kpat``       | ``false``      | removed (only false)                |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_eicarry``    | ``true``       | the fresh default; a restart file   |
-|                                     |                | without it takes it too (NOTE)      |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_gas_secant``      | ``max_stage2`` | the fresh default; a restart file   |
-|                                     |                | without it takes it too (NOTE)      |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_pred_xch``        | ``true``       | the fresh default; a restart file   |
-|                                     |                | without it takes it too (NOTE)      |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_fcone_gas``  | ``false``      | production value                    |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_wb_exch_local``   | ``true``       | recorded                            |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_mg_levels``  | ``2``          | the default (m35mms template: 4);   |
-|                                     |                | named because older restart files   |
-|                                     |                | may store 4                         |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/vet_gd_wall_sym``,      | ``true``       | recorded; a theta-periodic deck     |
-| ``vet_gd_theta_seam_sym``           |                | without ``vet_gd_theta_seam_sym``   |
-|                                     |                | stops with a FATAL                  |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<hydro>/floor_pay``               | ``rad_column`` | older star restart files do not     |
-|                                     |                | store it (restart default: none)    |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<hydro>/floor_pay_skip``,         | ``true``       | recorded                            |
-| ``dfloor_flux_limit``,              |                |                                     |
-| ``rad_signal_speed_diff``           |                |                                     |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<hydro>/fofc``, ``fofc_retest``   | ``true``       | older star restart files store      |
-|                                     |                | ``fofc = false``                    |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<mesh>/layout_invariant_mode``    | ``tile``       | see "Layout and reproducibility"    |
-+-------------------------------------+----------------+-------------------------------------+
-| ``<mesh>/layout_tile``              | ``128``        | the lateral MeshBlock size of the   |
-|                                     |                | templates                           |
-+-------------------------------------+----------------+-------------------------------------+
+.. code:: bash
+
+   athena -r old.rst -i $ATHENAK/inputs/stars/restart_old_files.txt mesh/layout_tile=64 ...
+
++-------------------------------------+------------------------------+------------------------------+
+| key                                 | value                        | why                          |
++=====================================+==============================+==============================+
+| ``<rad_vet>/scheme``,               | ``clean``, ``staggered``,    | the old solver and its forms |
+| ``clean_layout``, ``clean_rays``    | ``sc``                       | were removed: FATAL without  |
+|                                     |                              | them                         |
++-------------------------------------+------------------------------+------------------------------+
+| ``<rad_vet>/time2_k1_stiff``,       | ``0``                        | older files store 1.0, 0.1   |
+| ``time2_k1_redist``                 |                              |                              |
++-------------------------------------+------------------------------+------------------------------+
+| ``<rad_vet>/clean_stag_fwb_stage``, | ``false``                    | early files of this scheme   |
+| ``clean_stag_fwb_t2``               |                              | store true                   |
++-------------------------------------+------------------------------+------------------------------+
+| ``<rad_vet>/clean_w_fse_tau``,      | ``true``                     | early files may store false  |
+| ``time2_gtime_mom``                 |                              |                              |
++-------------------------------------+------------------------------+------------------------------+
+| ``<rad_vet>/clean_stag_mg_levels``  | ``2``                        | early files may store 4      |
++-------------------------------------+------------------------------+------------------------------+
+| ``<rad_vet>/clean_wb_exch_local``,  | ``true``, ``200``, ``rb``    | not stored, production is    |
+| ``clean_maxit``, ``clean_pc_sweep`` |                              | not the default              |
++-------------------------------------+------------------------------+------------------------------+
+| ``<rad_vet>/vet_gd_wall_interp``,   | ``true``                     | spherical-polar wedges with  |
+| ``vet_gd_wall_sym``,                |                              | fixed rays (commented out in |
+| ``vet_gd_theta_seam_sym``           |                              | the file); a theta-periodic  |
+|                                     |                              | wedge without them is FATAL  |
++-------------------------------------+------------------------------+------------------------------+
+| ``<hydro>/fofc``                    | ``true``                     | older star files may store   |
+|                                     |                              | false (HG, RSG, R136 store   |
+|                                     |                              | true)                        |
++-------------------------------------+------------------------------+------------------------------+
+| ``<hydro>/fofc_retest``,            | ``true``, ``rad_column``,    | not stored, restart default  |
+| ``floor_pay``, ``floor_pay_skip``,  | ``true``, ``true``,          | off                          |
+| ``dfloor_flux_limit``,              | ``true``, ``true``           |                              |
+| ``rad_signal_speed_diff``,          |                              |                              |
+| ``rad_signal_speed_phase``          |                              |                              |
++-------------------------------------+------------------------------+------------------------------+
+| ``<hydro>/dt_floor_courant``        | ``0.6``                      | commented out: FATAL without |
+|                                     |                              | ``floorcap_rho`` (HG, RSG    |
+|                                     |                              | files hold none)             |
++-------------------------------------+------------------------------+------------------------------+
+| ``<hydro>/merge_lat_mom``,          | ``radial``, ``exchange``     | commented out, a choice of   |
+| ``merge_lat_blockend``              |                              | physics: a stored ``rigid``  |
+|                                     |                              | (RSG) or ``flat`` stays      |
+|                                     |                              | (NOTE)                       |
++-------------------------------------+------------------------------+------------------------------+
+| ``<rad_vet>/vet_rotate_avg_ema``,   | ``128``, ``linear``,         | commented out: stars with    |
+| ``_change_form``, ``_wb``,          | ``true``, ``live``           | rotating rays (HG, RSG, R136 |
+| ``clean_rot_ring``                  |                              | continuations)               |
++-------------------------------------+------------------------------+------------------------------+
+| ``<problem>/mlt_src_time``          | ``stage``                    | files of the release         |
+|                                     |                              | ccab558ee store ``start``    |
+|                                     |                              | (MLT stars)                  |
++-------------------------------------+------------------------------+------------------------------+
+| ``<mesh>/layout_invariant_mode``,   | ``tile``, the lateral size   | stored as block (layout_tile |
+| ``layout_tile``                     | of the file's MeshBlocks     | is commented out: set it)    |
++-------------------------------------+------------------------------+------------------------------+
+| ``<time>/restart_refill_ghosts``    | ``false``                    | some files store true        |
++-------------------------------------+------------------------------+------------------------------+
+
+A file this code wrote stores every key it read: nothing needs naming (a file of the release
+ccab558ee: ``mlt_src_time`` only).
 
 Rows marked "hydro only" have no ``<mhd>`` form: the key named under ``<mhd>`` (``floorcap_rho``
 with ``<mhd>``) stops the run. ``fofc_retest`` is hydro only too.
@@ -136,10 +147,8 @@ with ``<mhd>``) stops the run. ``fofc_retest`` is hydro only too.
 The decks
 ---------
 
-``decks/*.athinput`` are complete input files. Each starts with a comment on the problem; its
-``<rad_vet>`` block begins with the scheme keys that production pins (the values of the
-production star decks in ``inputs/stars/``), then the test's physics and solver
-set-up. A test changes only a few keys on top (for example ``time/nlim``, ``time/dt_fixed``,
+``decks/*.athinput`` are complete input files. Each starts with a comment on the problem and
+names the test's physics and what differs from the defaults. A test changes only a few keys on top (for example ``time/nlim``, ``time/dt_fixed``,
 ``mesh/nx1``); ``run_tests.py`` writes the deck it actually ran as ``in.athinput`` in each run
 directory. To run a deck by hand:
 

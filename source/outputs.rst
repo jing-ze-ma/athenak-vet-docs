@@ -104,8 +104,8 @@ Definitions used in the table:
 | 2   | L_bot     | at the x1 face between the first and second active cells     | erg/s      |
 |     |           | (``is+1``), one cell above the inner boundary: with          |            |
 |     |           | ``scheme = clean`` the comoving flux sum (Phi - (4/3) v E) A |            |
-|     |           | (as L_midC; before IA12.3-rc4 it was the face flux sum F A); |            |
-|     |           | with the old scheme sum F A                                  |            |
+|     |           | (as L_midC; in earlier versions it was the face flux sum F   |            |
+|     |           | A); with the old scheme sum F A                              |            |
 +-----+-----------+--------------------------------------------------------------+------------+
 | 3   | L_mid     | sum F A at the lower face of cell ``imid``                   | erg/s      |
 +-----+-----------+--------------------------------------------------------------+------------+
@@ -184,7 +184,11 @@ Definitions used in the table:
 | 26  | Lz_hflx   | the same for the gas L_z                                     | g cm^2/s^2 |
 +-----+-----------+--------------------------------------------------------------+------------+
 | 27  | Lz_tot    | L_z of gas + radiation, including the radiation's L_z ledger | g cm^2/s   |
-|     |           | (``CleanLzTotal``)                                           |            |
+|     |           | (``CleanLzTotal``); summed exactly, so dLz_tot + Lz_hflx dt  |            |
+|     |           | of a row (the rate of the step it ends) holds to the state's |            |
+|     |           | round-off, a small part of eps = 1e-16 times the gross sum V |            |
+|     |           | R \|p_phi\| per step: where the net is far below the gross   |            |
+|     |           | sum, compare with eps x gross, not with eps x Lz_tot         |            |
 +-----+-----------+--------------------------------------------------------------+------------+
 | 28  | L_midE    | sum Phi A at the L_mid face: the energy flux that moved E    | erg/s      |
 |     |           | there                                                        |            |

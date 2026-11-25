@@ -231,17 +231,17 @@ def main(code):
         ('(RUN.md section 6)', '(Running the code: GPU memory)'),
         ('; RUN.md section 5)', '; Running the code: the time-step report)')]))
     t = sections(md['TESTS'])
-    page('input_file', 'The input file', [ks['_pre'], renumber(ks['The restart rule: name every production key']),
+    page('input_file', 'The input file', [ks['_pre'], renumber(ks['The restart rule']),
                                           renumber(t['The decks'])],
          'docs/vet_clean/KEYS.md and tests/vet_clean/README.md',
          'An input deck is a plain AthenaK ``.athinput`` file; the scheme reads the\n'
          '``<rad_vet>`` block (the old name ``<rad_m1>`` is accepted as an alias). Any key can be\n'
          'changed on the command line as ``block/key=value``.')
     page('keys', 'Keys reference', [renumber(v) for n, v in ks.items()
-                                    if n not in ('_pre', 'The restart rule: name every production key')],
+                                    if n not in ('_pre', 'The restart rule')],
          'docs/vet_clean/KEYS.md',
-         'The keys a user sets, by topic. How keys combine on a restart, and the keys that must\n'
-         'always be named: :doc:`input_file`.')
+         'The keys a user sets, by topic. How keys combine on a restart:\n'
+         ':doc:`input_file`.')
 
     tt = fix(md['TESTS'], [('``docs/vet_clean/BUILD.md``', ':doc:`notes_specific_machines`'),
                            ('see ``notebooks/README.md``', 'see :doc:`gallery`')], 'tests README')

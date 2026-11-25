@@ -34,7 +34,8 @@ Production star runs
 --------------------
 
 Templates: ``inputs/stars/star_bsg.athinput``, ``star_m35mms.athinput``,
-``star_t9l62.athinput``. They hold the full production key set (tile layout mode). They need:
+``star_t9l62.athinput``. They name only the star and what differs from the defaults (the start of the log lists
+both). They need:
 
 1. a binary built with ``-D PROBLEM=star_vet`` (see :doc:`build`);
 2. the opacity tables and initial-condition profiles named by the ``star_opac_table``,
@@ -79,16 +80,11 @@ This bites when a deck or the code default changed since the restart file was wr
 example, an old restart file stored ``time2_k1_stiff = 1.0``, and a restart that relied on the
 new default 0 silently ran with 1.0, which changed the photospheric luminosity by about
 50 %. So, when you restart from a file written with other keys (another code version,
-another run), name every key that matters on the command line:
+another run), name every key that matters. The keys of older code are in one file:
 
 .. code:: bash
 
-   ./athena -r run/hegiant.00205.rst rad_vet/time2_k1_stiff=0 rad_vet/clean_stag_fwb_stage=false \
-     rad_vet/clean_stag_fwb_t2=false rad_vet/clean_w_fse_tau=true rad_vet/time2_gtime_mom=true \
-     rad_vet/clean_pred_stage=false rad_vet/clean_stag_central=true rad_vet/clean_stag_kpat=false \
-     rad_vet/clean_stag_eicarry=true rad_vet/clean_gas_secant=max_stage2 rad_vet/clean_pred_xch=true \
-     rad_vet/clean_stag_fcone_gas=false rad_vet/clean_wb_exch_local=true hydro/floor_pay=rad_column \
-     hydro/floor_pay_skip=true hydro/dfloor_flux_limit=true hydro/rad_signal_speed_diff=true
+   ./athena -r run/hegiant.00205.rst -i ../inputs/stars/restart_old_files.txt mesh/layout_tile=64
 
 and check the start of the log: it lists the ``<rad_vet>``, ``<hydro>``, ``<mhd>``,
 ``<time>`` and ``<mesh>`` keys that differ from their default, with where each value came from. A restart of your own run with an unchanged deck needs no extra keys.
@@ -107,8 +103,8 @@ set-up) keep the restart default; the start-up log echoes it with the reason.
 nor the keys it goes with, so the run changes at the restart: the NOTEs list what applies and
 how to keep the old value. A stored value always wins, also an old one that a newer key needs
 differently; the run then stops with a FATAL that names both keys and what to name. Do not
-restart such a file with nothing named: name every key of the production deck (the list of
-:doc:`keys`, "Keys that must always be named"), read the NOTEs and check the start of
+restart such a file with nothing named: use ``-i inputs/stars/restart_old_files.txt``
+(:doc:`keys`, "Restart files of older code"), read the NOTEs and check the start of
 the log before you let it run on.
 
 **``<job>/recipe`` is removed.** A deck, command line or restart file that names it stops with a

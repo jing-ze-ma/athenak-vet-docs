@@ -504,7 +504,8 @@ Reproducibility
   (compared at that threshold, not byte by byte).
 
 Test: ``layout_tile`` (1 x 2 MeshBlocks along phi vs one MeshBlock: identical; 2 x 2, which
-also splits theta across the ray walls: bounded at 1e-8).
+also splits theta across the ray walls: bounded at 1e-8); on the cubed
+sphere ``layout_cs`` (one MeshBlock per panel vs 2 x 2: identical).
 
 
 CPU / GPU consistency: round-off, not bitwise
@@ -575,10 +576,18 @@ following. The properties of this section are not verified there.
 +-------------------------------------+------------------------------+------------------------------+
 | radiation with MHD (``<mhd>`` in    | accepted with                | hydrodynamics only           |
 | place of ``<hydro>``;               | ``time2_tableau = hesdirk2`` |                              |
-| ``RadiationVet::EmagBuild`` takes   | (default) or ``trbdf2``, not |                              |
-| \|B|^2/2 out of the gas energy)     | tested; ``sdirk2``, the      |                              |
-|                                     | tableau of the star decks,   |                              |
-|                                     | is FATAL with MHD and matter |                              |
+| ``RadiationVet::EmagBuild`` takes   | (default) or ``trbdf2``,     |                              |
+| \|B|^2/2 out of the gas energy)     | tested on small boxes and    |                              |
+|                                     | shells of the three          |                              |
+|                                     | geometries with Ohmic and    |                              |
+|                                     | ambipolar diffusion          |                              |
+|                                     | (``mhd_vet``,                |                              |
+|                                     | ``mhd_equil``), not on a     |                              |
+|                                     | star and not with            |                              |
+|                                     | super-time-stepping;         |                              |
+|                                     | ``sdirk2``, the tableau of   |                              |
+|                                     | the star decks, is FATAL     |                              |
+|                                     | with MHD and matter          |                              |
 |                                     | coupling; ``<hydro>`` and    |                              |
 |                                     | ``<mhd>`` together are FATAL |                              |
 +-------------------------------------+------------------------------+------------------------------+

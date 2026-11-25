@@ -4,8 +4,8 @@
 Keys reference
 ==============
 
-The keys a user sets, by topic. How keys combine on a restart, and the keys that must
-always be named: :doc:`input_file`.
+The keys a user sets, by topic. How keys combine on a restart:
+:doc:`input_file`.
 
 Scheme selection
 ----------------
@@ -253,6 +253,24 @@ Time integration, time step and retries
 |                                  | ``rad_signal_speed`` and          |                         |                 |                               |
 |                                  | ``rad_signal_speed_diff`` (FATAL  |                         |                 |                               |
 |                                  | otherwise).                       |                         |                 |                               |
++----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
+| ``problem/mlt_src_time``         | Time of the MLT source            | ``stage`` (a restart    | none of the     | ``pgen/star_vet.cpp``         |
+|                                  | (``mlt_flux_frozen``: the ramp    | file without the key    | templates has   |                               |
+|                                  | w(t), the ``adaptive`` /          | too, NOTE)              | an MLT flux     |                               |
+|                                  | ``pressure`` closure's F_sub):    |                         |                 |                               |
+|                                  | ``stage`` takes it at the time of |                         |                 |                               |
+|                                  | each implicit stage (second       |                         |                 |                               |
+|                                  | order), ``start`` at t^n for the  |                         |                 |                               |
+|                                  | whole step (first order; under    |                         |                 |                               |
+|                                  | ``sdirk2`` dt/2 late). A frozen   |                         |                 |                               |
+|                                  | flux without a ramp is the same   |                         |                 |                               |
+|                                  | either way. A restart file that   |                         |                 |                               |
+|                                  | stores ``start`` keeps it unless  |                         |                 |                               |
+|                                  | ``stage`` is named; the first     |                         |                 |                               |
+|                                  | step after the switch of an       |                         |                 |                               |
+|                                  | ``adaptive`` or ``pressure`` run  |                         |                 |                               |
+|                                  | takes the target of t^n for both  |                         |                 |                               |
+|                                  | ends (NOTE).                      |                         |                 |                               |
 +----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
 | ``rad_vet/time_scheme``          | ``hesdirk2``: two implicit stages | ``hesdirk2`` on a fresh | all:            | ``rad_vet/rad_vet_init.cpp``  |
 |                                  | per step with the Heun hydro      | run that supports it;   | ``hesdirk2``    | (``ImplicitInit``)            |
@@ -532,9 +550,9 @@ Opacity, units and coupling
 |                               | (``FOFC first-order cell-stages``, |                              |                              |                               |
 |                               | the run total).                    |                              |                              |                               |
 +-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``hydro/fofc_flag_exchange``  | (hydro only.) Every mesh with more | true, also on a restart      | -                            | ``hydro/hydro_fofc.cpp``      |
-|                               | than one MeshBlock (cubed sphere:  | whose file lacks it (a NOTE  |                              |                               |
-|                               | per panel) and a periodic wrap of  | in the log; name             |                              |                               |
+| ``hydro/fofc_flag_exchange``, | Every mesh with more than one      | true, also on a restart      | -                            | ``hydro/hydro_fofc.cpp``      |
+| ``mhd/fofc_flag_exchange``    | MeshBlock (cubed sphere: per       | whose file lacks it (a NOTE  |                              |                               |
+|                               | panel) and a periodic wrap of      | in the log; name             |                              |                               |
 |                               | spherical polar, no refinement, no | ``fofc_flag_exchange=false`` |                              |                               |
 |                               | shearing box: the FOFC flags of    | to keep the old)             |                              |                               |
 |                               | the face ghosts (block edge,       |                              |                              |                               |
@@ -546,6 +564,19 @@ Opacity, units and coupling
 |                               | depend on the MeshBlock layout     |                              |                              |                               |
 |                               | where a panel seam meets a         |                              |                              |                               |
 |                               | MeshBlock edge.                    |                              |                              |                               |
++-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
+| ``mhd/cs_seam_emf_exchange``  | Cubed sphere, GS07 corner EMF      | true (a restart file without | -                            | ``mhd/mhd_cs_seam.cpp``       |
+|                               | (``emf_scheme = gs07``, the only   | it: true, with the NOTE)     |                              |                               |
+|                               | one with ``fofc``), more than one  |                              |                              |                               |
+|                               | MeshBlock per panel: the upwind    |                              |                              |                               |
+|                               | sides of the corner EMF read the   |                              |                              |                               |
+|                               | shared seam mass flux in the       |                              |                              |                               |
+|                               | same-panel ghost rows too (one     |                              |                              |                               |
+|                               | exchange per stage), so the answer |                              |                              |                               |
+|                               | does not depend on the MeshBlock   |                              |                              |                               |
+|                               | layout (round-off instead of 1e-6  |                              |                              |                               |
+|                               | ... 2e-3); conservation and div B  |                              |                              |                               |
+|                               | are exact either way.              |                              |                              |                               |
 +-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
 
 Layout and reproducibility
@@ -711,11 +742,11 @@ Output and verbosity
 Appendix: advanced and internal keys
 ------------------------------------
 
-These keys are named in the templates to pin the scheme (keep their values) or are solver
+These keys hold the scheme (the templates run the defaults) or are solver
 internals. Do not change them without a dedicated test (energy and momentum conservation, a
-bitwise restart check, and a comparison with the production key set).
+bitwise restart check, and a comparison with the templates).
 
-Scheme options pinned by the templates (in brackets the templates' values):
+Scheme options (in brackets the templates' values):
 
 - ``clean_stag_upwind_central`` (true), ``clean_stag_central`` (true): central advective flux within the TVD bound.
 - ``clean_face_hctau`` (true), ``clean_face_jse`` (true), ``clean_face_opac`` (``harmonic``): face values of the rays' flux, half ranges and opacity.

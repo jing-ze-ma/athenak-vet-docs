@@ -4,7 +4,7 @@
 Download
 ========
 
-This site documents release ``vet-clean-release`` (commit ``ccab558ee``).
+This site documents release ``vet-clean-release`` (commit ``67165e494``).
 
 Clone the repository, switch to the release branch, and fetch Kokkos (a git submodule):
 

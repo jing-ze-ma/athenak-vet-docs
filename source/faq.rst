@@ -21,8 +21,9 @@ FAQ
 
 **My restart does not behave like the run it continues.**
   On a restart, a key that is not given in the deck or on the command line takes the value
-  stored in the restart file, not the code default. Name every production key when you
-  restart from a file written with other keys (:doc:`input_file`).
+  stored in the restart file, not the code default. Name on the command line each key the file
+  stores differently; for a file of older code use ``inputs/stars/restart_old_files.txt``
+  (:doc:`input_file`).
 
 **My wedge run stops with a FATAL about the azimuthal period.**
   On a phi-periodic wedge the width must be a whole number of the ray set's azimuthal
