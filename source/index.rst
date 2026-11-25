@@ -17,6 +17,8 @@ for stellar envelopes.
 **57 days of a blue supergiant in 6.0 hours on one node of 4 H200**: wall times of the star runs,
 a comparison with Athena++ on CPUs and where the time goes are on :doc:`performance`.
 
+Figures and movies of the five star runs are on :doc:`star_runs`.
+
 Its properties, each with how it is achieved and the test that shows it, are on
 :doc:`properties`: energy and mass conserved to round-off; :math:`L_z` exact on the cubed
 sphere (on spherical polar exact except where the face-flux cone cut acts, booked in a
@@ -80,6 +82,7 @@ problems with notebooks are in the companion repository
    :maxdepth: 1
 
    stars
+   star_runs
    gallery
 
 .. toctree::
