@@ -8,36 +8,36 @@ Step-by-step versions with the decks and the executed notebook: the ``star3d-sp`
 ``star3d-cs`` tutorials of the :doc:`gallery`.
 
 Two small, complete 3-D star decks that use the production scheme keys. Each one runs
-in about 15 minutes on 4 A100 GPUs, and it starts on one CPU node, where a few cycles show
+in 8 (sp) and 12 (cs) minutes on 4 MI300A APUs, and it starts on one CPU node, where a few cycles show
 that the setup works. Use them to check a new build or machine before you start a production
 run, and as starting points for your own star decks.
 
-+---------------------------------------------+-----------------+--------------+--------------+--------------+--------------+
-| deck                                        | mesh            | star         | cells        | MeshBlocks   | run          |
-+=============================================+=================+==============+==============+==============+==============+
-| ``inputs/rad_vet_clean/star3d_sp.athinput`` | spherical-polar | blue         | 256 x 64 x   | 16 of 256 x  | 4000 cycles, |
-|                                             | wedge: r 20-80  | supergiant   | 64 = 1.0 M   | 16 x 16      | 9.8 d        |
-|                                             | Rsun, theta     | envelope     |              |              |              |
-|                                             | pi/3..2pi/3,    | (the BSG     |              |              |              |
-|                                             | phi 0..pi/3     | production   |              |              |              |
-|                                             | (periodic       | deck at 1/4  |              |              |              |
-|                                             | lateral walls)  | of its       |              |              |              |
-|                                             |                 | lateral      |              |              |              |
-|                                             |                 | resolution)  |              |              |              |
-+---------------------------------------------+-----------------+--------------+--------------+--------------+--------------+
-| ``inputs/rad_vet_clean/star3d_cs.athinput`` | cubed sphere,   | red          | 548 x 32 x   | 24 of 548 x  | 1200 cycles, |
-|                                             | full sphere: r  | supergiant   | 32 x 6 = 3.4 | 16 x 16      | 13.9 d       |
-|                                             | 25-2530 Rsun    | (20.5 Msun,  | M            |              |              |
-|                                             | (stretched;     | MESA profile |              |              |              |
-|                                             | photosphere at  | from a 22    |              |              |              |
-|                                             | 834 Rsun), 6    | Msun model;  |              |              |              |
-|                                             | faces x 32 x 32 | the RSG      |              |              |              |
-|                                             |                 | production   |              |              |              |
-|                                             |                 | deck at 1/4  |              |              |              |
-|                                             |                 | of its       |              |              |              |
-|                                             |                 | lateral      |              |              |              |
-|                                             |                 | resolution)  |              |              |              |
-+---------------------------------------------+-----------------+--------------+--------------+--------------+--------------+
++-------------------------------------+-----------------+--------------+--------------+--------------+--------------+
+| deck                                | mesh            | star         | cells        | MeshBlocks   | run          |
++=====================================+=================+==============+==============+==============+==============+
+| ``inputs/stars/star3d_sp.athinput`` | spherical-polar | blue         | 256 x 64 x   | 16 of 256 x  | 2786 cycles, |
+|                                     | wedge: r 20-80  | supergiant   | 64 = 1.0 M   | 16 x 16      | 9.8 d        |
+|                                     | Rsun, theta     | envelope     |              |              |              |
+|                                     | pi/3..2pi/3,    | (the BSG     |              |              |              |
+|                                     | phi 0..pi/3     | production   |              |              |              |
+|                                     | (periodic       | deck at 1/4  |              |              |              |
+|                                     | lateral walls)  | of its       |              |              |              |
+|                                     |                 | lateral      |              |              |              |
+|                                     |                 | resolution)  |              |              |              |
++-------------------------------------+-----------------+--------------+--------------+--------------+--------------+
+| ``inputs/stars/star3d_cs.athinput`` | cubed sphere,   | red          | 548 x 32 x   | 24 of 548 x  | 1200 cycles, |
+|                                     | full sphere: r  | supergiant   | 32 x 6 = 3.4 | 16 x 16      | 13.9 d       |
+|                                     | 25-2530 Rsun    | (20.5 Msun,  | M            |              |              |
+|                                     | (stretched;     | MESA profile |              |              |              |
+|                                     | photosphere at  | from a 22    |              |              |              |
+|                                     | 834 Rsun), 6    | Msun model;  |              |              |              |
+|                                     | faces x 32 x 32 | the RSG      |              |              |              |
+|                                     |                 | production   |              |              |              |
+|                                     |                 | deck at 1/4  |              |              |              |
+|                                     |                 | of its       |              |              |              |
+|                                     |                 | lateral      |              |              |              |
+|                                     |                 | resolution)  |              |              |              |
++-------------------------------------+-----------------+--------------+--------------+--------------+--------------+
 
 Both decks start fresh from a 1-D profile. On the first cycle the code relaxes the
 radiation to its steady state in the initial gas (``clean_init = steady``). The cs deck sets
@@ -48,24 +48,28 @@ count gives the same answer, bit for bit.
 What you need
 -------------
 
-1. An AthenaK binary built with ``-D PROBLEM=he_star_vet``: ``build_star/src/athena`` of
+1. An AthenaK binary built with ``-D PROBLEM=star_vet``: ``build_star/src/athena`` of
    :doc:`build`, a CPU build for the start-up check and a CUDA
    (or HIP) build for the GPU run.
-2. The input data in ``inputs/rad_vet_clean/star3d_data/``. The decks read them by the relative
+2. The input data in ``inputs/stars/star3d_data/``. The decks read them by the relative
    path ``star3d_data/...``, so link that directory into the directory you start the run from.
 
 +-----------------------+--------+---------+--------------------------------------------------+
 | file                  | size   | used by | what                                             |
 +=======================+========+=========+==================================================+
-| ``bsg_ic.txt``        | 0.9 MB | sp      | 1-D initial state (r, rho, e, F_r, E; he_ic_cols |
-|                       |        |         | = 5): the Ma et al. (2026) BSG profile,          |
-|                       |        |         | radiative-only outward integration to the        |
-|                       |        |         | photosphere, isothermal atmosphere, F_r = 0      |
+| ``bsg_ic.txt``        | 0.9 MB | sp      | 1-D initial state (r, rho, e, F_r, E;            |
+|                       |        |         | star_ic_cols = 5): the Ma et al. (2026) BSG      |
+|                       |        |         | profile, radiative-only outward integration to   |
+|                       |        |         | the photosphere, isothermal atmosphere, F_r = 0  |
 |                       |        |         | above the photosphere                            |
 +-----------------------+--------+---------+--------------------------------------------------+
 | ``bsg_profile.txt``   | 0.3 MB | sp      | the MESA profile (r, T, rho, M, kappa, F_r) that |
-|                       |        |         | ``he_ic_profile`` interpolates (the BSG          |
-|                       |        |         | reference initial state)                         |
+|                       |        |         | ``star_ic_profile`` interpolates (the BSG        |
+|                       |        |         | reference initial state); a thinned copy of the  |
+|                       |        |         | full profile, which is not in the repository:    |
+|                       |        |         | ``star_bsg.athinput`` needs the full one         |
+|                       |        |         | (``TABLES/bsg/bsg_profile.txt``), this copy can  |
+|                       |        |         | stand in for a test run                          |
 +-----------------------+--------+---------+--------------------------------------------------+
 | ``bsg_rosseland.txt`` | 0.8 MB | sp      | Rosseland-mean opacity incl. electron            |
 |                       |        |         | scattering, OPAL via MESA ``kap`` (GS98, X 0.70, |
@@ -110,8 +114,8 @@ Set up a run directory once, outside the checkout (``ATHENAK`` names the ``athen
 
    export ATHENAK=/path/to/athenak
    mkdir -p star3d && cd star3d
-   ln -s $ATHENAK/inputs/rad_vet_clean/star3d_data .
-   cp $ATHENAK/inputs/rad_vet_clean/star3d_sp.athinput $ATHENAK/inputs/rad_vet_clean/star3d_cs.athinput .
+   ln -s $ATHENAK/inputs/stars/star3d_data .
+   cp $ATHENAK/inputs/stars/star3d_sp.athinput $ATHENAK/inputs/stars/star3d_cs.athinput .
 
 One CPU node: does it start? (a few cycles)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,20 +154,21 @@ For a run over several nodes of A100s with InfiniBand (e.g. MPCDF Raven), also s
 between nodes fails with ``ib_mlx5 ... Local protection error``. With ``put_ppln``, two nodes were bitwise
 from run to run.
 
-Measured on one node of 4 A100-40GB (MPCDF Raven, ``gcc/13 cuda/12.6 openmpi_gpu/5.0``):
+Measured on 4 MI300A APUs (two nodes of MPCDF Viper, ``gcc/16 rocm/7.2 openmpi_gpu/5.0``):
 
 +------+------------------+-----------+---------------------------+---------------------------+
 | deck | wall time        | per cycle | simulated time            | output                    |
 +======+==================+===========+===========================+===========================+
-| sp   | 13.9 min (832 s) | 0.21 s    | 4000 cycles, 9.8 d (dt    | 6 dumps of hydro_w + vet, |
-|      |                  |           | about 260 s)              | 0.6 GB                    |
+| sp   | 8.0 min (479 s)  | 0.17 s    | 2786 cycles, 9.8 d (dt    | 4 dumps of hydro_w + vet, |
+|      |                  |           | 320 s until 8 d, then     | 0.4 GB                    |
+|      |                  |           | down to 174 s)            |                           |
 +------+------------------+-----------+---------------------------+---------------------------+
-| cs   | 13.3 min (797 s) | 0.65 s    | 1200 cycles, 13.9 d (dt   | 6 dumps of hydro_w + vet, |
+| cs   | 11.9 min (713 s) | 0.59 s    | 1200 cycles, 13.9 d (dt   | 6 dumps of hydro_w + vet, |
 |      |                  |           | 1000 s)                   | 1.9 GB                    |
 +------+------------------+-----------+---------------------------+---------------------------+
 
-To make a run shorter or longer, change ``time/nlim`` (or give ``time/nlim=N`` on the command
-line). Dumps are written every 1000 cycles (sp) or 300 cycles (cs), set by ``output2/dcycle``
+To make a run shorter, change ``time/nlim`` (or give ``time/nlim=N`` on the command line); the sp deck
+ends at ``time/tlim`` (9.8 d), which a longer run must raise too. Dumps are written every 1000 cycles (sp) or 300 cycles (cs), set by ``output2/dcycle``
 and ``output3/dcycle``, and the history every cycle.
 
 What to look at
@@ -185,8 +190,8 @@ Checks:
 2. ``grep -c 'CLEAN WARNING' run_sp.log`` gives 0 (the same for cs).
 3. The steady start converged (log line ``clean_init steady: converged after N passes``).
    The line ``clean_init steady pass 1: ... = ...`` is a fingerprint of the binary, and a
-   new machine or compiler should reproduce it to a few digits: sp ``9.025e-09``, cs
-   ``1.218e-07`` (the same on CPU and A100). On the RSG the steady-start residual stalls
+   new machine or compiler should reproduce it to a few digits: sp ``8.220e-11``, cs
+   ``1.140e-07`` (the same on CPU and MI300A). On the RSG the steady-start residual stalls
    near 1.1e-7 of max E. The default tolerance 1e-8 is then never reached, and the start
    ends after 40 passes with a ``CLEAN WARNING``, so the cs deck accepts 2e-7. Do not use a
    large pseudo time step (``clean_init_dtfac = 1e6``, as in the BSG deck) on the RSG. It
@@ -198,26 +203,33 @@ Checks:
    the innermost faces (erg/s; on the sp wedge these are integrated over the wedge only).
    Expected at the end of the 4-GPU runs:
 
-+------+------------------+------------------+-----------------------+-----------------------+
-| deck | L_in             | L_top at the end | L_top / L_in at the   | L_top / L_in over the |
-|      |                  |                  | end                   | second half           |
-+======+==================+==================+=======================+=======================+
-| sp   | 4.651e37 (wedge) | 4.83e37          | 1.039                 | 0.958 - 1.066         |
-+------+------------------+------------------+-----------------------+-----------------------+
-| cs   | 6.837e38         | 6.74e38          | 0.986                 | 0.986 - 0.997         |
-+------+------------------+------------------+-----------------------+-----------------------+
++-----------------+------------------+------------------+-----------------+-----------------+
+| deck            | L_in             | L_top at the end | L_top / L_in at | L_top / L_in    |
+|                 |                  |                  | the end         | over the second |
+|                 |                  |                  |                 | half            |
++=================+==================+==================+=================+=================+
+| sp (over        | 4.651e37 (wedge) | 4.81e37          | 1.035           | 0.958 - 1.066   |
+| 4.9-9.8 d)      |                  |                  |                 |                 |
++-----------------+------------------+------------------+-----------------+-----------------+
+| cs              | 6.837e38         | 6.74e38          | 0.986           | 0.986 - 0.997   |
++-----------------+------------------+------------------+-----------------+-----------------+
 
 What the curves look like (the notebook plots them):
 
 - sp: at t = 0, ``L_top`` is 1600 ``L_in``, because the radiation of the initial isothermal
   atmosphere (E = a T^4, F = 0 above the photosphere) streams out. It falls to about
-  1.4 ``L_in`` within 10 cycles and to within 5 % of ``L_in`` after about 0.3 d. After that it
-  oscillates around ``L_in`` by up to 10 % (0.96 - 1.07 over the second half). ``L_bot``
-  swings between -1.4 and +2.2 ``L_in`` over the first 100 cycles while the inner wall
-  adjusts, then stays within 10 % of ``L_in`` (0.94 - 1.05 over the second half).
+  1.3 ``L_in`` within 10 cycles; its mean over 0.5-1 d is 1.060 ``L_in``, and over 2-3 d it
+  ranges from 0.855 to 1.148 ``L_in``. The numbers of the table refer to 4.9-9.8 d; after
+  about 8 d the model's iron-bump layer (N^2 < 0, growth time 0.5-0.6 d) starts convecting,
+  seeded by the 5 % noise of the start (inferred), and ``L_top`` is still rising at 12.2 d
+  (1.12 ``L_in``, in a 12.2 d run), so the deck ends at 9.8 d. ``L_bot`` stays between 0.87 and 1.25 ``L_in``
+  over the first 100 cycles while the inner wall adjusts, and within 0.9 % of ``L_in`` after the first day (1.004 - 1.008 over 4.9-9.8 d).
 - cs: ``L_top / L_in`` starts at 0.987, peaks at 1.10 after about 0.1 d and relaxes back to
-  0.986 - 0.997 over the second week. ``L_bot / L_in`` stays within 3 % of 1, and within
-  2e-4 of 1 after the first day.
+  0.986 - 0.997 over the second week. ``L_bot / L_in`` stays within 0.4 % of 1, and within
+  1.4e-3 of 1 after the first day (4e-4 over 4.9-13.9 d).
+
+The photosphere velocities of the sp deck are affected by the gap of the profile between
+r = 3.36e12 and 3.65e12 cm (cells 133-159 of the radial grid).
 
 A run that departs from these values by much more than the oscillation amplitude, or
 that prints ``CLEAN WARNING`` lines, is worth a closer look (:doc:`outputs`).
@@ -226,13 +238,13 @@ that prints ``CLEAN WARNING`` lines, is worth a closer look (:doc:`outputs`).
    :alt: star3d_sp
    :width: 100%
 
-   Spherical-polar BSG deck on 4 A100 GPUs: shell-averaged density and radiation energy density at t = 0 and at the end (9.8 d); the atmosphere's initial radiation has streamed out. (Its luminosity plot is dominated by the t = 0 burst, L_top = 1600 L_in; expected: L_top / L_in between 0.96 and 1.07 over the second half.)
+   Spherical-polar BSG deck on 4 MI300A APUs: shell-averaged density and radiation energy density at t = 0 and at the end (9.8 d); the atmosphere's initial radiation has streamed out. (Its luminosity plot is dominated by the t = 0 burst, L_top = 1600 L_in; expected: L_top / L_in between 0.958 and 1.066 over 4.9-9.8 d.)
 
 .. figure:: figures/star3d_cs_lum.png
    :alt: star3d_cs
    :width: 100%
 
-   Cubed-sphere RSG deck on 4 A100 GPUs: L_top, L_bot and L_in against time (left) and their ratios to L_in (right). Expected: L_top / L_in between 0.986 and 0.997 over the second half.
+   Cubed-sphere RSG deck on 4 MI300A APUs: L_top, L_bot and L_in against time (left) and their ratios to L_in (right). Expected: L_top / L_in between 0.986 and 0.997 over the second half.
 
 .. figure:: figures/star3d_sp_slices.png
    :alt: star3d_sp
@@ -266,7 +278,7 @@ Set the two run directories in the first cell (``RUNS``), or set the environment
    STAR3D_SP=run_sp STAR3D_CS=run_cs jupyter nbconvert --to notebook --execute \
      $ATHENAK/docs/vet_clean/notebooks/star3d.ipynb --output star3d_run.ipynb --output-dir .
 
-The notebook in the repository was executed on the 4-A100 runs above.
+The notebook in the repository was executed on the 4-MI300A runs above.
 
 From the test to a production run
 ---------------------------------

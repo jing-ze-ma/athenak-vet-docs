@@ -10,9 +10,9 @@ changed on the command line as ``block/key=value``.
 
 This page lists the keys a user sets for a run: the scheme, the rays, the time step, the
 boundaries, opacities and units, the layout mode, and output. The production values are those
-of the star templates in ``inputs/rad_vet_clean/`` (``star_bsg``, ``star_m35mms``, ``star_t9l62``:
+of the star templates in ``inputs/stars/`` (``star_bsg``, ``star_m35mms``, ``star_t9l62``:
 3-D spherical-polar wedges, one MeshBlock along x1, fixed rays, problem generator
-``he_star_vet``). Solver internals and keys without effect are listed only by name in the
+``star_vet``). Solver internals and keys without effect are listed only by name in the
 appendix. A full sphere with poles or a stretched theta under ``vet_gd``, and radiation with
 ``<mhd>``, are in the code but no deck or test covers them
 (:doc:`scheme`, "In the code but not tested").
@@ -40,7 +40,11 @@ parameters are put together in this order (``main.cpp``):
 
 **On a restart, a key that is not given in the deck or on the command line takes the value
 stored in the restart file, not the code default.** If the file does not hold the key either,
-the key takes its restart default.
+a key that corrects the scheme takes the fresh default, with a ``### NOTE: ... the fix applies``
+(name the old value to keep the old behaviour), and a stored old value of ``merge_lat_mom``,
+``merge_lat_blockend``, ``fofc_flag_exchange``, ``clean_cs_lat_wb``, ``time2_gtime_slope`` or
+``time2_gtime_pos`` prints a ``### NOTE`` with the name to switch; the other keys take their restart default. A restart from
+a file of an older scheme should name every key of the production deck (RUN.md, Restarts).
 
 Example: a restart file had stored ``time2_k1_stiff = 1.0`` from an earlier deck. The code
 default is 0 (off), but the restart ran with 1.0, because the new deck did not name the key.
@@ -51,9 +55,17 @@ Rules:
   ``-i <production deck>`` or name every production key on the command line. The grid keys
   (``<mesh>`` x1min..x3max, nx1..nx3, nghost, the stretch keys and ``<meshblock>`` nx1..nx3)
   must stay as the file was written: a change is FATAL.
+
 - ``athena -r <file>.rst -i <deck> -n`` prints the merged parameter list and quits (keys the
   modules add later are not shown).
+
 - After the first cycle the code prints ``### WARNING: N input parameter(s) were never read by the code``: a key there is a typo or a key this build does not have.
+
+- The star keys ``<problem>/star_*`` were named ``he_*`` (one: ``hs_*``) in earlier versions. Old
+  names in a deck, on the command line or in a restart file are read as ``star_*`` with one ``### NOTE``; a deck
+  that names both spellings of a key with different values is FATAL.
+  ``tools/rename_star_keys.sh FILE ...`` renames the keys in decks and scripts. The problem
+  generator ``-D PROBLEM=star_vet`` was ``he_star_vet``; CMake accepts the old name.
 
 Keys that must always be named
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,8 +76,7 @@ out of a restart deck changes the scheme silently. The templates name them all.
 +-------------------------------------+----------------+-------------------------------------+
 | key                                 | value          | why                                 |
 +=====================================+================+=====================================+
-| ``<rad_vet>/time2_k1_stiff``        | ``0``          | read only when named; older files   |
-|                                     |                | stored 1.0                          |
+| ``<rad_vet>/time2_k1_stiff``        | ``0``          | recorded; older files stored 1.0    |
 +-------------------------------------+----------------+-------------------------------------+
 | ``<rad_vet>/clean_stag_fwb_stage``  | ``false``      | older files stored true             |
 +-------------------------------------+----------------+-------------------------------------+
@@ -77,35 +88,36 @@ out of a restart deck changes the scheme silently. The templates name them all.
 +-------------------------------------+----------------+-------------------------------------+
 | ``<rad_vet>/clean_pred_stage``      | ``false``      | production value                    |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_central``    | ``true``       | production value (default false)    |
+| ``<rad_vet>/clean_stag_central``    | ``true``       | the fresh default; a restart file   |
+|                                     |                | without it takes it too (NOTE)      |
 +-------------------------------------+----------------+-------------------------------------+
 | ``<rad_vet>/clean_stag_kpat``       | ``false``      | removed (only false)                |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_eicarry``    | ``true``       | production value (default false)    |
+| ``<rad_vet>/clean_stag_eicarry``    | ``true``       | the fresh default; a restart file   |
+|                                     |                | without it takes it too (NOTE)      |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_gas_secant``      | ``max_stage2`` | production value (default false)    |
+| ``<rad_vet>/clean_gas_secant``      | ``max_stage2`` | the fresh default; a restart file   |
+|                                     |                | without it takes it too (NOTE)      |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_pred_xch``        | ``true``       | production value (default false)    |
+| ``<rad_vet>/clean_pred_xch``        | ``true``       | the fresh default; a restart file   |
+|                                     |                | without it takes it too (NOTE)      |
 +-------------------------------------+----------------+-------------------------------------+
 | ``<rad_vet>/clean_stag_fcone_gas``  | ``false``      | production value                    |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_wb_exch_local``   | ``true``       | read only when named                |
+| ``<rad_vet>/clean_wb_exch_local``   | ``true``       | recorded                            |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/clean_stag_mg_levels``  | ``2``          | the default; named because older    |
-|                                     |                | restart files may store 4 (4 is -9  |
-|                                     |                | % per cycle on the late m35mms      |
-|                                     |                | state but +18-19 % on fresh t9l62 / |
-|                                     |                | bsg; USER 11-24: 2 for all stars)   |
+| ``<rad_vet>/clean_stag_mg_levels``  | ``2``          | the default (m35mms template: 4);   |
+|                                     |                | named because older restart files   |
+|                                     |                | may store 4                         |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<rad_vet>/vet_gd_wall_sym``,      | ``true``       | read only when named; a             |
-| ``vet_gd_theta_seam_sym``           |                | theta-periodic deck without         |
-|                                     |                | ``vet_gd_theta_seam_sym`` stops     |
-|                                     |                | with a FATAL                        |
+| ``<rad_vet>/vet_gd_wall_sym``,      | ``true``       | recorded; a theta-periodic deck     |
+| ``vet_gd_theta_seam_sym``           |                | without ``vet_gd_theta_seam_sym``   |
+|                                     |                | stops with a FATAL                  |
 +-------------------------------------+----------------+-------------------------------------+
 | ``<hydro>/floor_pay``               | ``rad_column`` | older star restart files do not     |
 |                                     |                | store it (restart default: none)    |
 +-------------------------------------+----------------+-------------------------------------+
-| ``<hydro>/floor_pay_skip``,         | ``true``       | read only when named                |
+| ``<hydro>/floor_pay_skip``,         | ``true``       | recorded                            |
 | ``dfloor_flux_limit``,              |                |                                     |
 | ``rad_signal_speed_diff``           |                |                                     |
 +-------------------------------------+----------------+-------------------------------------+
@@ -118,12 +130,15 @@ out of a restart deck changes the scheme silently. The templates name them all.
 |                                     |                | templates                           |
 +-------------------------------------+----------------+-------------------------------------+
 
+Rows marked "hydro only" have no ``<mhd>`` form: the key named under ``<mhd>`` (``floorcap_rho``
+with ``<mhd>``) stops the run. ``fofc_retest`` is hydro only too.
+
 The decks
 ---------
 
 ``decks/*.athinput`` are complete input files. Each starts with a comment on the problem; its
 ``<rad_vet>`` block begins with the scheme keys that production pins (the values of the
-production star decks in ``inputs/rad_vet_clean/``), then the test's physics and solver
+production star decks in ``inputs/stars/``), then the test's physics and solver
 set-up. A test changes only a few keys on top (for example ``time/nlim``, ``time/dt_fixed``,
 ``mesh/nx1``); ``run_tests.py`` writes the deck it actually ran as ``in.athinput`` in each run
 directory. To run a deck by hand:

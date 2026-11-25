@@ -20,7 +20,7 @@ Compile through Kokkos' ``nvcc_wrapper`` and name the GPU architecture:
      -D Kokkos_ENABLE_CUDA=On -D Kokkos_ARCH_<ARCH>=On \
      -D Kokkos_ENABLE_IMPL_CUDA_MALLOC_ASYNC=OFF \
      -D Athena_ENABLE_MPI=ON -D CMAKE_CXX_FLAGS=-ffp-contract=off \
-     -D Athena_VET_VGD_NMAX=512 -D PROBLEM=he_star_vet
+     -D Athena_VET_VGD_NMAX=512 -D PROBLEM=star_vet
    make -C build_cuda -j 32 athena
 
 ``<ARCH>`` is ``AMPERE80`` for A100, ``HOPPER90`` for H100 / H200 / GH200.
@@ -65,7 +65,7 @@ AMD GPUs (HIP, MI300A)
      -D Kokkos_ENABLE_HIP=On -D Kokkos_ARCH_AMD_GFX942_APU=On \
      -D Kokkos_ENABLE_IMPL_HIP_MALLOC_ASYNC=OFF \
      -D Athena_ENABLE_MPI=ON -D CMAKE_CXX_FLAGS=-ffp-contract=off \
-     -D Athena_VET_VGD_NMAX=512 -D PROBLEM=he_star_vet
+     -D Athena_VET_VGD_NMAX=512 -D PROBLEM=star_vet
    make -C build_hip -j 32 athena
 
 Tested on MI300A APUs with ``module load gcc/16 rocm/7.2 openmpi_gpu/5.0 cmake/4.0``.

@@ -8,7 +8,7 @@ Every block below makes two binaries from the same flags:
 
 - ``build_tests/src/athena``, with the built-in problem generators: for the test suite
   (``tests/vet_clean``) and the notebooks;
-- ``build_star/src/athena``, with ``-D PROBLEM=he_star_vet``: for the 3-D star decks. It
+- ``build_star/src/athena``, with ``-D PROBLEM=star_vet``: for the 3-D star decks. It
   contains no built-in test problems.
 
 ``-D CMAKE_CXX_FLAGS=-ffp-contract=off`` makes CPU and GPU agree to round-off; keep it.
@@ -26,7 +26,7 @@ Configure and compile with MPI and OpenMP (about 2 min per binary with 16 make j
      -D Athena_ENABLE_MPI=ON -D Athena_ENABLE_OPENMP=ON
      -D CMAKE_CXX_FLAGS=-ffp-contract=off -D Athena_VET_VGD_NMAX=4096"
    cmake -S . -B build_tests $OPTS
-   cmake -S . -B build_star $OPTS -D PROBLEM=he_star_vet
+   cmake -S . -B build_star $OPTS -D PROBLEM=star_vet
    make -C build_tests -j 16 athena
    make -C build_star -j 16 athena
 
@@ -46,7 +46,7 @@ binary with 32 make jobs; set ``ARCH=AMPERE80`` for A100, ``ARCH=HOPPER90`` for 
      -D Kokkos_ENABLE_CUDA=On -D Kokkos_ARCH_$ARCH=On -D Kokkos_ENABLE_IMPL_CUDA_MALLOC_ASYNC=OFF
      -D Athena_ENABLE_MPI=ON -D CMAKE_CXX_FLAGS=-ffp-contract=off -D Athena_VET_VGD_NMAX=512"
    cmake -S . -B build_tests $OPTS
-   cmake -S . -B build_star $OPTS -D PROBLEM=he_star_vet
+   cmake -S . -B build_star $OPTS -D PROBLEM=star_vet
    make -C build_tests -j 32 athena
    make -C build_star -j 32 athena
 
@@ -72,7 +72,7 @@ The same as 3b with ``ARCH=HOPPER90``; on a Cray system the host compiler is ``C
      -D Kokkos_ENABLE_CUDA=On -D Kokkos_ARCH_$ARCH=On -D Kokkos_ENABLE_IMPL_CUDA_MALLOC_ASYNC=OFF
      -D Athena_ENABLE_MPI=ON -D CMAKE_CXX_FLAGS=-ffp-contract=off -D Athena_VET_VGD_NMAX=512"
    cmake -S . -B build_tests $OPTS
-   cmake -S . -B build_star $OPTS -D PROBLEM=he_star_vet
+   cmake -S . -B build_star $OPTS -D PROBLEM=star_vet
    make -C build_tests -j 32 athena
    make -C build_star -j 32 athena
 
@@ -91,7 +91,7 @@ for MI300A, ``AMD_GFX942`` for MI300X, ``AMD_GFX90A`` for MI250):
      -D Kokkos_ENABLE_HIP=On -D Kokkos_ARCH_$ARCH=On -D Kokkos_ENABLE_IMPL_HIP_MALLOC_ASYNC=OFF
      -D Athena_ENABLE_MPI=ON -D CMAKE_CXX_FLAGS=-ffp-contract=off -D Athena_VET_VGD_NMAX=512"
    cmake -S . -B build_tests $OPTS
-   cmake -S . -B build_star $OPTS -D PROBLEM=he_star_vet
+   cmake -S . -B build_star $OPTS -D PROBLEM=star_vet
    make -C build_tests -j 32 athena
    make -C build_star -j 32 athena
 
@@ -136,15 +136,15 @@ Options that matter for this scheme
 |                          |                                | test decks use up to 512.      |
 +--------------------------+--------------------------------+--------------------------------+
 | ``PROBLEM``              | unset (built-in problem        | The test suite uses only       |
-|                          | generators) or ``he_star_vet`` | built-in generators            |
+|                          | generators) or ``star_vet``    | built-in generators            |
 |                          |                                | (``rad_vet_beam``). The star   |
 |                          |                                | decks need                     |
-|                          |                                | ``-D PROBLEM=he_star_vet``.    |
+|                          |                                | ``-D PROBLEM=star_vet``.       |
 +--------------------------+--------------------------------+--------------------------------+
 
 A binary built with ``-D PROBLEM=<name>`` runs only that problem generator: a
-``he_star_vet`` binary cannot run the test decks. Build the test binary without ``-D PROBLEM``
-(the GPU blocks below name ``he_star_vet``; drop it, in a second build directory, for the
+``star_vet`` binary cannot run the test decks. Build the test binary without ``-D PROBLEM``
+(the GPU blocks below name ``star_vet``; drop it, in a second build directory, for the
 test suite on a GPU).
 
 Build time

@@ -33,12 +33,12 @@ clips); :doc:`outputs` explains which lines matter. A healthy run prints no
 Production star runs
 --------------------
 
-Templates: ``inputs/rad_vet_clean/star_bsg.athinput``, ``star_m35mms.athinput``,
+Templates: ``inputs/stars/star_bsg.athinput``, ``star_m35mms.athinput``,
 ``star_t9l62.athinput``. They hold the full production key set (tile layout mode). They need:
 
-1. a binary built with ``-D PROBLEM=he_star_vet`` (see :doc:`build`);
-2. the opacity tables and initial-condition profiles named by the ``he_opac_table``,
-   ``he_planck_table``, ``he_ic_file`` (and for the BSG ``he_ic_profile_file``) keys. Replace
+1. a binary built with ``-D PROBLEM=star_vet`` (see :doc:`build`);
+2. the opacity tables and initial-condition profiles named by the ``star_opac_table``,
+   ``star_planck_table``, ``star_ic_file`` (and for the BSG ``star_ic_profile_file``) keys. Replace
    ``TABLES/`` with the directory that holds them. The tables are not in the repository.
 
 Typical launch, one MPI rank per GPU:
@@ -90,16 +90,32 @@ another run), name every key that matters on the command line:
      rad_vet/clean_stag_fcone_gas=false rad_vet/clean_wb_exch_local=true hydro/floor_pay=rad_column \
      hydro/floor_pay_skip=true hydro/dfloor_flux_limit=true hydro/rad_signal_speed_diff=true
 
-and check the start of the log: it prints the value in effect for every key (grep for the
-keys you named). A restart of your own run with an unchanged deck needs no extra keys.
+and check the start of the log: it lists the ``<rad_vet>``, ``<hydro>``, ``<mhd>``,
+``<time>`` and ``<mesh>`` keys that differ from their default, with where each value came from. A restart of your own run with an unchanged deck needs no extra keys.
 
 Restarts are bitwise: N cycles straight and N/2 + restart + N/2 give identical output (the
 ``restart_*`` tests check this). The restart file holds every piece of solver state that
 carries from step to step (the stage slopes, the ray-closure history, the ledgers).
 
-Some keys have one default for a fresh run and another for a restart of a file that does
-not name them, so that old runs continue unchanged. The start-up log echoes such
-defaults with the reason, e.g. "(default with vet_gd on a fresh start)".
+A key the restart file does not hold takes the fresh default when it corrects the scheme
+(the clean-scheme keys, ``time2_*``, ``merge_lat_mom``, ``fofc_flag_exchange``, ``clean_cs_lat_wb``
+...), with a ``### NOTE: ... the fix applies``; naming the old value keeps the old behaviour. A
+few keys (the angular set and its rotation and averaging, the closure history, the problem
+set-up) keep the restart default; the start-up log echoes it with the reason.
+
+**Restarting a file of an older scheme.** Files written before a key existed store neither it
+nor the keys it goes with, so the run changes at the restart: the NOTEs list what applies and
+how to keep the old value. A stored value always wins, also an old one that a newer key needs
+differently; the run then stops with a FATAL that names both keys and what to name. Do not
+restart such a file with nothing named: name every key of the production deck (the list of
+:doc:`keys`, "Keys that must always be named"), read the NOTEs and check the start of
+the log before you let it run on.
+
+**``<job>/recipe`` is removed.** A deck, command line or restart file that names it stops with a
+FATAL; the fresh defaults are the only default set. A deck cannot remove a key that a restart
+file stores, so such a file cannot be restarted. The headers of the production restart files
+on viper (RSG, HG, HG262, R136) and of the five runs at Caltech were checked: none holds the
+key; those on Raven were not checked (maintenance).
 
 Time step and retries
 ~~~~~~~~~~~~~~~~~~~~~

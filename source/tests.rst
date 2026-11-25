@@ -5,7 +5,7 @@ Tests
 =====
 
 A self-contained CPU test suite for the clean VET radiation scheme: one command, a PASS / FAIL
-line per test, about 1 min (``--quick``) or 3 min (full) on 48 cores (``--jobs 12``).
+line per test, about 1 min (``--quick``) or 5 min (full) on 48 cores (``--jobs 12``).
 
 .. code:: bash
 
@@ -17,10 +17,13 @@ line per test, about 1 min (``--quick``) or 3 min (full) on 48 cores (``--jobs 1
 
 Requirements: python3 with numpy (nothing else), and for ``--build`` CMake, MPI (``mpicxx``) and
 a C++17 compiler. The binary needs only the built-in problem generators, so the default
-build (no ``-D PROBLEM``) is enough. Every test runs on one MPI rank with OpenMP threads.
+build (no ``-D PROBLEM``) is enough. Every test runs on one MPI rank with
+OpenMP threads, except ``mpi_ranks`` (2 ranks), which compares the dumps and ``hydro.hst``
+(the sums of ``user.hst`` depend on the order of the ranks' partial sums).
 
 Options (``run_tests.py --help``): ``--jobs N`` tests at the same time (default: cores / 4),
-``--threads T`` OpenMP threads per run (default 4; on a shared node cap ``--jobs``, the default
+``--star-exe PATH`` a binary built with ``-D PROBLEM=star_vet`` (for ``star_smoke`` and
+``wb_star``, which are skipped without it), ``--threads T`` OpenMP threads per run (default 4; on a shared node cap ``--jobs``, the default
 takes every core), ``--workdir DIR`` (default
 ``./vet_clean_runs``), ``--keep`` (keep the run directories of passed tests; failed tests are
 always kept), ``--record FILE`` (write every measured number to a JSON file), ``--keys 'block/key=value ...'`` (extra input keys for every run, e.g. to test a new key on the whole
@@ -32,169 +35,275 @@ is a FAIL with the path of its ``run.log``.
 What the tests check
 --------------------
 
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| test                 | deck                 | what                                     | criterion             |
-+======================+======================+==========================================+=======================+
-| ``conservation_sp``  | ``shell_sp``         | closed rotating shell, 3-D spherical     | dE/E, dM/M, dLz <=    |
-|                      |                      | polar, 40 cycles (16 quick): total       | 1e-13                 |
-|                      |                      | energy (gas + radiation), mass, total    |                       |
-|                      |                      | L_z                                      |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``conservation_cs``  | ``shell_cs``         | the same on a cubed sphere, 12 cycles    | as above              |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``conservation_lz``  | ``shell_sp``,        | the rotating shells with every L_z-exact | dE, dM, dLz <= 1e-13  |
-|                      | ``shell_cs``         | cap / cut on (``clean_stag_fcone_lz``,   | on both, dLz_gr <=    |
-|                      |                      | ``clean_lz_spin``,                       | 1e-13 on sp (cs:      |
-|                      |                      | ``clean_stag_fcone_emax``,               | reported, as          |
-|                      |                      | ``clean_wb_mcap``, ``floor_from_ekin``   | conservation_cs);     |
-|                      |                      | with ``vceil = 5e-3``, ``floorcap_lz``   | restart and retry     |
-|                      |                      | on every cell), 40 / 12 cycles; restart  | bitwise; no           |
-|                      |                      | 8 + 8 and a forced dt_retry (factor 1)   | ``CLEAN WARNING``     |
-|                      |                      | with the same keys                       |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``floorcap_spin``    | ``shell_sp``,        | the ``conservation_lz`` keys +           | dE, dM, dLz <= 1e-13  |
-|                      | ``shell_cs``         | ``floorcap_lz_spin`` with                | on both, dLz_gr <=    |
-|                      |                      | ``floorcap_rho = gas_rho`` (cells that   | 1e-13 on sp; capped   |
-|                      |                      | thin below the IC density are floor gas, | cells > 0; restart,   |
-|                      |                      | capped at 5e-3; the rest take the rigid  | retry and layout      |
-|                      |                      | rotation), 40 / 12 cycles; restart 8 +   | bitwise; no           |
-|                      |                      | 8, a forced dt_retry (factor 1), 1 vs 1  | ``CLEAN WARNING``     |
-|                      |                      | x 2 MeshBlocks in tile mode; the same    |                       |
-|                      |                      | without ``floorcap_lz`` for information  |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``floor_dt``         | ``shell_sp``         | ``hydro/dt_floor_courant = 0.6`` with    | dE <= 1e-13; restart  |
-|                      |                      | floor gas (``floorcap_rho = 100``), 16   | and retry bitwise;    |
-|                      |                      | cycles; restart 8 + 8 and a forced       | dt_gain reported; no  |
-|                      |                      | dt_retry                                 | ``CLEAN WARNING``     |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``restart_sp``       | ``shell_sp``         | 16 cycles straight vs 8 + restart + 8    | every dump and        |
-|                      |                      |                                          | history row identical |
-|                      |                      |                                          | (difference 0)        |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``restart_cs``       | ``shell_cs``         | 8 straight vs 4 + restart + 4            | identical             |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``dt_retry``         | ``shell_sp``         | a forced step retry at cycle 4 with      | factor 1: identical   |
-|                      |                      | factor 1 (the step is repeated at the    | to the run without    |
-|                      |                      | same dt) and with factor 0.5             | retry; factor 0.5:    |
-|                      |                      |                                          | runs on; one retry    |
-|                      |                      |                                          | each                  |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``layout_tile``      | ``shell_sp`` (16 x   | ``<mesh>/layout_invariant_mode = tile``, | 1 x 2: identical      |
-|                      | 16 lateral)          | ``layout_tile = 8``, 8 cycles: 1         | (difference 0); 2 x   |
-|                      |                      | MeshBlock vs 1 x 2 MeshBlocks (along     | 2: largest difference |
-|                      |                      | phi) and vs 2 x 2 (theta x phi, vacuum   | / largest value <=    |
-|                      |                      | ray walls)                               | 1e-8 (see below); the |
-|                      |                      |                                          | 1 x 2 pair again with |
-|                      |                      |                                          | ``dfloor_flux_limit`` |
-|                      |                      |                                          | and ``dfloor`` just   |
-|                      |                      |                                          | below the gas density |
-|                      |                      |                                          | (the limiter acts in  |
-|                      |                      |                                          | every cell):          |
-|                      |                      |                                          | identical, and its    |
-|                      |                      |                                          | dE, dM, dLz <= 1e-13  |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``order_time``       | ``deckD``            | time step halved at a fixed grid (3      | order of the finest   |
-|                      |                      | levels quick, 5 full);                   | pair >= 1.7; errors   |
-|                      |                      | successive-difference L1 of E, F_r, T    | within 5 % of the     |
-|                      |                      |                                          | reference             |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``order_space``      | ``wave_cart``        | linear radiation-hydro wave, one period, | order of the finest   |
-|                      |                      | N = 16 ... 128 cells with dt following   | pair >= 1.7 (full     |
-|                      |                      | the CFL                                  | only)                 |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``nlte_eps1e-1``,    | ``nlte_eps*``        | two-level-atom non-LTE atmosphere (Jiang | L1 within 5 % of the  |
-| ``nlte_eps1e-4``     |                      | 2021, ApJS 253, 49, sec. 4.5): J vs the  | reference value       |
-|                      |                      | exact transport solution                 |                       |
-|                      |                      | (``ref/nlte_exact_eps*.txt``)            |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``thermal_eq``       | ``thermal_eq``       | uniform gas + radiation relaxing to      | max relative error of |
-|                      |                      | equilibrium (Jiang 2021, sec. 4.1) vs    | E(t), T(t) <= bound   |
-|                      |                      | the exact ODE                            |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``wb_sp``, ``wb_cs`` | ``rhse_sp``,         | grey scattering envelope in hydrostatic  | max over the run of   |
-|                      | ``rhse_cs``          | and radiative equilibrium (spherical     | max                   |
-|                      |                      | polar 2-D, cubed sphere); again with a   |                       |
-|                      |                      | rotating set (``_rot``: sp GL 11 x 12    |                       |
-|                      |                      | turning about z every 2, cs GL 10 x 12   |                       |
-|                      |                      | about a 3-D axis every 0.5; EMA ring,    |                       |
-|                      |                      | cross-fade,                              |                       |
-|                      |                      | ``vet_rotate_avg_ema_wb = true``)        |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``radwave``          | ``wave_cart`` (64 x  | linear radiation-acoustic wave           | phase speed within    |
-|                      | 4)                   | (amplitude 1e-6, the exact eigenmode, 2  | 3e-3, damping within  |
-|                      |                      | periods, cfl 0.3) at P_rad/P_gas, x =    | 5e-3 per radian, no   |
-|                      |                      | (10, 0.01), (100, 0.1), (10, 1), (1,     | growth; dt gain of    |
-|                      |                      | 100), x = tau_cell c_eq / c the          | the diff key within 2 |
-|                      |                      | grid-scale trapping parameter; phase     | % of 2.77; the phase  |
-|                      |                      | speed and damping of a k = 1 fit vs the  | key's dt >= the diff  |
-|                      |                      | analytic root (``vett.radwave_root``);   | key's (2.15 at x =    |
-|                      |                      | the x = 0.01 case also without           | 0.1, 1 at x = 1)      |
-|                      |                      | ``hydro/rad_signal_speed_diff``, x = 0.1 |                       |
-|                      |                      | and 1 also with                          |                       |
-|                      |                      | ``hydro/rad_signal_speed_phase`` (full   |                       |
-|                      |                      | only, ~1 min)                            |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``wedge_sym``        | ``shell_sp``         | the shell at rest, spherically           | fphi, fth, fth_rot <= |
-|                      |                      | symmetric, GL 7 x 18 rays, 8 cycles, on  | 1e-8; the runs        |
-|                      |                      | a 20 deg wedge and (with                 | without their key,    |
-|                      |                      | ``vet_gd_wall_sym = true``) 3.7 and 7.3  | and 10 x 12, stop     |
-|                      |                      | deg wedges: fphi = \|Σ F_phi\| / Σ       | with the FATAL        |
-|                      |                      | \|F_r\|; the 3.7 deg wedge without the   |                       |
-|                      |                      | key; the 20 deg shell made               |                       |
-|                      |                      | theta-periodic with                      |                       |
-|                      |                      | ``vet_gd_theta_seam_sym = true``: fth =  |                       |
-|                      |                      | \|Σ F_theta\| / Σ \|F_r\|, and without   |                       |
-|                      |                      | the key; the theta-periodic 30 deg wedge |                       |
-|                      |                      | with GL 11 x 12 turning about z (EMA     |                       |
-|                      |                      | ring, cross-fade): fth_rot, and GL 10 x  |                       |
-|                      |                      | 12 staggered (no mirror)                 |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``floor_pay``        | ``shell_sp``         | ``hydro/eos = general``, ``tfloor`` just | dE <= 1e-13; floor    |
-|                      |                      | above the gas temperature (the floor     | energy paid > 0,      |
-|                      |                      | acts in most cells every cycle),         | unpaid 0; ekin dE,    |
-|                      |                      | ``floor_pay = rad_column``,              | dM, dLz <= 1e-13; no  |
-|                      |                      | ``floor_pay_skip``,                      | ``CLEAN WARNING``     |
-|                      |                      | ``dfloor_flux_limit``,                   |                       |
-|                      |                      | ``floor_audit = 1``, 40 cycles:          |                       |
-|                      |                      | total-energy drift from t = 0; then 16   |                       |
-|                      |                      | cycles with ``floor_from_ekin = true``   |                       |
-|                      |                      | and ``vceil = 1.2e-2``: energy, mass and |                       |
-|                      |                      | L_z drift                                |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``ceiling_metric``   | ``shell_sp``,        | the rotating shells (``gas_rot = 0.3``,  | dvphi, dcap, vtheta   |
-|                      | ``shell_cs``         | ``gas_vr = 0.2``, r 1-3),                | <= 1e-13; scale_ok    |
-|                      |                      | ``hydro/eos = general``,                 |                       |
-|                      |                      | ``floor_from_ekin = true``,              |                       |
-|                      |                      | ``vceil = 0.5`` (below \|v\| in 1408 /   |                       |
-|                      |                      | 2928 cells) against the same run without |                       |
-|                      |                      | the ceiling, cell by cell at t = 0 (cs:  |                       |
-|                      |                      | the velocity rebuilt from the            |                       |
-|                      |                      | contravariant v^a on the unit tangents,  |                       |
-|                      |                      | \|V\| the metric norm): v_phi kept       |                       |
-|                      |                      | (L_z), \|V\| = max(vceil, \|v_phi\|)     |                       |
-|                      |                      | where capped, else unchanged, v_theta 0, |                       |
-|                      |                      | the radial part scaled in [0, 1]. A      |                       |
-|                      |                      | ceiling on Σ v_a² of mixed components or |                       |
-|                      |                      | a split along the covariant phi          |                       |
-|                      |                      | component fails it on cs (dvphi 0.31).   |                       |
-|                      |                      | The cell-level C++ test                  |                       |
-|                      |                      | ``unit/ceiling_cell.cpp`` (build line in |                       |
-|                      |                      | its header) checks the same, the tfloor  |                       |
-|                      |                      | payment and the heat = metric KE change, |                       |
-|                      |                      | at corner and ghost-extended points of   |                       |
-|                      |                      | all six panels, on sp, Cartesian and cs  |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
-| ``momentum_box``     | ``wave_cart`` (8^3,  | total linear momentum, gas (``hydro_u``) | **a report, not a     |
-|                      | periodic 3-D)        | + radiation (face momenta of             | criterion**: passes   |
-|                      |                      | ``vet_face`` / c^2), every cycle for 8   | when the run          |
-|                      |                      | cycles; radiation wave along the xyz     | completes, the        |
-|                      |                      | diagonal, amplitude 1e-3,                | numbers are finite    |
-|                      |                      | ``radwave_eig = false``, ``nghost = 3``, | and there is no       |
-|                      |                      | tile 8: ``dP_cyc`` = largest component   | ``CLEAN WARNING``     |
-|                      |                      | of \|P - P_0\| / Σ|p_gas\| per cycle,    |                       |
-|                      |                      | ``dP_max`` its maximum (quick and full,  |                       |
-|                      |                      | ~10 s)                                   |                       |
-+----------------------+----------------------+------------------------------------------+-----------------------+
++----------------------+----------------------+------------------------------------------+----------------------------+
+| test                 | deck                 | what                                     | criterion                  |
++======================+======================+==========================================+============================+
+| ``conservation_sp``  | ``shell_sp``         | closed rotating shell, 3-D spherical     | dE/E, dM/M, dLz <= 1e-13   |
+|                      |                      | polar, 40 cycles (16 quick): total       |                            |
+|                      |                      | energy (gas + radiation), mass, total    |                            |
+|                      |                      | L_z                                      |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``conservation_cs``  | ``shell_cs``         | the same on a cubed sphere, 12 cycles    | as above                   |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``mpi_ranks``        | ``shell_sp``,        | 2 MPI ranks against 1 on the same        | maxdiff = 0,               |
+|                      | ``shell_cs``         | MeshBlocks, 6 / 4 cycles: the            | ``CLEAN FCONE_LZ`` lines   |
+|                      |                      | ``floorcap_spin`` keys on both meshes    | present                    |
+|                      |                      | (every ``CLEAN`` counter and report line |                            |
+|                      |                      | on) and ``floor_pay`` with               |                            |
+|                      |                      | ``floor_audit_worst``; dumps and hydro   |                            |
+|                      |                      | histories bitwise. Needs an MPI build    |                            |
+|                      |                      | and launcher (``--mpirun``), else        |                            |
+|                      |                      | skipped                                  |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``conservation_lz``  | ``shell_sp``,        | the rotating shells with every L_z-exact | dE, dM, dLz <= 1e-13 on    |
+|                      | ``shell_cs``         | cap / cut on (``clean_stag_fcone_lz``,   | both, dLz_gr <= 1e-13 on   |
+|                      |                      | ``clean_lz_spin``,                       | sp (cs: reported, as       |
+|                      |                      | ``clean_stag_fcone_emax``,               | conservation_cs); restart  |
+|                      |                      | ``clean_wb_mcap``, ``floor_from_ekin``   | and retry bitwise; no      |
+|                      |                      | with ``vceil = 5e-3``, ``floorcap_lz``   | ``CLEAN WARNING``          |
+|                      |                      | on every cell), 40 / 12 cycles; restart  |                            |
+|                      |                      | 8 + 8 and a forced dt_retry (factor 1)   |                            |
+|                      |                      | with the same keys                       |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``floorcap_spin``    | ``shell_sp``,        | the ``conservation_lz`` keys +           | dE, dM, dLz <= 1e-13 on    |
+|                      | ``shell_cs``         | ``floorcap_lz_spin`` with                | both, dLz_gr <= 1e-13 on   |
+|                      |                      | ``floorcap_rho = gas_rho`` (cells that   | sp; capped cells > 0;      |
+|                      |                      | thin below the IC density are floor gas, | restart, retry and layout  |
+|                      |                      | capped at 5e-3; the rest take the rigid  | bitwise; no                |
+|                      |                      | rotation), 40 / 12 cycles; restart 8 +   | ``CLEAN WARNING``          |
+|                      |                      | 8, a forced dt_retry (factor 1), 1 vs 1  |                            |
+|                      |                      | x 2 MeshBlocks in tile mode; the same    |                            |
+|                      |                      | without ``floorcap_lz`` for information  |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``floor_dt``         | ``shell_sp``         | ``hydro/dt_floor_courant = 0.6`` with    | dE <= 1e-13; restart and   |
+|                      |                      | floor gas (``floorcap_rho = 100``), 16   | retry bitwise; dt_gain     |
+|                      |                      | cycles; restart 8 + 8 and a forced       | reported; no               |
+|                      |                      | dt_retry                                 | ``CLEAN WARNING``          |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``merge_lat``        | ``merge_sp``,        | merged lateral groups                    | dM, dLz, dE, every group's |
+|                      | ``merge_cs``,        | (``hydro/merge_lat_rc``, f = 4, 2,       | change of M, E, sum V m_r, |
+|                      | ``shell_sp``         | ``merge_lat_mom = radial``): cell noise  | L and the lateral velocity |
+|                      |                      | (density x 1e6, supersonic) 200 / 100    | of a radial flow <= 1e-13; |
+|                      |                      | cycles on both meshes, radial flow, the  | restart, forced dt_retry,  |
+|                      |                      | radiating shell; ``rigid`` on the same   | 1 vs 2 x 2 MeshBlocks (sp) |
+|                      |                      | noise                                    | bitwise; ``rigid`` must    |
+|                      |                      |                                          | drift in L_z (>= 1e-8)     |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``restart_fixes``    | ``shell_cs``,        | a restart file without                   | named with the old value:  |
+|                      | ``fofc_cs``,         | ``clean_cs_lat_wb``,                     | bitwise the run that       |
+|                      | ``merge_sp``,        | ``fofc_flag_exchange``,                  | stored it; not named: the  |
+|                      | ``shell_sp``         | ``merge_lat_mom``,                       | NOTE "the fix applies", no |
+|                      |                      | ``merge_lat_blockend``,                  | ``CLEAN WARNING``, a       |
+|                      |                      | ``time2_gtime_slope`` /                  | different run; the stored  |
+|                      |                      | ``time2_gtime_pos`` (written with the    | old value prints its own   |
+|                      |                      | old value, the key's line then removed   | NOTE                       |
+|                      |                      | from it)                                 |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``restart_sp``       | ``shell_sp``         | 16 cycles straight vs 8 + restart + 8    | every dump and history row |
+|                      |                      |                                          | identical (difference 0)   |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``restart_cs``       | ``shell_cs``         | 8 straight vs 4 + restart + 4            | identical                  |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``dt_retry``         | ``shell_sp``         | a forced step retry at cycle 4 with      | factor 1: identical to the |
+|                      |                      | factor 1 (the step is repeated at the    | run without retry; factor  |
+|                      |                      | same dt) and with factor 0.5             | 0.5: runs on; one retry    |
+|                      |                      |                                          | each                       |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``layout_tile``      | ``shell_sp`` (16 x   | ``<mesh>/layout_invariant_mode = tile``, | 1 x 2: identical           |
+|                      | 16 lateral)          | ``layout_tile = 8``, 8 cycles: 1         | (difference 0); 2 x 2:     |
+|                      |                      | MeshBlock vs 1 x 2 MeshBlocks (along     | largest difference /       |
+|                      |                      | phi) and vs 2 x 2 (theta x phi, vacuum   | largest value <= 1e-8 (see |
+|                      |                      | ray walls)                               | below); the 1 x 2 pair     |
+|                      |                      |                                          | again with                 |
+|                      |                      |                                          | ``dfloor_flux_limit`` and  |
+|                      |                      |                                          | ``dfloor`` just below the  |
+|                      |                      |                                          | gas density (the limiter   |
+|                      |                      |                                          | acts in every cell):       |
+|                      |                      |                                          | identical, and its dE, dM, |
+|                      |                      |                                          | dLz <= 1e-13               |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``fofc_layout_cs``   | ``fofc_cs``          | hydro shell on the cubed sphere whose    | identical; E, L_z drifts   |
+|                      |                      | fluxes FOFC replaces (density floor, cfl | of the 2 x 2 run, M drift  |
+|                      |                      | 0.8), 8 cycles: one MeshBlock per panel  | of a fast shell without    |
+|                      |                      | vs 2 x 2, 2 along r and 2 x 2 x 2;       | the density floor <= 1e-13 |
+|                      |                      | restart and a forced dt_retry of the 2 x |                            |
+|                      |                      | 2 run                                    |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``order_time``       | ``deckD``            | time step halved at a fixed grid (3      | order of the finest pair   |
+|                      |                      | levels quick, 5 full);                   | >= 1.7; errors within 5 %  |
+|                      |                      | successive-difference L1 of E, F_r, T    | of the reference           |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``order_stiff``      | ``wave_cart``        | radiation-acoustic wave in the trapped   | order of the finest pair   |
+|                      |                      | regime (x = 100, P_rad/P_gas 1), time    | >= 1.7; errors within 5 %  |
+|                      |                      | step T/64 ... T/512, strict solves (full | of the reference           |
+|                      |                      | only)                                    |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``order_space``      | ``wave_cart``        | linear radiation-hydro wave, one period, | order of the finest pair   |
+|                      |                      | N = 16 ... 128 cells with dt following   | >= 1.7 (full only)         |
+|                      |                      | the CFL                                  |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``nlte_eps1e-1``,    | ``nlte_eps*``        | two-level-atom non-LTE atmosphere (Jiang | L1 within 5 % of the       |
+| ``nlte_eps1e-4``     |                      | 2021, ApJS 253, 49, sec. 4.5): J vs the  | reference value            |
+|                      |                      | exact transport solution                 |                            |
+|                      |                      | (``ref/nlte_exact_eps*.txt``)            |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``thermal_eq``       | ``thermal_eq``       | uniform gas + radiation relaxing to      | max relative error of      |
+|                      |                      | equilibrium (Jiang 2021, sec. 4.1) vs    | E(t), T(t) <= bound        |
+|                      |                      | the exact ODE                            |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``mhd_equil``        | ``mhd_equil``        | the relaxing uniform box with ``<mhd>``, | starts; gas + radiation    |
+|                      |                      | ``eos = general`` and a uniform field,   | energy and field <= 1e-13; |
+|                      |                      | every other ``<mhd>`` key at its         | 3 FATALs; no               |
+|                      |                      | default, 10 cycles; keys of ``<hydro>``  | ``CLEAN WARNING``          |
+|                      |                      | only under ``<mhd>``                     |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``wb_sp``, ``wb_cs`` | ``rhse_sp``,         | grey scattering envelope in hydrostatic  | max over the run of max    |
+|                      | ``rhse_cs``          | and radiative equilibrium (spherical     |                            |
+|                      |                      | polar 2-D, cubed sphere); again with a   |                            |
+|                      |                      | rotating set (``_rot``: sp GL 11 x 12    |                            |
+|                      |                      | turning about z every 2, cs GL 10 x 12   |                            |
+|                      |                      | about a 3-D axis every 0.5; EMA ring,    |                            |
+|                      |                      | cross-fade,                              |                            |
+|                      |                      | ``vet_rotate_avg_ema_wb = true``)        |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``shell_force_cs``   | ``shell_cs``         | the opaque shell (``kappa_s = 300``) at  | rms lateral / rms radial   |
+|                      |                      | rest and spherically symmetric, 8        | velocity and rms of the    |
+|                      |                      | cycles: the radiation pushes the gas     | radial velocity about its  |
+|                      |                      | along r alone, the same in every cell of | shell mean / rms radial    |
+|                      |                      | a shell (``clean_cs_lat_wb``; ``wb_cs``  | velocity: lat <= 3e-4, rad |
+|                      |                      | withholds the static force and cannot    | <= 2e-4 (6e-5 and 6e-5;    |
+|                      |                      | see this)                                | 2.4e-3 and 6.4e-4 without  |
+|                      |                      |                                          | the key)                   |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``eddington_cs``     | ``shell_cs``         | ``clean_closure = eddington`` with       | drift of E, M, L_z <=      |
+|                      |                      | ``vet_gd`` set, 4 cycles (no rays are    | 1e-13; restart identical;  |
+|                      |                      | swept; the solve read their face sums    | on and off agree to 1e-10  |
+|                      |                      | and crashed), its restart pair, and      | (3e-14); no                |
+|                      |                      | ``clean_consistency = false`` with       | ``CLEAN WARNING``          |
+|                      |                      | ``vet_gd`` on and off                    |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``radwave``          | ``wave_cart`` (80 x  | linear radiation-acoustic wave           | phase speed within 3e-3,   |
+|                      | 4, x on 64 cells)    | (amplitude 1e-3, at 1e-6 the thin wave   | damping within 5e-3 per    |
+|                      |                      | ends below the solver tolerance; the     | radian, no growth; dt gain |
+|                      |                      | exact eigenmode, 2 periods, cfl 0.3) at  | of the diff key within 2 % |
+|                      |                      | P_rad/P_gas, x = (10, 0.01), (100, 0.1), | of 2.77; the phase key's   |
+|                      |                      | (10, 1), (1, 100), x = tau_cell c_eq / c | dt >= the diff key's (2.15 |
+|                      |                      | the grid-scale trapping parameter;       | at x = 0.1, 1 at x = 1)    |
+|                      |                      | ``mid_phase`` is 3.17e-3 at N = 64       |                            |
+|                      |                      | (bound 3e-3; 2.26e-3 at 80), and the     |                            |
+|                      |                      | thin phase error of 2e-5 that N = 64     |                            |
+|                      |                      | used to show was a cancellation of time  |                            |
+|                      |                      | and space errors (1.1e-3 at cfl 0.15);   |                            |
+|                      |                      | phase speed and damping of a k = 1 fit   |                            |
+|                      |                      | vs the analytic root                     |                            |
+|                      |                      | (``vett.radwave_root``); the x = 0.01    |                            |
+|                      |                      | case also without                        |                            |
+|                      |                      | ``hydro/rad_signal_speed_diff``, x = 0.1 |                            |
+|                      |                      | and 1 also with                          |                            |
+|                      |                      | ``hydro/rad_signal_speed_phase`` (full   |                            |
+|                      |                      | only, ~1 min)                            |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``wedge_sym``        | ``shell_sp``         | the shell at rest, spherically           | fphi, fth, fth_rot <=      |
+|                      |                      | symmetric, GL 7 x 18 rays, 8 cycles, on  | 1e-8; the runs without     |
+|                      |                      | a 20 deg wedge and (with                 | their key, and 10 x 12,    |
+|                      |                      | ``vet_gd_wall_sym = true``) 3.7 and 7.3  | stop with the FATAL        |
+|                      |                      | deg wedges: fphi = \|Σ F_phi\| / Σ       |                            |
+|                      |                      | \|F_r\|; the 3.7 deg wedge without the   |                            |
+|                      |                      | key; the 20 deg shell made               |                            |
+|                      |                      | theta-periodic with                      |                            |
+|                      |                      | ``vet_gd_theta_seam_sym = true``: fth =  |                            |
+|                      |                      | \|Σ F_theta\| / Σ \|F_r\|, and without   |                            |
+|                      |                      | the key; the theta-periodic 30 deg wedge |                            |
+|                      |                      | with GL 11 x 12 turning about z (EMA     |                            |
+|                      |                      | ring, cross-fade): fth_rot, and GL 10 x  |                            |
+|                      |                      | 12 staggered (no mirror)                 |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``floor_pay``        | ``shell_sp``         | ``hydro/eos = general``, ``tfloor`` just | dE <= 1e-13; floor energy  |
+|                      |                      | above the gas temperature (the floor     | paid > 0, unpaid 0; ekin   |
+|                      |                      | acts in most cells every cycle),         | dE, dM, dLz <= 1e-13; no   |
+|                      |                      | ``floor_pay = rad_column``,              | ``CLEAN WARNING``          |
+|                      |                      | ``floor_pay_skip``,                      |                            |
+|                      |                      | ``dfloor_flux_limit``,                   |                            |
+|                      |                      | ``floor_audit = 1``, 40 cycles:          |                            |
+|                      |                      | total-energy drift from t = 0; then 16   |                            |
+|                      |                      | cycles with ``floor_from_ekin = true``   |                            |
+|                      |                      | and ``vceil = 1.2e-2``: energy, mass and |                            |
+|                      |                      | L_z drift                                |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``star_smoke``       | ``star_small``       | the star3d_sp deck on 256 x 8 x 8 cells  | every history column of    |
+|                      |                      | with the production scheme keys and the  | ``STAR_COLS`` within 2e-4  |
+|                      |                      | BSG tables, 20 cycles, ~15 s (needs      | of the stored history      |
+|                      |                      | ``--star-exe``, a                        | ``ref/star_smoke.*.hst``   |
+|                      |                      | ``-D PROBLEM=star_vet`` binary)          | (relative to its maximum); |
+|                      |                      |                                          | the two files are in git   |
+|                      |                      |                                          | (``.gitignore`` excepts    |
+|                      |                      |                                          | them): re-record both by   |
+|                      |                      |                                          | copying                    |
+|                      |                      |                                          | ``bsg3d.{user,hydro}.hst`` |
+|                      |                      |                                          | of the run when the scheme |
+|                      |                      |                                          | is meant to change; no     |
+|                      |                      |                                          | ``CLEAN WARNING``          |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``wb_star``          | ``star_small``       | the stars' well-balance mode (dynamic,   | **a report, not a          |
+|                      |                      | ``wb_x1``,                               | criterion**: the column is |
+|                      |                      | ``force_reference = wb_arad``) on the    | not in discrete            |
+|                      |                      | unseeded BSG column, 20 cycles (needs    | equilibrium with its own   |
+|                      |                      | ``--star-exe``)                          | opacities, so v/c_s        |
+|                      |                      |                                          | reaches 3e-3 in the        |
+|                      |                      |                                          | interior (r < 2.9e12 cm)   |
+|                      |                      |                                          | and 0.7 at the photosphere |
+|                      |                      |                                          | and in the floor gas;      |
+|                      |                      |                                          | lateral velocity 1.4e-11   |
+|                      |                      |                                          | outside the merged-cell    |
+|                      |                      |                                          | radius; no                 |
+|                      |                      |                                          | ``CLEAN WARNING``          |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``ceiling_metric``   | ``shell_sp``,        | the rotating shells (``gas_rot = 0.3``,  | dvphi, dcap, vtheta <=     |
+|                      | ``shell_cs``         | ``gas_vr = 0.2``, r 1-3),                | 1e-13; scale_ok            |
+|                      |                      | ``hydro/eos = general``,                 |                            |
+|                      |                      | ``floor_from_ekin = true``,              |                            |
+|                      |                      | ``vceil = 0.5`` (below \|v\| in 1408 /   |                            |
+|                      |                      | 2928 cells) against the same run without |                            |
+|                      |                      | the ceiling, cell by cell at t = 0 (cs:  |                            |
+|                      |                      | the velocity rebuilt from the            |                            |
+|                      |                      | contravariant v^a on the unit tangents,  |                            |
+|                      |                      | \|V\| the metric norm): v_phi kept       |                            |
+|                      |                      | (L_z), \|V\| = max(vceil, \|v_phi\|)     |                            |
+|                      |                      | where capped, else unchanged, v_theta 0, |                            |
+|                      |                      | the radial part scaled in [0, 1]. A      |                            |
+|                      |                      | ceiling on Σ v_a² of mixed components or |                            |
+|                      |                      | a split along the covariant phi          |                            |
+|                      |                      | component fails it on cs (dvphi 0.31).   |                            |
+|                      |                      | The cell-level C++ test                  |                            |
+|                      |                      | ``unit/ceiling_cell.cpp`` (build line in |                            |
+|                      |                      | its header) checks the same, the tfloor  |                            |
+|                      |                      | payment and the heat = metric KE change, |                            |
+|                      |                      | at corner and ghost-extended points of   |                            |
+|                      |                      | all six panels, on sp, Cartesian and cs  |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``floor_momentum``   | ``wave_cart`` (8^3), | the momentum ledger of the inversions'   | box and shells <= 1e-12;   |
+|                      | ``shell_sp``,        | floors (``CLEAN FLOORMOM``): periodic    | momentum removed in the    |
+|                      | ``shell_cs``         | box of sound waves (amplitude 0.2,       | box >= 1e-6; the same      |
+|                      |                      | negligible radiation) with               | lines; no                  |
+|                      |                      | ``floor_from_ekin``, with ``vceil`` and  | ``CLEAN WARNING``          |
+|                      |                      | with both, and with the energy exchange  |                            |
+|                      |                      | (``exch_ratio``), per cycle \|P(n+1) -   |                            |
+|                      |                      | P(n) - ledger\| / Σ|p_gas\|; the t = 0   |                            |
+|                      |                      | inversion of the rotating expanding      |                            |
+|                      |                      | shells against the dumps' p_r; restart,  |                            |
+|                      |                      | forced dt_retry, 1 vs 2 MeshBlocks       |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
+| ``momentum_box``     | ``wave_cart`` (8^3,  | total linear momentum, gas (``hydro_u``) | **a report, not a          |
+|                      | periodic 3-D)        | + radiation (face momenta of             | criterion**: passes when   |
+|                      |                      | ``vet_face`` / c^2), every cycle for 8   | the run completes, the     |
+|                      |                      | cycles; radiation wave along the xyz     | numbers are finite and     |
+|                      |                      | diagonal, amplitude 1e-3,                | there is no                |
+|                      |                      | ``radwave_eig = false``, ``nghost = 3``, | ``CLEAN WARNING``          |
+|                      |                      | tile 8: ``dP_cyc`` = largest component   |                            |
+|                      |                      | of \|P - P_0\| / Σ|p_gas\| per cycle,    |                            |
+|                      |                      | ``dP_max`` its maximum (quick and full,  |                            |
+|                      |                      | ~10 s)                                   |                            |
++----------------------+----------------------+------------------------------------------+----------------------------+
 
 IDORT literature tests
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -208,8 +317,8 @@ fast-relaxation thermal equilibrium is ``thermal_eq``). L1 is sum \|q - q_exact\
 | test                   | deck                  | what                               | criterion            |
 +========================+=======================+====================================+======================+
 | ``idort_beams``        | ``idort_beams``       | two beams, 4 cells wide, crossing  | L1 and ``lum_top``   |
-|                        |                       | in vacuum at +-45 deg (256 x 64,   | within 5 % of 0.2015 |
-|                        |                       | x2 periodic, ring of 4 rays): E vs | and 1.204            |
+|                        |                       | in vacuum at +-45 deg (256 x 64,   | within 5 % of 0.1772 |
+|                        |                       | x2 periodic, ring of 4 rays): E vs | and 1.193            |
 |                        |                       | the exact straight beams (cell     | (regression          |
 |                        |                       | averages); ``lum_top`` the energy  | references, see      |
 |                        |                       | of the row 3 cells below x1max vs  | below); ``flux_err`` |
@@ -241,7 +350,7 @@ fast-relaxation thermal equilibrium is ``thermal_eq``). L1 is sum \|q - q_exact\
 +------------------------+-----------------------+------------------------------------+----------------------+
 | ``idort_radshock_m2``, | ``idort_radshock_m*`` | Lowrie & Edwards (2008) radiative  | each L1 within 5 %   |
 | ``_m5``                |                       | shocks, Mach 2 and 5, 256 cells,   | of the reference     |
-|                        |                       | started from the semi-analytic     | (2.5e-4 ... 2.2e-3)  |
+|                        |                       | started from the semi-analytic     | (2.1e-4 ... 1.7e-3)  |
 |                        |                       | profile                            |                      |
 |                        |                       | (``ref/idort_radshock_m*.txt``,    |                      |
 |                        |                       | its absolute path set by           |                      |
@@ -264,22 +373,22 @@ fast-relaxation thermal equilibrium is ``thermal_eq``). L1 is sum \|q - q_exact\
 Gauss polar angles x 4096 azimuths and the cylinder's periodic images. Notes:
 
 - **Beams.** The 4-cell beams stay straight, at their angle and 0.8 cells wider at half maximum
-  than the exact ones, but carry 1.20 x the exact energy (``lum_top``): the cap of the streaming
+  than the exact ones, but carry 1.19 x the exact energy (``lum_top``): the cap of the streaming
   share at the beam edges. They cross and go on: the field differs from the sum of the two
-  single-beam fields by more than 0.05 E_b only in 48 of the 256 rows, around the crossings
-  (1.6 % of the energy; the largest E is 1.13 x the exact). The excess falls as the beam
-  widens: 1.79, 1.39, 1.20, 1.09 x at 1, 2, 4, 8 cells (L1 0.78, 0.39, 0.20, 0.11). Both are
-  regression references. The energy flux through every row equals the injected flux to 6e-8
-  (``flux_err``).
+  single-beam fields by more than 0.05 E_b only in 40 of the 256 rows, around the crossings
+  (1.3 % of the energy; the largest E is 1.13 x the exact). The excess falls as the beam
+  widens: 1.76, 1.38, 1.19, 1.09 x at 1, 2, 4, 8 cells (L1 0.71, 0.35, 0.18, 0.093).
+  Both are regression references. The energy flux through every row equals the injected flux
+  to 6e-8 (``flux_err``).
 - **Cylinder flux.** E outside the cylinder is within 1.1 % of exact transport and the
   energy flux Phi (``F_out``, ``vet_phi1``, the flux the method paper measures) within 1.2 %
   (r F at x = 2-3.5 is 0.989 of exact). The face momentum F (``vet_f1``, ``FH_out``) is 20 %
-  above exact, a regression reference. A study of 11-21 with other keys attributed it to the
-  harmonic face opacity at the cylinder's sharp edge; that is not re-measured on this code.
-- **Shocks.** The method paper's bench table (v20.3) ran the default tableau ``hesdirk2``; these
-  decks name the production ``time2_tableau = sdirk2``, whose L1 values are 4-27 % higher
-  (Mach 5 rho: 2.2e-3 vs 1.7e-3). With ``hesdirk2`` the release reproduces the table within
-  2 %; the shock stays at the semi-analytic position (no shift needed).
+  above exact, a regression reference. The likely
+  cause is the harmonic face opacity at the cylinder's sharp edge (not measured).
+- **Shocks.** The decks name the production ``time2_tableau = sdirk2``, with its default
+  ``time2_gtime_slope``: the L1 values are within 3 % of the method paper's bench table, which
+  ran ``hesdirk2`` (Mach 2 and 5); the shock stays at the semi-analytic position (no shift
+  needed).
 
 Classic radiation tests
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -296,8 +405,8 @@ other Cartesian decks, Marshak radiation faces).
 | ``radshock_m5``      | ``rad_radshock_m5``    | Waves 18, 129) steady          | L1 of rho, T_rad     |
 |                      |                        | radiative shock, Mach 2        | within 5 % of the    |
 |                      |                        | (subcritical) and 5            | reference (0.44 %,   |
-|                      |                        | (supercritical), 256 cells,    | 1.1 %; Mach 5: 0.45  |
-|                      |                        | 2e-10 s from the semi-analytic | %, 0.75 %); E > 0    |
+|                      |                        | (supercritical), 256 cells,    | 1.1 %; Mach 5: 0.39  |
+|                      |                        | 2e-10 s from the semi-analytic | %, 0.74 %); E > 0    |
 |                      |                        | profile, with the production   |                      |
 |                      |                        | closure (``idort_radshock_m*`` |                      |
 |                      |                        | runs them with                 |                      |
@@ -330,8 +439,8 @@ other Cartesian decks, Marshak radiation faces).
 +----------------------+------------------------+--------------------------------+----------------------+
 | ``advect_pulse``     | ``rad_advect_pulse``   | diffusing radiation pulse      | L1 <= 3e-3 at every  |
 |                      |                        | advected at 3e7 cm/s (Krumholz | dump; the last       |
-|                      |                        | et al. 2007) vs the same pulse | within 5 % of 7.2e-4 |
-|                      |                        | at rest shifted by v t         |                      |
+|                      |                        | et al. 2007) vs the same pulse | within 5 % of        |
+|                      |                        | at rest shifted by v t         | 7.75e-4              |
 +----------------------+------------------------+--------------------------------+----------------------+
 | ``shadow``           | ``rad_shadow``         | opaque clump in a thin gas     | radiation left in    |
 |                      |                        | illuminated by a 1740 K bath   | the geometric umbra  |
@@ -349,74 +458,16 @@ the packet does not move); ``jump``, ``advect_shear`` (no such ``vet_test`` in t
 generator); ``equil``, ``equil_table`` (= ``thermal_eq``), ``atmosphere`` (= ``nlte_*``);
 ``g5_pulse2d`` is part of ``diffusion``.
 
-Notes on the results of this release (465aff485):
-
-- **L_z.** ``dLz`` is the drift of ``Lz_tot`` (gas + radiation + the L_z ledger of the clean
-  solve). It is round-off (2e-16) by construction: the ledger books what the step does not
-  conserve, so ``dLz`` checks the bookkeeping, not the conservation. The conservation error
-  is the ledger's growth, ``dLz_gr`` (gas + radiation alone): 7e-7 on ``shell_sp``, from the
-  face-flux cone cut ``clean_stag_fcone`` (with ``clean_stag_fcone_gas = true`` and
-  ``clean_stag_fwb_ring = 1``, 1.6e-15 with no ledger; without the cut 2e-15). On the cubed
-  sphere the ledger stays at round-off; there ``dLz_gr`` (6e-5) is not a conservation measure,
-  because the history's ``Lrz`` is the cell vector u0 F while the scheme's radiation momentum
-  is its face momenta (``CleanLzTotal``; ~0.6 % of the radiation's L_z apart).
-- **Layout.** Tile mode gives bit-identical results for every layout of whole-tile
-  MeshBlocks with one MeshBlock along x1 and x2 (theta): 1 x 2 (along phi) is identical.
-  2 x 2 differs after 8 cycles by 7.8e-14 of the largest value with 4 OpenMP threads, 3.6e-14
-  with 8 (CPU, 89b05b1c7): splitting theta puts ray walls (mirror or vacuum) inside the mesh,
-  which is outside the tile guarantee, so the test bounds that difference instead of
-  requiring 0.
-  The ``dfl`` pair covers the stage-2 outflow limiter: under ``time2_tableau = sdirk2`` the u0
-  ghosts held the stage-2 flux state while the interior held the gas state, so the two
-  MeshBlocks of a face limited with different donors (before the fix: 1 x 2 differed by
-  1.6e-2 of the largest value, dE 1e-8, dLz 3e-9).
-- **Floors.** The floor energy of the initial conversion is paid before the t = 0 output, so
-  ``floor_pay`` measures dE from t = 0 (``dE0``, the first step alone, is printed).
-- **Narrow wedges.** On a phi-periodic wedge every ray set needs the width to be a multiple
-  of its azimuthal period (GL n_theta x n_phi: 360/n_phi deg; LQ10: 90 deg; the default
-  icosahedral set: 180 deg), else the run stops with a FATAL; ``vet_gd_wall_sym = true`` (with
-  ``vet_gd_wall_interp = true``) lifts it on narrow wedges. All suite decks meet the rule. A
-  theta-periodic mesh needs ``vet_gd_theta_seam_sym = true`` (FATAL otherwise; ``wedge_sym``).
-  With the budget keys (``clean_clos1_budget``, ``clean_bud_maxnorm``) a stage solve stops at the
-  time-error tolerance, so the mirror symmetry holds only to that tolerance; the turning-set arm
-  of ``wedge_sym`` therefore names them false, so it tests the mirror pairing under a ``--keys`` run.
-- **Linear momentum.** The scheme does not conserve linear momentum (gas + radiation) in
-  general, and keeps no ledger for it: the face-flux cone cut (``clean_stag_fcone`` with
-  ``clean_stag_fcone_gas = false``), the well-balancing residual (``clean_stag_fwb``) and the
-  floor velocity rules (``floorcap``, ``dfloor_keep_velocity``, the velocity ceiling) change it
-  and are not booked. Where none of them acts the momentum exchange is exact; at amplitude
-  1e-3 in ``momentum_box`` none acts and dP is round-off (5.8e-17; per cycle 5.4-5.8e-17, measured at 69bfe5d04).
-  In a non-linear box (amplitude 0.1) the cut changes P by up to ~4e-3 of Σ|p_gas\| per
-  cycle. ``momentum_box`` therefore reports dP (printed, and kept with ``--record``) and does
-  not bound it; on spherical polar and cubed-sphere meshes Cartesian P is not a discrete
-  invariant at all (local bases), so the test is Cartesian only.
-- **Order.** Deck D's successive orders are 1.57, 1.61, 1.84 (E) over the five time steps:
-  below 2 on the whole ladder. The criterion is on the finest pair.
-  Neither order deck has stiff gas-radiation exchange, where the sdirk2 tableau is first order.
-
-The reference values and tolerances are in ``ref/references.json`` (measured with commit
-512cf768a, CPU, GCC 13, ``-ffp-contract=off``; reproduced to all printed digits on 465aff485 with
-the IA12.2 scheme keys of the decks; ``radwave`` measured there; the classic radiation tests
-measured with 30d0e3461, CPU, GCC 13, MPCDF Orion). Bitwise tests (restart, dt_retry, layout) need
-no reference: they compare two runs of the same binary. ``momentum_box`` has only
-``"equal": {"warnings": 0}``: its dP is recorded, not bounded.
-
-``references.json`` format, per test: ``"max": {name: bound}``, ``"min": {name: bound}``,
-``"equal": {name: value}``, ``"near": {name: [reference, relative tolerance]}``; ``"last": true``
-applies list-valued bounds (orders) to the last element only.
-
 GPU builds
 ----------
 
 The same suite runs a GPU binary built WITHOUT ``-D PROBLEM`` (the built-in problem
-generators; a ``he_star_vet`` binary cannot run these decks): ``--exe build_tests/src/athena --threads 1 --jobs 1`` (on MI300A also ``export HSA_XNACK=1``). The bitwise tests compare two
+generators; a ``star_vet`` binary cannot run these decks): ``--exe build_tests/src/athena --threads 1 --jobs 1`` (on MI300A also ``export HSA_XNACK=1``). The bitwise tests compare two
 runs of one binary and must pass on a GPU too. The reference tests (``order_*``, ``nlte_*``,
 ``thermal_eq``, ``wb_*``) must agree with the CPU references within their tolerances; a much
 larger difference points at the build (see the CUDA 12.2 warning in
-:doc:`notes_specific_machines`). On MI300A (viper, ROCm 7.2) the quick subset passes 10 of 11:
-``layout_tile`` finds 1 x 2 MeshBlocks (a phi split) 1.9e-11 from one MeshBlock, where the CPU
-is bitwise; IA12.2 gives the same numbers, so on a GPU the 1 x 2 case is bounded, not
-bitwise (an open item).
+:doc:`notes_specific_machines`). On MI300A (ROCm 7.2) ``layout_tile`` finds 1 x 2 MeshBlocks (a phi split) 1.9e-11 from one
+MeshBlock, where the CPU is bitwise: on a GPU the 1 x 2 case is bounded, not bitwise.
 
 Notebooks
 ---------
@@ -450,10 +501,10 @@ The key plot of each test, from its notebook (``docs/vet_clean/figures/``).
    Radiation energy per cycle of the straight run (dots) and of the run restarted half-way (crosses). Pass: every dump and history row identical (difference 0).
 
 .. figure:: figures/order.png
-   :alt: order_time, order_space
+   :alt: order_time, order_space, order_stiff
    :width: 100%
 
-   Relative L1 difference of successive levels against dt (left, deck D) and against N (right, linear wave), with a slope-2 line. Pass: order of the finest pair >= 1.7.
+   Relative L1 difference of successive levels against dt (left, deck D), against N (middle, linear wave) and against the steps per period (right, trapped wave), with a slope-2 line. Pass: order of the finest pair >= 1.7.
 
 .. figure:: figures/radwave.png
    :alt: radwave
@@ -507,7 +558,13 @@ The key plot of each test, from its notebook (``docs/vet_clean/figures/``).
    :alt: idort_beams
    :width: 100%
 
-   Two 4-cell-wide beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay straight and carry 1.20 x the exact energy, at the exact energy flux. Pass: L1 of E and the beam energy within 5 % of 0.2015 and 1.204; energy flux through every row within 1e-5 of the injected.
+   Two 4-cell-wide beams crossing in vacuum at ±45 deg: E of the run and the exact straight beams (images) and cuts across the beams at four heights (dashed: exact). The beams stay straight and carry 1.19 x the exact energy, at the exact energy flux. Pass: L1 of E and the beam energy within 5 % of 0.1772 and 1.193; energy flux through every row within 1e-5 of the injected.
+
+.. figure:: figures/idort_beams_2.png
+   :alt: idort_beams
+   :width: 100%
+
+   The beam test at 1, 2, 4 and 8 cells: L1 of E against the exact beams (left, dashed: 1/width) and the energy of the row three cells below the top over the exact (right, 1 = exact). Not a suite test; the 4-cell point is.
 
 .. figure:: figures/idort_shadow.png
    :alt: idort_shadow, idort_shadow_gl

@@ -8,7 +8,7 @@ FAQ
   :doc:`notes_specific_machines`).
 
 **The test decks do not run with my star binary.**
-  A binary built with ``-D PROBLEM=he_star_vet`` runs only that problem generator. Build the
+  A binary built with ``-D PROBLEM=star_vet`` runs only that problem generator. Build the
   test binary without ``-D PROBLEM``, in a second build directory (:doc:`build`).
 
 **A run started without** ``mpirun`` **takes minutes instead of seconds.**
