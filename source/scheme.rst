@@ -13,6 +13,31 @@ the decks and the exact criteria).
 The method in brief
 -------------------
 
+Why this scheme
+~~~~~~~~~~~~~~~
+
+- **Second order in time and space.** Measured orders of the finest pair: 1.8 in time, 1.9-2.3
+  for cells and time step refined together, and 2 also where the gas-radiation exchange is stiff
+  (tests ``order_time``, ``order_space``, ``order_stiff``; :doc:`properties`;
+  worked examples in :doc:`Notebooks <gallery>`). The implicit discrete-ordinates
+  radiation of Athena++ (Jiang 2021) is, as that paper states, first order in time.
+- **Many angles.** The Eddington tensor comes from rays along a fixed set of directions, 126 in
+  the star templates (Gauss-Legendre 7 x 18). Crossing beams pass through each other, and a clump
+  leaves a sharp shadow (0.6 % of the radiation left in its umbra); an M1 closure merges the
+  beams and fills the shadow (tests ``idort_beams``, ``shadow``).
+- **Speed.** 57 d of a blue supergiant (16.8 million cells) in 6.0 h on one node of 4 H200;
+  48-84 times faster in wall time than the Athena++ CPU runs of the same three stars, which
+  differ in hardware, angles and cells (:doc:`performance page <performance>`). A step normally
+  costs one ray sweep; the implicit solve takes 53-73 % of a cycle, the rays 15-38 %. Maps and
+  movies of the runs: :doc:`Gallery <star_runs>`.
+- **Iterations per step.** A step has two implicit stages. In the four star runs a stage takes
+  2.2-4.1 Newton passes on average (mostly 2 to 5), each one linear solve of 5.5-7.4 BiCGStab
+  iterations on average, so 15-24 iterations per stage, plus one ray sweep per step. No step had
+  to be retried or redone (0 of 380,141 steps; from the runs' ``CLEAN cycle`` lines).
+- **Conservation and positivity.** Gas + radiation energy and mass are conserved to round-off,
+  :math:`L_z` exactly on the cubed sphere; linear momentum is not conserved in general. Density and
+  :math:`E` stay non-negative by construction, :math:`E` with counted backstops (:doc:`properties`).
+
 **Equations.** Two-moment grey radiation transport for the radiation energy
 density :math:`E` and flux :math:`\mathbf F`, in the mixed frame: lab-frame moments with
 comoving-frame opacities, keeping the :math:`O(v/c)` terms and the :math:`O(\beta^2)` terms that are
