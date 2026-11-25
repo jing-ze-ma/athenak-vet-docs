@@ -27,7 +27,7 @@ OUT = os.path.join(ROOT, 'source')
 PAGE = {  # Markdown file -> page, for links
     'QUICKSTART.md': 'quickstart', 'BUILD.md': 'build', 'RUN.md': 'running_the_code',
     'KEYS.md': 'keys', 'OUTPUTS.md': 'outputs', 'SCHEME.md': 'scheme', 'STARS.md': 'stars',
-    '../../tests/vet_clean/README.md': 'tests',
+    'PERFORMANCE.md': 'performance', '../../tests/vet_clean/README.md': 'tests',
     '../../tests/vet_clean/notebooks/README.md': 'gallery',
 }
 UNDER = '=-~^"'
@@ -168,6 +168,19 @@ def page(name, title, parts, src, intro=''):
     print('wrote source/%s.rst' % name)
 
 
+def performance(code):
+    """The page of docs/vet_clean/PERFORMANCE.md; copies its figure and data files."""
+    d = os.path.join(code, 'docs/vet_clean')
+    if not os.path.exists(os.path.join(d, 'PERFORMANCE.md')):
+        return
+    out = os.path.join(OUT, 'performance')
+    shutil.rmtree(out, ignore_errors=True)
+    shutil.copytree(os.path.join(d, 'performance'), out, ignore=shutil.ignore_patterns('__pycache__'))
+    rst = convert(os.path.join(d, 'PERFORMANCE.md')).split('\n', 2)[2].lstrip('\n')
+    rst = re.sub(r'`([^`<\n]+)\s<(performance/[^>\s]+)>`__', r':download:`\1 <\2>`', rst)
+    page('performance', 'Performance', [renumber(rst)], 'docs/vet_clean/PERFORMANCE.md')
+
+
 def main(code):
     D = os.path.join(code, 'docs/vet_clean')
     T = os.path.join(code, 'tests/vet_clean')
@@ -265,6 +278,7 @@ def main(code):
     page('scheme', 'The VET scheme', [s['_pre'], renumber(s['The method in brief']),
                                       renumber(s['Code map']), renumber(s['How to cite'])],
          'docs/vet_clean/SCHEME.md')
+    performance(code)
     figs = figures(code)
     tfigs = [r for r in figs if not r['tests'][0].startswith('star3d')]
     page('properties', 'Properties', [with_figures(body(s['Properties']), tfigs)],

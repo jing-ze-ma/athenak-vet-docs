@@ -14,6 +14,9 @@ short-characteristic ray sweeps, integrated with an IMEX SDIRK2 scheme (implicit
 and gas-radiation exchange, explicit AthenaK hydrodynamics), in a well-balanced formulation
 for stellar envelopes.
 
+**57 days of a blue supergiant in 6.0 hours on one node of 4 H200**: wall times of the star runs,
+a comparison with Athena++ on CPUs and where the time goes are on :doc:`performance`.
+
 Its properties, each with how it is achieved and the test that shows it, are on
 :doc:`properties`: energy and mass conserved to round-off; :math:`L_z` exact on the cubed
 sphere (on spherical polar exact except where the face-flux cone cut acts, booked in a
@@ -41,6 +44,12 @@ problems with notebooks are in the companion repository
    :maxdepth: 1
 
    quickstart
+
+.. toctree::
+   :caption: Performance
+   :maxdepth: 1
+
+   performance
 
 .. toctree::
    :caption: Running
