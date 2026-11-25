@@ -1,5 +1,5 @@
-Star runs
-=========
+Gallery
+=======
 
 2-D maps and movies of five 3-D runs of massive stars, each on one node of 4 H200 GPUs. The wall times, the
 comparison with CPU runs and the cost of each module are on :doc:`performance`. How to set up a star run:

@@ -300,7 +300,7 @@ def main(code):
              if n == 'What to look at' else '') for n, v in st.items() if n != '_pre'],
          'docs/vet_clean/STARS.md',
          'Step-by-step versions with the decks and the executed notebook: the ``star3d-sp`` and\n'
-         '``star3d-cs`` tutorials of the :doc:`gallery`.')
+         '``star3d-cs`` tutorials in :doc:`gallery`.')
 
 
 if __name__ == '__main__':

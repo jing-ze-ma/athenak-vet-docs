@@ -1,5 +1,5 @@
-Gallery
-=======
+Notebooks
+=========
 
 Worked problems live in a separate repository,
 `athenak-vet-gallery <https://github.com/jing-ze-ma/athenak-vet-gallery>`_, one folder per

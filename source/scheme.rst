@@ -53,34 +53,20 @@ one normal component per face. The face flux of a stage is a blend of
 - the advective flux :math:`\mathbf a E` of radiation carried by the gas, and lagged terms (the
   off-diagonal stress and a consistency correction towards the rays' own thin-limit flux).
 
-**Time integration.** IMEX. The hydrodynamics is AthenaK's explicit Heun (``rk2``) integrator,
-unchanged. Radiation transport and the gas-radiation exchange are implicit, with Alexander's
-two-stage L-stable SDIRK tableau (``time2_tableau = sdirk2``); its first stage sees the gas at
-:math:`t^n + g\,\Delta t` (:math:`g = 1 - 1/\sqrt{2}`), not at the time of the explicit part, and the
-hydro's stage-2 flux state takes the exchange with the slope of the last step and of this
-stage (``time2_gtime_slope``); the coupling conditions make the IMEX scheme second order, also
-where the exchange is stiff. Backward Euler is the
-fallback (first step, or a step whose stage failed). At ``cfl_number = 0.3`` per direction the
-radiation does not limit the stability of the step; this is not general: in a linear analysis
-of a uniform medium the 1-D limit is 1.0 in the Courant number of the weighted signal
-speed below and 0.66 in that of the gas speed alone (where :math:`P_{\rm rad}/P_{\rm gas} \approx
-7-10` and :math:`x \gg 1`); in 3-D with equal directions it is 0.34 per direction (the hydro's own).
-With ``<hydro>/rad_signal_speed_diff = true`` (production) the radiation enters the hydro time
-step only where it is trapped: the radiation part of the signal speed is weighted by
-:math:`1 - e^{-x}`, :math:`x = \tau_d\,c_{\rm eq}/c` the grid-scale trapping parameter (:math:`\tau_d` the
-optical depth of a cell). Where :math:`x \ll 1` the radiation diffuses out of a cell faster than a
-sound wave crosses it and does not stiffen the gas, so dt is not limited by it. The weight
-is for accuracy; at cfl 0.3 stability does not need it.
-``<hydro>/rad_signal_speed_phase = true`` weights it by :math:`1 - e^{-x^2}` instead: for :math:`x \ll 1` the
-radiation-pressure perturbation lags the compression by about :math:`\pi/2`, so its restoring part is
-:math:`O(x^2)` and its :math:`O(x)` part only damps the wave; the linear root of the grid-scale mode
-stays at the gas speed until the mode is overdamped (:math:`x \sim 0.3`); a resolved wave is
-trapped more at the same :math:`x`. In thin gas (:math:`c_{\rm eq}^2 \propto 1/\rho`) the
-linear weight's term grows as :math:`\rho^{-1/2}`; this one stays far below :math:`c_g`.
-Floor gas (:math:`\rho` below ``rad_vet/floorcap_rho``) can be pinned at the floor-gas velocity cap;
-with ``<hydro>/dt_floor_courant = C`` (production 0.6) it takes one Courant bound on the sum of its
-signal rates, dt :math:`\le C/\sum_d(|v_d| + c_d)/h_d`, instead of ``cfl_number`` per direction, so the
-floor atmosphere does not set the step of the star (test: ``floor_dt``).
+**Time integration.** The scheme is second-order accurate in time. The hydrodynamics is
+AthenaK's explicit two-stage integrator (``rk2``); the radiation and the gas-radiation exchange
+are implicit, with a two-stage implicit Runge-Kutta method (``time2_tableau = sdirk2``). The two
+parts are coupled so that the whole step stays second order, also where the gas-radiation
+exchange is stiff.
+
+What the order means: the error of a solution falls as a power of the step. With second
+order, a 10 times smaller time step (or 10 times finer cells, for the second-order space
+discretisation) makes the error 100 times smaller; with first order only 10 times smaller.
+Put the other way: to go from a 10 % to a 1 % error, a second-order method needs about 3
+times more steps, a first-order one 10 times more. Many radiation-hydrodynamics codes advance
+the radiation with backward Euler, which is first order in time; for the same accuracy they
+need much smaller steps, or they accept a larger error at the same cost. The measured orders
+are in "Order of accuracy in space and time" below (tests ``order_time``, ``order_stiff``).
 
 **Implicit stage solve.** In each stage the face momentum equation is eliminated face by face,
 which leaves a scalar system for :math:`E`. It is solved by Newton passes: each pass is a

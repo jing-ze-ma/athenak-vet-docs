@@ -54,6 +54,12 @@ problems with notebooks are in the companion repository
    performance
 
 .. toctree::
+   :caption: Gallery
+   :maxdepth: 1
+
+   star_runs
+
+.. toctree::
    :caption: Running
    :maxdepth: 1
 
@@ -82,7 +88,6 @@ problems with notebooks are in the companion repository
    :maxdepth: 1
 
    stars
-   star_runs
    gallery
 
 .. toctree::
