@@ -44,8 +44,8 @@ its plots. The test notebooks run their test through the suite of the code repos
      - ``wb_sp``, ``wb_cs``
      - max :math:`|v|/c_s` vs time of an equilibrium envelope
    * - ``order``
-     - ``order_time``, ``order_space``
-     - L1 error vs dt and vs N, with a slope-2 line
+     - ``order_time``, ``order_space``, ``order_stiff``
+     - L1 error vs dt, vs N and vs the steps per period (stiff exchange), with a slope-2 line
    * - ``thermal_eq``
      - ``thermal_eq``
      - E(t), T(t) vs the exact ODE
@@ -58,3 +58,12 @@ its plots. The test notebooks run their test through the suite of the code repos
    * - ``floor_pay``
      - ``floor_pay``
      - total-energy drift with floors paid from the radiation
+   * - ``beams_shadow``
+     - ``idort_beams``, ``idort_beams_mb``, ``idort_shadow``, ``idort_shadow_gl``
+     - crossing beams (with a beam-width ladder) and the shadow of an ellipse vs the exact beams
+   * - ``cylinder``
+     - ``idort_cylinder``
+     - E, energy flux and face momentum around an emitting cylinder vs exact transport
+   * - ``radshock``
+     - ``radshock``, ``radshock_m5``
+     - Lowrie & Edwards radiative shocks vs the semi-analytic profiles
