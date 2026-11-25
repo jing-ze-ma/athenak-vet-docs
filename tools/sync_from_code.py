@@ -26,7 +26,7 @@ OUT = os.path.join(ROOT, 'source')
 
 PAGE = {  # Markdown file -> page, for links
     'QUICKSTART.md': 'quickstart', 'BUILD.md': 'build', 'RUN.md': 'running_the_code',
-    'KEYS.md': 'keys', 'OUTPUTS.md': 'outputs', 'SCHEME.md': 'scheme', 'STARS.md': 'stars',
+    'WORKFLOW.md': 'code_layout', 'KEYS.md': 'keys', 'OUTPUTS.md': 'outputs', 'SCHEME.md': 'scheme', 'STARS.md': 'stars',
     'PERFORMANCE.md': 'performance', '../../tests/vet_clean/README.md': 'tests',
     '../../tests/vet_clean/notebooks/README.md': 'gallery',
 }
@@ -123,9 +123,12 @@ def figures(code):
     d = os.path.join(code, 'docs/vet_clean/figures')
     out = os.path.join(OUT, 'figures')
     shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(os.path.join(out, 'flow'))
+    for f in sorted(os.listdir(os.path.join(d, 'flow'))):      # the flow charts (SVG)
+        if f.endswith('.svg'):
+            shutil.copy(os.path.join(d, 'flow', f), os.path.join(out, 'flow'))
     if not os.path.exists(os.path.join(d, 'FIGURES.md')):
         return []
-    os.makedirs(out)
     rows = []
     for line in open(os.path.join(d, 'FIGURES.md'), encoding='utf-8'):
         c = [x.strip() for x in line.strip().strip('|').replace('\\|', '\x00').split('|')]
@@ -187,7 +190,8 @@ def main(code):
     rev = subprocess.run(['git', '-C', code, 'rev-parse', '--short=9', 'HEAD'],
                          stdout=subprocess.PIPE, universal_newlines=True).stdout.strip()
     md = {k: convert(os.path.join(D, k)) for k in
-          ('QUICKSTART.md', 'BUILD.md', 'RUN.md', 'KEYS.md', 'OUTPUTS.md', 'SCHEME.md', 'STARS.md')}
+          ('QUICKSTART.md', 'BUILD.md', 'RUN.md', 'KEYS.md', 'OUTPUTS.md', 'SCHEME.md', 'STARS.md',
+           'WORKFLOW.md')}
     md['TESTS'] = convert(os.path.join(T, 'README.md'))
     md['NB'] = convert(os.path.join(T, 'notebooks/README.md'))
 
@@ -280,6 +284,8 @@ def main(code):
     page('scheme', 'The VET scheme', [s['_pre'], renumber(s['The method in brief']),
                                       renumber(s['Code map']), renumber(s['How to cite'])],
          'docs/vet_clean/SCHEME.md')
+    w = md['WORKFLOW.md'].split('\n', 2)[2].lstrip('\n')      # its own title; numbers stripped
+    page('code_layout', 'Code layout', [renumber(w)], 'docs/vet_clean/WORKFLOW.md')
     performance(code)
     figs = figures(code)
     tfigs = [r for r in figs if not r['tests'][0].startswith('star3d')]

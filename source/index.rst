@@ -82,6 +82,7 @@ problems with notebooks are in the companion repository
    :maxdepth: 1
 
    keys
+   code_layout
    tests
 
 .. toctree::
