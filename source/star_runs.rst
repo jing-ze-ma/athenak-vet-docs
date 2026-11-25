@@ -129,3 +129,55 @@ t9mlt, 0 to 22.25 d (the run continues): all 179 dumps, 3 h apart, at 24 frames 
 node up to 21.5 d. The colour limits of :math:`T_{\rm eff}` are 9.0 to 29.5 :math:`\times 10^3` K. A
 partial-test run, not a validated prediction. Surface and envelope only; the velocity of the deep stable layer is not
 shown.
+
+3-D videos
+----------
+
+Perspective view with a fixed camera. The surface is the photosphere (:math:`\tau_R = 2/3`), coloured by
+:math:`T_{\rm eff} = (F_r/\sigma)^{1/4}` with the lab-frame flux; the relief is at true scale. A quarter is cut
+out, and its faces are coloured by :math:`v_r` out to the local photosphere. The scale bar is exact at the depth of the near side
+of the photosphere: 10 :math:`R_\odot` for bsg, 1 for m35mms, 0.1 for m35zams, 100 for t9l62 and 10 for t9mlt. Softer
+lighting (t9l62, t9mlt) means an ambient share of 0.8: the lit colour is 0.83 to 1.01 of the colour bar. No sound.
+
+.. raw:: html
+
+   <video controls muted playsinline preload="none" width="100%"
+          poster="_static/star_runs/mov3d_bsg_poster.png" src="_static/star_runs/mov3d_bsg.mp4">
+   </video>
+
+bsg.
+
+.. raw:: html
+
+   <video controls muted playsinline preload="none" width="100%"
+          poster="_static/star_runs/mov3d_m35mms_poster.png" src="_static/star_runs/mov3d_m35mms.mp4">
+   </video>
+
+m35mms. Frames interpolated: cross-faded between dumps. The cut faces start at 0.86 :math:`R_{\rm ph,IC}`.
+
+.. raw:: html
+
+   <video controls muted playsinline preload="none" width="100%"
+          poster="_static/star_runs/mov3d_m35zams_poster.png" src="_static/star_runs/mov3d_m35zams.mp4">
+   </video>
+
+m35zams. Frames interpolated: cross-faded between dumps. The cut faces start at 0.93 :math:`R_{\rm ph,IC}`.
+
+.. raw:: html
+
+   <video controls muted playsinline preload="none" width="100%"
+          poster="_static/star_runs/mov3d_t9l62_poster.png" src="_static/star_runs/mov3d_t9l62.mp4">
+   </video>
+
+t9l62. The movie starts at 9.5 d, and its first five days are saturated (:math:`T_{\rm eff}` limits 4.9 to
+10.0 :math:`\times 10^3` K). The cut faces start at 0.42 :math:`R_{\rm ph,IC}`. The surface has softer
+lighting.
+
+.. raw:: html
+
+   <video controls muted playsinline preload="none" width="100%"
+          poster="_static/star_runs/mov3d_t9mlt_poster.png" src="_static/star_runs/mov3d_t9mlt.mp4">
+   </video>
+
+t9mlt. :math:`T_{\rm eff}` limits 9.0 to 29.5 :math:`\times 10^3` K. The cut faces start at 0.62 :math:`R_{\rm
+ph,IC}`. The surface has softer lighting. A partial-test run, not a validated prediction.
