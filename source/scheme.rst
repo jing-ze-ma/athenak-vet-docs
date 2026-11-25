@@ -21,6 +21,12 @@ Why this scheme
   (tests ``order_time``, ``order_space``, ``order_stiff``; :doc:`properties`;
   worked examples in :doc:`Notebooks <gallery>`). The implicit discrete-ordinates
   radiation of Athena++ (Jiang 2021) is, as that paper states, first order in time.
+  What the order means: the error falls as a power of the step. With second order, a 10 times
+  smaller time step (or 10 times finer cells) makes the error 100 times smaller; with first order
+  only 10 times smaller. Put the other way: to go from a 10 % to a 1 % error, a second-order method
+  needs about 3 times more steps, a first-order one 10 times more. A code that advances the
+  radiation with backward Euler (first order in time) needs much smaller steps for the same
+  accuracy, or accepts a larger error at the same cost.
 - **Many angles.** The Eddington tensor comes from rays along a fixed set of directions, 126 in
   the star templates (Gauss-Legendre 7 x 18). Crossing beams pass through each other, and a clump
   leaves a sharp shadow (0.6 % of the radiation left in its umbra); an M1 closure merges the
@@ -83,15 +89,6 @@ AthenaK's explicit two-stage integrator (``rk2``); the radiation and the gas-rad
 are implicit, with a two-stage implicit Runge-Kutta method (``time2_tableau = sdirk2``). The two
 parts are coupled so that the whole step stays second order, also where the gas-radiation
 exchange is stiff.
-
-What the order means: the error of a solution falls as a power of the step. With second
-order, a 10 times smaller time step (or 10 times finer cells, for the second-order space
-discretisation) makes the error 100 times smaller; with first order only 10 times smaller.
-Put the other way: to go from a 10 % to a 1 % error, a second-order method needs about 3
-times more steps, a first-order one 10 times more. Many radiation-hydrodynamics codes advance
-the radiation with backward Euler, which is first order in time; for the same accuracy they
-need much smaller steps, or they accept a larger error at the same cost. The measured orders
-are in "Order of accuracy in space and time" below (tests ``order_time``, ``order_stiff``).
 
 **Implicit stage solve.** In each stage the face momentum equation is eliminated face by face,
 which leaves a scalar system for :math:`E`. It is solved by Newton passes: each pass is a
