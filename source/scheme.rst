@@ -21,12 +21,14 @@ Why this scheme
   (tests ``order_time``, ``order_space``, ``order_stiff``; :doc:`properties`;
   worked examples in :doc:`Notebooks <gallery>`). The implicit discrete-ordinates
   radiation of Athena++ (Jiang 2021) is, as that paper states, first order in time.
-  What the order means: the error falls as a power of the step. With second order, a 10 times
-  smaller time step (or 10 times finer cells) makes the error 100 times smaller; with first order
-  only 10 times smaller. Put the other way: to go from a 10 % to a 1 % error, a second-order method
-  needs about 3 times more steps, a first-order one 10 times more. A code that advances the
-  radiation with backward Euler (first order in time) needs much smaller steps for the same
-  accuracy, or accepts a larger error at the same cost.
+  What the order means: the error falls as a power of the cell size. With second order, 10 times
+  finer cells make the error 100 times smaller; with first order only 10 times smaller. Put the
+  other way: to make the error 10 times smaller, a second-order method needs cells about 3 times
+  finer, a first-order one 10 times finer. In 3-D the cost grows as the fourth power of the
+  resolution (three directions, and a time step that shrinks with the cell), so that is about 100
+  times the cost against 10,000 times. The same holds for the time step: a code whose radiation is
+  first order in time (backward Euler) needs much smaller steps for the same accuracy, or accepts a
+  larger error at the same cost.
 - **Many angles.** The Eddington tensor comes from rays along a fixed set of directions, 126 in
   the star templates (Gauss-Legendre 7 x 18). Crossing beams pass through each other, and a clump
   leaves a sharp shadow (0.6 % of the radiation left in its umbra); an M1 closure merges the
