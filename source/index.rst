@@ -9,8 +9,7 @@ AthenaK VET radiation documentation
    </div>
 
 The VET scheme is a grey radiation-hydrodynamics scheme for
-`AthenaK <https://github.com/IAS-Astrophysics/athenak>`_ (``src/rad_vet/``,
-``<rad_vet>/scheme = clean``): two-moment radiation transport with the energy density on
+`AthenaK <https://github.com/IAS-Astrophysics/athenak>`_: two-moment radiation transport with the energy density on
 cells and the flux on cell faces, closed by a variable Eddington tensor from
 short-characteristic ray sweeps, integrated with an IMEX SDIRK2 scheme (implicit radiation
 and gas-radiation exchange, explicit AthenaK hydrodynamics), in a well-balanced formulation
@@ -28,7 +27,7 @@ ledger); positivity of the density by construction; well-balanced envelopes; mea
 bitwise restarts, dt retries and rank counts; CPU and GPU agreement to round-off;
 Cartesian, spherical-polar and cubed-sphere meshes with one implementation.
 
-The release code is the ``vet-clean-release`` branch of
+The release code is on GitHub:
 `github.com/jing-ze-ma/athenak <https://github.com/jing-ze-ma/athenak/tree/vet-clean-release>`_.
 
 This site covers how to obtain, build and run the code, the method and its tests. Worked
@@ -104,5 +103,5 @@ The layout, theme, style sheet and publishing workflow of this site, and the sep
 tutorial repository, follow the `IAS AthenaK documentation
 <https://github.com/IAS-Astrophysics/athenak-docs>`_ and `AthenaK gallery
 <https://github.com/IAS-Astrophysics/athenak-gallery>`_; we thank their authors. The text of
-most pages is generated from ``docs/vet_clean/`` of the code repository
+most pages is generated from the documentation folder of the code repository
 (``tools/sync_from_code.py``).

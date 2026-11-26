@@ -26,7 +26,7 @@ html_theme_options = {
         {
             "name": "Release code on GitHub",
             "url": RELEASE_URL,
-            "html": "Release code: github.com/jing-ze-ma/athenak (vet-clean-release)",
+            "html": "Release code: github.com/jing-ze-ma/athenak",
             "class": "",
         },
     ],
