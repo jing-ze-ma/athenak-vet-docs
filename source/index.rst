@@ -8,7 +8,7 @@ AthenaK VET radiation documentation
      <figure><video autoplay loop muted playsinline preload="auto" poster="_static/hero/hero_rsg_poster.png" src="_static/hero/hero_rsg.mp4" aria-label="3-D red supergiant run on the cubed sphere"></video><figcaption>Red supergiant, cubed sphere (production run of the earlier version of the scheme)</figcaption></figure>
    </div>
 
-The clean VET scheme is a grey radiation-hydrodynamics scheme for
+The VET scheme is a grey radiation-hydrodynamics scheme for
 `AthenaK <https://github.com/IAS-Astrophysics/athenak>`_ (``src/rad_vet/``,
 ``<rad_vet>/scheme = clean``): two-moment radiation transport with the energy density on
 cells and the flux on cell faces, closed by a variable Eddington tensor from

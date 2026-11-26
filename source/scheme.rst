@@ -43,8 +43,9 @@ Features
   iterations on average, so 15-24 iterations per stage, plus one ray sweep per step. No step had
   to be retried or redone (0 of 380,141 steps; from the runs' ``CLEAN cycle`` lines).
 - **Conservation and positivity.** Gas + radiation energy and mass are conserved to round-off,
-  :math:`L_z` exactly on the cubed sphere; linear momentum is not conserved in general. Density and
-  :math:`E` stay non-negative by construction, :math:`E` with counted backstops (:doc:`properties`).
+  :math:`L_z` exactly on the cubed sphere; linear momentum is not conserved in general. Second order
+  with local first-order fallbacks where positivity needs them, all counted (Positivity, below;
+  :doc:`properties`).
 
 **Equations.** Two-moment grey radiation transport for the radiation energy
 density :math:`E` and flux :math:`\mathbf F`, in the mixed frame: lab-frame moments with
@@ -123,6 +124,29 @@ the secant chord replaces the tangent only where it is better by more than a der
 bound, 16 eps of the terms of :math:`e(T) - e(T_p)`), then a line solve that recovers the face
 fluxes. Convergence is measured in each cell's own energy budget of the stage, with the
 tolerance tied to the step's time-error estimate.
+
+**Positivity.** No linear scheme above first order keeps a solution positive for every step
+(Godunov 1959). The scheme is therefore second order where nothing is near zero and falls back
+to a first-order positive form only locally, where it is needed; every such event is counted
+(the end-of-run ``vet-positivity`` line, the FOFC and backward-Euler counts). From first to last:
+
+- hydrodynamics: first-order flux correction (``hydro/fofc``, ``fofc_retest``;
+  ``hydro/hydro_fofc.cpp``): a trial update flags every cell where a floor or the velocity
+  ceiling would act, and the faces of that cell take the first-order LLF flux.
+  ``dfloor_flux_limit`` scales back the outflow of a nearly empty cell so that its density
+  stays above the floor;
+- radiation energy :math:`E`: the implicit operator is an M-matrix for any step (donor-cell and
+  smallest-donor parts), and Zalesak limiters on the explicit stage increment and on the
+  written-back fluxes keep :math:`E` above ``e_floor``;
+- time: a failed implicit stage is redone with backward Euler (first order, L-stable), and a
+  step that still fails is taken again with a smaller dt (``time/dt_retry``);
+- last: floors, which take their energy from the cell's gas or radiation (``implicit_pos_floor``,
+  ``implicit_pos_gas``, ``hydro/floor_pay = rad_column``) and are counted.
+
+In the four finished star runs no stage fell back and no step was redone or retried; the only
+backward-Euler step of each run was the first step of its fresh start. Every suite deck runs
+with no floor raise, no energy created and no ``CLEAN WARNING`` (except ``floor_pay``, which raises
+the gas temperature on purpose and pays it from the radiation).
 
 **Well-balanced formulation.** For a hydrostatic envelope in radiative equilibrium, the
 problem generator supplies the reference radiative acceleration of the initial state; the

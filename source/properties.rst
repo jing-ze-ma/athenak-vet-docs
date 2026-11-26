@@ -191,6 +191,9 @@ conservation claim (the shell decks have closed walls that exert forces).
 Positivity
 ~~~~~~~~~~
 
+How second order and positivity go together (local first-order fallbacks, all counted) is
+described in :doc:`scheme`, under **Positivity**.
+
 - **Density** stays above its floor by construction
   (``dfloor_flux_limit``, above).
 - **Radiation energy :math:`E`** is non-negative by construction of the implicit operator: it is an

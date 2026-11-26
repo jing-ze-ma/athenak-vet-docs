@@ -275,6 +275,7 @@ def main(code):
         ('(see its README for\nthe decks and the exact criteria)', '(see :doc:`tests` for\nthe decks and the exact criteria)'),
         ('(``tests/vet_clean/README.md``, "GPU builds")', '(:doc:`tests`, "GPU builds")'),
         ('section 2, Properties', ':doc:`properties`', 2),
+        ('section 1, the method in brief', ':doc:`scheme`'),
         ('the Gallery page of the documentation site', ':doc:`Gallery <star_runs>`'),
     ], 'SCHEME.md'))
     page('scheme', 'The VET scheme', [s['_pre'], renumber(s['The method in brief']),

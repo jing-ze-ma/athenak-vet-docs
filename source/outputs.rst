@@ -86,10 +86,10 @@ Definitions used in the table:
   from the top of the mesh, reaches ``<problem>/star_tau_int`` (1.0 in the decks), i.e. the
   initial photosphere (``star_vet.cpp``). If it is never reached, ``r_int = r_in``.
   "The L_int face" is the lower x1 face of the cell that contains ``r_int``.
-- ``F``: the radiation flux stored on the x1 face. In the staggered clean scheme this is the
+- ``F``: the radiation flux stored on the x1 face. In the staggered scheme this is the
   face flux variable of the F equation (the radiation momentum times c^2, in flux units). In
   a steady state it equals the energy flux to O(v/c), but it is not the flux that moved E.
-- ``Phi``: the radiation **energy** flux that the clean solve applied at a face in the step's
+- ``Phi``: the radiation **energy** flux that the radiation solve applied at a face in the step's
   last solve (the stage-2 solve of an sdirk2 step, or the backward-Euler solve). This is the
   flux that changed E; it includes the advective part (4/3) v E.
 - ``A``: the area of the x1 face. All L columns are sums over all (k, j) of the wedge.
@@ -113,7 +113,7 @@ Definitions used in the table:
 +-----+-----------+--------------------------------------------------------------+------------+
 | 5   | L_top     | energy that the step's radiation solves moved **out**        | erg/s      |
 |     |           | through the outer x1 face, divided by dt (positive outward). |            |
-|     |           | This is the boundary record of the clean solve               |            |
+|     |           | This is the boundary record of the radiation solve           |            |
 |     |           | (``CleanBndAcc``, ``src/rad_vet/rad_vet_time2.cpp``). If the |            |
 |     |           | record is missing for a step it falls back to sum F A at the |            |
 |     |           | top face.                                                    |            |
@@ -161,7 +161,7 @@ Definitions used in the table:
 | 20  | v1sq_wall | mean v_r^2 over the first active radial cells of the whole   | cm^2/s^2   |
 |     |           | mesh                                                         |            |
 +-----+-----------+--------------------------------------------------------------+------------+
-| 21  | Picard    | **Always 0** under ``scheme = clean``; the clean solve       | -          |
+| 21  | Picard    | **Always 0** under ``scheme = clean``; the radiation solve   | -          |
 |     |           | reports its passes in the ``CLEAN cycle`` lines (section     |            |
 |     |           | 4.2).                                                        |            |
 +-----+-----------+--------------------------------------------------------------+------------+
@@ -220,9 +220,9 @@ Notes:
 where the density floor acted), ``eos_efloor``, ``eos_tfloor``, ``eos_vceil``, ``eos_fail``, ``c2p_it``,
 ``fofc``, ``efloor_de`` (internal energy created by the energy floor), ``eos_tclamp``, ``eos_tset``,
 ``vceil_de`` (kinetic energy the velocity ceiling removed), ``dfloor_ke`` (kinetic energy change of
-``dfloor_keep_velocity``), then the radiation totals ``vet_bcg_break vet_bcg_fall vet_bcg_keep vet_newt_fb vet_gn_switch vet_od_fall vet_vlat_fall vet_opn_skip vet_pos_flr vet_pos_un vet_pos_s2 vet_acl_e vet_acl_f`` (``src/outputs/eventlog.cpp``). For the clean scheme the radiation columns
+``dfloor_keep_velocity``), then the radiation totals ``vet_bcg_break vet_bcg_fall vet_bcg_keep vet_newt_fb vet_gn_switch vet_od_fall vet_vlat_fall vet_opn_skip vet_pos_flr vet_pos_un vet_pos_s2 vet_acl_e vet_acl_f`` (``src/outputs/eventlog.cpp``). For this scheme the radiation columns
 that matter are ``vet_pos_flr`` (E floor raises) and ``vet_pos_un`` (energy the E floor created,
-x volume); most of the others are not used by the clean scheme.
+x volume); most of the others are not used by this scheme.
 
 3. Checking energy and mass conservation from ``<basename>.user.hst``
 ---------------------------------------------------------------------
@@ -392,7 +392,7 @@ handled but that the user should know about.
 |                                                                                                                                                       |                                   | seconds (default 600).                  | the run may hang.            |
 +-------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------+-----------------------------------------+------------------------------+
 
-4.2 Other per-cycle lines of the clean scheme
+4.2 Other per-cycle lines of the scheme
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 With ``<rad_vet>/clean_verbose = 0`` (default) the code prints the ``CLEAN cycle`` lines, the
@@ -499,7 +499,7 @@ round-off levels of that test (to see which passes a solve needs and why).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At the end of the run (``RadiationVet`` destructor and ``Driver::Finalize``) rank 0 prints a
-block of ``<rad_vet>``, ``<time>`` and ``<hydro>`` lines. The ones that matter for the clean scheme:
+block of ``<rad_vet>``, ``<time>`` and ``<hydro>`` lines. The ones that matter for this scheme:
 
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------+
 | line                                                                                                                                                                                                                                                                   | what it tells you                            |
@@ -513,7 +513,7 @@ block of ``<rad_vet>``, ``<time>`` and ``<hydro>`` lines. The ones that matter f
 |                                                                                                                                                                                                                                                                        | limiter's totals, including ``left (Q<=0)``  |
 |                                                                                                                                                                                                                                                                        | and ``emptied`` cells.                       |
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------+
-| ``<rad_vet> vet-positivity: ... implicit_pos_gas=1 ... cell-solves=K energy moved rad->gas=X | E floor raises cell-solves=K energy from gas=X energy created=Y ... taken from the column's radiation (implicit_pos_floor_cons)=Z | hydro EOS floors energy created=W`` | The positivity book-keeping of the clean     |
+| ``<rad_vet> vet-positivity: ... implicit_pos_gas=1 ... cell-solves=K energy moved rad->gas=X | E floor raises cell-solves=K energy from gas=X energy created=Y ... taken from the column's radiation (implicit_pos_floor_cons)=Z | hydro EOS floors energy created=W`` | The positivity book-keeping of the           |
 |                                                                                                                                                                                                                                                                        | write-back. **``energy created`` (Y) should  |
 |                                                                                                                                                                                                                                                                        | be 0**: a non-zero value is energy the E     |
 |                                                                                                                                                                                                                                                                        | floor created (energy x volume).             |
@@ -532,18 +532,18 @@ block of ``<rad_vet>``, ``<time>`` and ``<hydro>`` lines. The ones that matter f
 |                                                                                                                                                                                                                                                                        | at the end.                                  |
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------+
 | ``<rad_vet> implicit energy solve: cells=... FAILURES=...``                                                                                                                                                                                                            | The explicit-transport energy solve; not     |
-|                                                                                                                                                                                                                                                                        | used by the clean scheme.                    |
+|                                                                                                                                                                                                                                                                        | used by this scheme.                         |
 +------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------+
 
 4.4 Start-up messages and FATAL errors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - ``### WARNING (scheme = clean): <rad_vet/key> has no effect, the clean solve reads <rad_vet>/other``
-  and ``### WARNING (scheme = clean): no effect: ...``: the input names a key that the clean
-  solve does not use; use the clean key named in the message. (``CleanPreflight``,
+  and ``### WARNING (scheme = clean): no effect: ...``: the input names a key that the
+  solve does not use; use the key named in the message. (``CleanPreflight``,
   ``src/rad_vet/rad_vet_clean.cpp``.)
 - ``### NOTE: <rad_vet>/implicit_maxit = A is not the clean solve's: clean_maxnl = B``: that
-  key is ignored; name the clean key to change the limit.
+  key is ignored; name ``clean_maxnl`` to change the limit.
 - ``### WARNING: N input parameter(s) were never read by the code``: printed after the first
   cycle; check each listed key for a typo (keys that the templates name without effect, :doc:`keys` appendix, may be
   listed).

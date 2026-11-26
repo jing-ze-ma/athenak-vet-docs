@@ -13,7 +13,7 @@ Scheme selection
 +----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
 | key                        | meaning                         | default               | production        | read in                 |
 +============================+=================================+=======================+===================+=========================+
-| ``rad_vet/transport``      | Radiation transport; the clean  | ``implicit`` on a     | all: ``implicit`` | ``rad_vet/rad_vet.cpp`` |
+| ``rad_vet/transport``      | Radiation transport; the        | ``implicit`` on a     | all: ``implicit`` | ``rad_vet/rad_vet.cpp`` |
 |                            | scheme needs ``implicit``.      | fresh run with a      |                   | (constructor)           |
 |                            |                                 | ``<rad_vet>`` block   |                   |                         |
 +----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
@@ -105,7 +105,7 @@ Rays
 |                                   | written with on the cubed      |                    |                 |                               |
 |                                   | sphere (FATAL otherwise).      |                    |                 |                               |
 +-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/clean_rot_ring``        | Rotating ray ring of the clean | read only when     | all: ``off``    | ``rad_vet/rad_vet.cpp``       |
+| ``rad_vet/clean_rot_ring``        | Rotating ray ring of the       | read only when     | all: ``off``    | ``rad_vet/rad_vet.cpp``       |
 |                                   | scheme: ``off``, ``live``,     | named              |                 | (constructor)                 |
 |                                   | ``jump``.                      |                    |                 |                               |
 +-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
@@ -178,7 +178,7 @@ Time integration, time step and retries
 |                                  | (the explicit part of the IMEX    |                         |                 | (constructor)                 |
 |                                  | scheme).                          |                         |                 |                               |
 +----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``time/cfl_number``              | Courant number of the hydro step  | 0.3 on a fresh clean    | all: ``0.3``    | ``mesh/build_tree.cpp``       |
+| ``time/cfl_number``              | Courant number of the hydro step  | 0.3 on a fresh          | all: ``0.3``    | ``mesh/build_tree.cpp``       |
 |                                  | (per direction); the radiation    | VET run                 |                 |                               |
 |                                  | enters dt by ``rad_signal_speed`` |                         |                 |                               |
 |                                  | where it is trapped.              |                         |                 |                               |
@@ -438,7 +438,7 @@ Opacity, units and coupling
 |                               | start-up log compares them with    |                              |                              |                               |
 |                               | the values ``<units>`` implies.    |                              |                              |                               |
 +-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/chat_over_c``       | Reduced speed of light; the clean  | 1.0                          | all: ``1.0``                 | ``rad_vet/rad_vet.cpp``       |
+| ``rad_vet/chat_over_c``       | Reduced speed of light; the        | 1.0                          | all: ``1.0``                 | ``rad_vet/rad_vet.cpp``       |
 |                               | scheme needs 1 (FATAL otherwise).  |                              |                              | (constructor)                 |
 +-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
 | ``rad_vet/temp_unit_kelvin``, | Unit conversions for the table     | 1.0                          | per deck                     | ``rad_vet/rad_vet.cpp``       |
@@ -455,7 +455,7 @@ Opacity, units and coupling
 |                               | radiative acceleration, the gas    |                              |                              |                               |
 |                               | receives only the residual force;  |                              |                              |                               |
 |                               | its work is paid as ``split``      |                              |                              |                               |
-|                               | (required by the clean scheme).    |                              |                              |                               |
+|                               | (required by the scheme).          |                              |                              |                               |
 +-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
 | ``rad_vet/e_floor``           | Floor of E (code units).           | FLT_MIN                      | all: ``1.0e-4``              | ``rad_vet/rad_vet.cpp``       |
 |                               |                                    |                              |                              | (constructor)                 |
@@ -634,7 +634,7 @@ Layout and reproducibility
 |                                | nx2 and nx3.      |                 |                 |                         |
 +--------------------------------+-------------------+-----------------+-----------------+-------------------------+
 | ``mesh/nghost``                | Ghost cells; the  | 3 on a fresh    | all: ``3``      | ``mesh/mesh.cpp``       |
-|                                | face line solves  | clean VET run   |                 | (constructor)           |
+|                                | face line solves  | VET run         |                 | (constructor)           |
 |                                | across MeshBlocks |                 |                 |                         |
 |                                | need >= 3.        |                 |                 |                         |
 +--------------------------------+-------------------+-----------------+-----------------+-------------------------+

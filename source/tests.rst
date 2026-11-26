@@ -4,7 +4,7 @@
 Tests
 =====
 
-A self-contained CPU test suite for the clean VET radiation scheme: one command, a PASS / FAIL
+A self-contained CPU test suite for the VET radiation scheme: one command, a PASS / FAIL
 line per test, about 1 min (``--quick``) or 5 min (full) on 48 cores (``--jobs 12``).
 
 .. code:: bash
@@ -465,7 +465,7 @@ Classic radiation tests
 
 The classic grey radiation tests (group ``radiation``; decks ``decks/rad_*.athinput``, ported from
 the former ``inputs/tests/rad_vet_*`` decks, removed because they used the explicit transport, to
-the production clean scheme: ``transport = implicit``, ``closure = vet_sc``, the key block of the
+the production scheme: ``transport = implicit``, ``closure = vet_sc``, the key block of the
 other Cartesian decks, Marshak radiation faces).
 
 +----------------------+------------------------+--------------------------------+----------------------+
