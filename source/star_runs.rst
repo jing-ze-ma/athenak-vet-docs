@@ -11,8 +11,12 @@ Each figure of one star shows three maps:
   :math:`\tau_R = 2/3` (the same for all five stars; linear between cell centres, no smoothing);
 - middle: the effective temperature :math:`T_{\rm eff}` in :math:`10^3` K of each column, from the comoving flux
   at its :math:`\tau_R = 2/3` (also the same for all five stars);
-- right: the density relative to the mean of its shell, :math:`\delta\rho/\langle\rho\rangle`, on a slice in radius
-  and angle. Grey is gas near the density floor (at most 1.5 times the floor).
+- right: the radial velocity :math:`v_r` in km/s on a slice in radius and angle (cell values, no smoothing), with
+  symmetric colour limits: in a figure the 99th percentile of :math:`|v_r|` over the slice cells drawn in that dump,
+  in a movie the 99th percentile pooled over about 40 dumps spread over the run (and the last), fixed over the movie.
+  Grey is gas near the density floor (at most 1.5 times the floor). In M35 ZAMS and M56 LBV (radiative IC) the
+  largest :math:`|v_r|` sit at the top of the slice (the photosphere layers and the outflow above them), so the limits
+  are set there and the interior flow shows in pale colours.
 
 Axes are in solar radii and degrees. :math:`R_{\rm ph,IC}` is the photosphere radius of the initial model. The scale
 bar on the maps is a length at the median photosphere radius of the dump shown, exact at the equator: 10
@@ -88,8 +92,9 @@ Figures
 Movies
 ------
 
-The same three maps in time, from the start of the run to the day given, every dump, with fixed colour limits. No
-sound. Press play; the M20 BSG, M56 LBV (radiative IC) and M56 LBV movies last about 10 s, the M35 movies 40 s.
+The same three maps in time, from the start of the run to the day given, every dump, with fixed colour limits. The
+limits of :math:`v_r` on the slice: :math:`\pm 61` km/s for M20 BSG, :math:`\pm 137` for M35 MMS, :math:`\pm 71` for M35
+ZAMS, :math:`\pm 395` for M56 LBV (radiative IC) and :math:`\pm 206` for M56 LBV. No sound. Press play; the M20 BSG, M56 LBV (radiative IC) and M56 LBV movies last about 10 s, the M35 movies 40 s.
 
 .. raw:: html
 

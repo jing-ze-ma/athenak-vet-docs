@@ -84,6 +84,7 @@ problems with notebooks are in the companion repository
    keys
    code_layout
    tests
+   cite
 
 .. toctree::
    :caption: Worked problems

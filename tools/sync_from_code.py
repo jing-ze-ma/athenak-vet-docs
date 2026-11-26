@@ -281,9 +281,11 @@ def main(code):
         ('section 1, the method in brief', ':doc:`scheme`'),
         ('the Gallery page of the documentation site', ':doc:`Gallery <star_runs>`'),
     ], 'SCHEME.md'))
+    c = s['How to cite'].split('\n\n.. |', 1)    # pandoc puts the image definitions last: they stay
     page('scheme', 'The VET scheme', [s['_pre'], renumber(s['The method in brief']),
-                                      renumber(s['Code map']), renumber(s['How to cite'])],
+                                      renumber(s['Code map'])] + ['.. |' + x for x in c[1:]],
          'docs/vet_clean/SCHEME.md')
+    page('cite', 'How to cite', [body(c[0])], 'docs/vet_clean/SCHEME.md')
     w = md['WORKFLOW.md'].split('\n', 2)[2].lstrip('\n')      # its own title; numbers stripped
     page('code_layout', 'Code layout', [renumber(w)], 'docs/vet_clean/WORKFLOW.md')
     performance(code)
