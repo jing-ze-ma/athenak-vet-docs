@@ -76,6 +76,15 @@ half-range fluxes (outgoing and incoming parts of the flux) and the rays' own fl
 each face, which the face fluxes use in optically thin regions. Normally a step costs one ray
 sweep: the second stage uses an extrapolation of the closure in time.
 
+**Rotating rays.** A fixed set of directions leaves ray effects: light from a hot spot or a
+compact source travels only along the directions of the set, and the closure carries that
+pattern. On the cubed sphere the set is rotated every ``vet_gd_rotate_dt`` of physical time
+(``auto`` = 20 times the first time step), and the closure is an exponential moving average over
+the rotated sets (``vet_rotate_avg_ema``, 128), so the pattern averages out instead of being frozen
+into the solution. With ``vet_rotate_avg_ema_wb = true`` a static envelope keeps its closure and its
+equilibrium across a turn (section 2, well balance). Spherical-polar wedges use a fixed set
+(``vet_gd_rotate_dt = 0``, the default there); the RSG and HG runs rotate.
+
 **Staggered layout.** :math:`E` lives at cell centres; the radiation flux lives on the cell faces,
 one normal component per face. The face flux of a stage is a blend of
 
