@@ -9,45 +9,40 @@ Performance on 3-D wedges of stars
 
 16.8 million cells, 29,657 cycles, 4 MPI ranks on 4 NVIDIA H200 GPUs.
 
-   Draft: the row of M56 LBV is to be updated (the run is still going).
-
 Wall times of the star runs, one node of 4 H200
 -----------------------------------------------
 
-+------------+---------------+------------+------------+------------+------------+------------+
-| star       | mass and type | resolution | model time | **wall     | status     | seconds    |
-|            |               |            |            | time**     |            | per cycle, |
-|            |               |            |            |            |            | early /    |
-|            |               |            |            |            |            | late       |
-+============+===============+============+============+============+============+============+
-| M20 BSG    | 20 Msun blue  | 256 x 256  | 57.0 d     | **6.03 h** | complete   | 0.761 /    |
-|            | supergiant    | x 256      |            |            |            | 0.743      |
-|            |               | (16.8 M    |            |            |            |            |
-|            |               | cells)     |            |            |            |            |
-+------------+---------------+------------+------------+------------+------------+------------+
-| M35 MMS    | 35 Msun,      | 336 x 256  | 10 d       | **19.89    | complete   | 0.660 /    |
-|            | middle of the | x 256      |            | h**        |            | 0.962      |
-|            | main sequence | (22.0 M    |            |            |            |            |
-|            |               | cells)     |            |            |            |            |
-+------------+---------------+------------+------------+------------+------------+------------+
-| M35 ZAMS   | 35 Msun,      | 384 x 128  | 10 d       | **20.08    | complete   | 0.289 /    |
-|            | zero-age main | x 128 (6.3 |            | h**        |            | 0.296      |
-|            | sequence      | M cells)   |            |            |            |            |
-|            | (ZAMS)        |            |            |            |            |            |
-+------------+---------------+------------+------------+------------+------------+------------+
-| M56 LBV    | 56 Msun,      | 512 x 256  | 31.04 d    | **21.99    | complete   | 2.53 /     |
-| (radiative | luminous blue | x 512      |            | h**        |            | 3.09       |
-| IC)        | variable      | (67.1 M    |            |            |            |            |
-|            | (T9L6.2)      | cells)     |            |            |            |            |
-+------------+---------------+------------+------------+------------+------------+------------+
-| M56 LBV    | as M56 LBV    | 512 x 256  | 20.5 d so  | 15.29 h so | running    | 2.383 /    |
-|            | (radiative    | x 512      | far, of 31 | far        | when       | 3.088      |
-|            | IC),          | (67.1 M    | d          |            | written    |            |
-|            | mixing-length | cells)     |            |            |            |            |
-|            | start         |            |            |            |            |            |
-+------------+---------------+------------+------------+------------+------------+------------+
++-------------+---------------+-------------+------------+-------------+----------+-------------+
+| star        | mass and type | resolution  | model time | **wall      | status   | seconds per |
+|             |               |             |            | time**      |          | cycle,      |
+|             |               |             |            |             |          | early /     |
+|             |               |             |            |             |          | late        |
++=============+===============+=============+============+=============+==========+=============+
+| M20 BSG     | 20 Msun blue  | 256 x 256 x | 57.0 d     | **6.03 h**  | complete | 0.761 /     |
+|             | supergiant    | 256 (16.8 M |            |             |          | 0.743       |
+|             |               | cells)      |            |             |          |             |
++-------------+---------------+-------------+------------+-------------+----------+-------------+
+| M35 MMS     | 35 Msun,      | 336 x 256 x | 10 d       | **19.89 h** | complete | 0.660 /     |
+|             | middle of the | 256 (22.0 M |            |             |          | 0.962       |
+|             | main sequence | cells)      |            |             |          |             |
++-------------+---------------+-------------+------------+-------------+----------+-------------+
+| M35 ZAMS    | 35 Msun,      | 384 x 128 x | 10 d       | **20.08 h** | complete | 0.289 /     |
+|             | zero-age main | 128 (6.3 M  |            |             |          | 0.296       |
+|             | sequence      | cells)      |            |             |          |             |
+|             | (ZAMS)        |             |            |             |          |             |
++-------------+---------------+-------------+------------+-------------+----------+-------------+
+| M56 LBV     | 56 Msun,      | 512 x 256 x | 31.04 d    | **21.99 h** | complete | 2.53 / 3.09 |
+| (radiative  | luminous blue | 512 (67.1 M |            |             |          |             |
+| IC)         | variable      | cells)      |            |             |          |             |
+|             | (T9L6.2)      |             |            |             |          |             |
++-------------+---------------+-------------+------------+-------------+----------+-------------+
+| M56 LBV     | as M56 LBV    | 512 x 256 x | 31.04 d    | **23.64 h** | complete | 2.38 / 3.20 |
+|             | (radiative    | 512 (67.1 M |            |             |          |             |
+|             | IC),          | cells)      |            |             |          |             |
+|             | mixing-length |             |            |             |          |             |
+|             | start         |             |            |             |          |             |
++-------------+---------------+-------------+------------+-------------+----------+-------------+
 
-- M56 LBV was still running when this was written (read on 2026-11-25): its row is to be updated.
 - One node, so the node-hours equal the hours. The wall time is the time of the job steps,
   with the start-up and the final restart dump; the pause between two segments of a run (24 to
   30 s) is not counted.

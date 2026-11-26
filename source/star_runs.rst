@@ -37,7 +37,7 @@ the photosphere; this was not examined. The M56 LBV (radiative IC) map shows mos
    :width: 100%
 
    The five stars at their newest dumps: :math:`v_r` (top) and :math:`T_{\rm eff}` (bottom). M20 BSG at 57.0 d, M35 MMS at
-   10.0 d, M35 ZAMS at 10.0 d, M56 LBV (radiative IC) at 31.04 d, M56 LBV at 22.25 d. The wedges have different widths (see the axes), and
+   10.0 d, M35 ZAMS at 10.0 d, M56 LBV (radiative IC) at 31.04 d, M56 LBV at 31.04 d. The wedges have different widths (see the axes), and
    each panel has its own colour limits.
 
 Figures
@@ -80,8 +80,8 @@ Figures
    :alt: 2-D maps of the M56 LBV run
    :width: 100%
 
-   M56 LBV (adaptive mixing-length start) at 22.25 d: 67.1 million cells, **16.0 h** up to 21.5 d (one build; the run
-   continues). A partial-test run, not a validated prediction. :math:`v_r` at :math:`\tau_R = 2/3` in each
+   M56 LBV (adaptive mixing-length start) at its last dump, 31.04 d: 67.1 million cells, 31.04 d of model time in
+   **23.6 h** (one build, no restart). A partial-test run, not a validated prediction. :math:`v_r` at :math:`\tau_R = 2/3` in each
    column; slice from 0.62 to 1.12 :math:`R_{\rm ph,IC}` in the equatorial plane. Surface and envelope only; the
    velocity of the deep stable layer is not shown.
 
@@ -136,8 +136,8 @@ shown.
           poster="_static/star_runs/mov_t9mlt_poster.png" src="_static/star_runs/mov_t9mlt.mp4">
    </video>
 
-M56 LBV, 0 to 22.25 d (the run continues): all 179 dumps, 3 h apart, at 24 frames per second. **16.0 h** on one
-node up to 21.5 d. The colour limits of :math:`T_{\rm eff}` are 9.0 to 29.5 :math:`\times 10^3` K. A
+M56 LBV, 0 to 31.04 d: all 250 dumps, 3 h apart, at 24 frames per second. **23.6 h** on one
+node. The colour limits of :math:`T_{\rm eff}` are 9.0 to 29.5 :math:`\times 10^3` K. A
 partial-test run, not a validated prediction. Surface and envelope only; the velocity of the deep stable layer is not
 shown.
 
@@ -190,5 +190,5 @@ lighting.
           poster="_static/star_runs/mov3d_t9mlt_poster.png" src="_static/star_runs/mov3d_t9mlt.mp4">
    </video>
 
-M56 LBV. :math:`T_{\rm eff}` limits 9.0 to 29.5 :math:`\times 10^3` K. The cut faces start at 0.62 :math:`R_{\rm
+M56 LBV. The movie shows 0 to 31.04 d. :math:`T_{\rm eff}` limits 9.0 to 29.5 :math:`\times 10^3` K. The cut faces start at 0.62 :math:`R_{\rm
 ph,IC}`. The surface has softer lighting. A partial-test run, not a validated prediction.
