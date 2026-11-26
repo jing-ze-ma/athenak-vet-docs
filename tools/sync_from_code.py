@@ -272,7 +272,6 @@ def main(code):
          'history file: :doc:`outputs`, section 3. Worked examples with plots: :doc:`gallery`.')
 
     s = sections(fix(md['SCHEME.md'], [
-        ('(see its README for\nthe decks and the exact criteria)', '(see :doc:`tests` for\nthe decks and the exact criteria)'),
         ('(``tests/vet_clean/README.md``, "GPU builds")', '(:doc:`tests`, "GPU builds")'),
         ('section 2, Properties', ':doc:`properties`', 2),
         ('section 1, the method in brief', ':doc:`scheme`'),

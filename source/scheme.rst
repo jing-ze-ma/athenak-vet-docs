@@ -4,11 +4,10 @@
 The VET scheme
 ==============
 
-This page describes the grey radiation-hydrodynamics scheme selected by
-``<rad_vet>/transport = implicit`` with ``scheme = clean`` (the default with implicit transport).
-It stays at the level of the method and its properties. The input keys are in
-:doc:`keys`, and the tests named below are in ``tests/vet_clean/`` (see :doc:`tests` for
-the decks and the exact criteria).
+This page describes the default grey radiation scheme for implicit transport (keys:
+:doc:`Keys <keys>`). It stays at the level of the method and its properties. The tests named below
+are those of the test suite (see :doc:`Tests <tests>` for the decks and the
+exact criteria).
 
 The method in brief
 -------------------
@@ -41,7 +40,7 @@ Features
 - **Iterations per step.** A step has two implicit stages. In the four star runs a stage takes
   2.2-4.1 Newton passes on average (mostly 2 to 5), each one linear solve of 5.5-7.4 BiCGStab
   iterations on average, so 15-24 iterations per stage, plus one ray sweep per step. No step had
-  to be retried or redone (0 of 380,141 steps; from the runs' ``CLEAN cycle`` lines).
+  to be retried or redone (0 of 380,141 steps; from the solver's per-stage log lines).
 - **Conservation and positivity.** Gas + radiation energy and mass are conserved to round-off,
   :math:`L_z` exactly on the cubed sphere; linear momentum is not conserved in general. Second order
   with local first-order fallbacks where positivity needs them, all counted (Positivity, below;
@@ -88,7 +87,7 @@ very slowly where scattering dominates): it is taken from the moment solution, :
 of the stage (``vet_scatter_j = relaxed``). The rays then give only the shape of the field, :math:`\mathsf
 D = \mathsf K/J`, which depends weakly on :math:`S`; the moment system does the work of the iteration,
 as in a variable-Eddington-tensor or synthetic-acceleration method. The steady start
-(``clean_init = steady``) repeats rays and moments to convergence; in a run the closure is updated
+repeats rays and moments to convergence; in a run the closure is updated
 once per step.
 
 **Rotating rays.** A fixed set of directions leaves ray effects: light from a hot spot or a
@@ -119,7 +118,7 @@ exchange is stiff.
 **Implicit stage solve.** In each stage the face momentum equation is eliminated face by face,
 which leaves a scalar system for :math:`E`. It is solved by Newton passes: each pass is a
 right-preconditioned BiCGStab with a line-relaxation multigrid preconditioner, followed by an
-exact per-cell root for the gas temperature (any EOS; with ``clean_gas_secant = max_stage2``
+exact per-cell root for the gas temperature (any EOS; with the secant root option (:doc:`Keys <keys>`)
 the secant chord replaces the tangent only where it is better by more than a derived round-off
 bound, 16 eps of the terms of :math:`e(T) - e(T_p)`), then a line solve that recovers the face
 fluxes. Convergence is measured in each cell's own energy budget of the stage, with the
@@ -145,14 +144,14 @@ to a first-order positive form only locally, where it is needed; every such even
 
 In the four finished star runs no stage fell back and no step was redone or retried; the only
 backward-Euler step of each run was the first step of its fresh start. Every suite deck runs
-with no floor raise, no energy created and no ``CLEAN WARNING`` (except ``floor_pay``, which raises
+with no floor raise, no energy created and no solver warning (except ``floor_pay``, which raises
 the gas temperature on purpose and pays it from the radiation).
 
 **Well-balanced formulation.** For a hydrostatic envelope in radiative equilibrium, the
 problem generator supplies the reference radiative acceleration of the initial state; the
 well-balanced hydro already holds it, and the radiation hands the gas only the residual
 force. The face flux equations are written as deviations from the rays' own steady state,
-and a steady start (``clean_init = steady``) relaxes the initial radiation to the scheme's own
+and a steady start relaxes the initial radiation to the scheme's own
 discrete steady solution in the given gas.
 
 Code map
