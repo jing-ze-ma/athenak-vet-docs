@@ -14,11 +14,7 @@ The method in brief
 
 One time step: the hydrodynamics is explicit, the radiation and its exchange with the gas are implicit in two
 stages. A step whose stage fails is done again with one implicit solve, and a step that still fails is taken
-again at a smaller size.
-
-|One time step|
-
-The radiation solve, the closure and the files are drawn on :doc:`code_layout` (code layout).
+again at a smaller size. The step is drawn under Code map (section 3).
 
 Features
 ~~~~~~~~
@@ -184,6 +180,8 @@ discrete steady solution in the given gas.
 
 Code map
 --------
+
+|One time step|
 
 :doc:`code_layout`: flow charts of a step, a stage, the closure and the linear solve, and the list of files.
 Start in ``src/rad_vet/rad_vet_tasks.cpp``. Outside ``src/rad_vet``: ``driver/driver.cpp`` (the step), ``driver/dt_retry.cpp``
