@@ -13,8 +13,8 @@ the decks and the exact criteria).
 The method in brief
 -------------------
 
-Why this scheme
-~~~~~~~~~~~~~~~
+Features
+~~~~~~~~
 
 - **Second order in time and space.** Measured orders of the finest pair: 1.8 in time, 1.9-2.3
   for cells and time step refined together, and 2 also where the gas-radiation exchange is stiff
