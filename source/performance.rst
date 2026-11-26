@@ -9,7 +9,7 @@ Performance on 3-D wedges of stars
 
 16.8 million cells, 29,657 cycles, 4 MPI ranks on 4 NVIDIA H200 GPUs.
 
-   Draft: the rows of M56 LBV (radiative IC) and M56 LBV are to be updated.
+   Draft: the row of M56 LBV is to be updated (the run is still going).
 
 Wall times of the star runs, one node of 4 H200
 -----------------------------------------------
@@ -35,9 +35,9 @@ Wall times of the star runs, one node of 4 H200
 |            | sequence      | M cells)   |            |            |            |            |
 |            | (ZAMS)        |            |            |            |            |            |
 +------------+---------------+------------+------------+------------+------------+------------+
-| M56 LBV    | 56 Msun,      | 512 x 256  | 25.9 d so  | 18.20 h so | running    | 2.529 /    |
-| (radiative | luminous blue | x 512      | far, of 31 | far        | when       | 2.728      |
-| IC)        | variable      | (67.1 M    | d          |            | written    |            |
+| M56 LBV    | 56 Msun,      | 512 x 256  | 31.04 d    | **21.99    | complete   | 2.53 /     |
+| (radiative | luminous blue | x 512      |            | h**        |            | 3.09       |
+| IC)        | variable      | (67.1 M    |            |            |            |            |
 |            | (T9L6.2)      | cells)     |            |            |            |            |
 +------------+---------------+------------+------------+------------+------------+------------+
 | M56 LBV    | as M56 LBV    | 512 x 256  | 20.5 d so  | 15.29 h so | running    | 2.383 /    |
@@ -47,8 +47,7 @@ Wall times of the star runs, one node of 4 H200
 |            | start         |            |            |            |            |            |
 +------------+---------------+------------+------------+------------+------------+------------+
 
-- M56 LBV (radiative IC) and M56 LBV were still running when this was written (read on 2026-11-25): their rows are
-  to be updated.
+- M56 LBV was still running when this was written (read on 2026-11-25): its row is to be updated.
 - One node, so the node-hours equal the hours. The wall time is the time of the job steps,
   with the start-up and the final restart dump; the pause between two segments of a run (24 to
   30 s) is not counted.
@@ -85,11 +84,11 @@ Speed-up over Athena++ on CPUs
 |            | sequence   |              | 72,000   |                                               |              |            |              |
 |            | (ZAMS)     |              | node-h   |                                               |              |            |              |
 +------------+------------+--------------+----------+-----------------------------------------------+--------------+------------+--------------+
-| M56 LBV    | 56 Msun,   | 31 d (745 h) | 60       | `Jiang et al.                                 | about 22 h   | not stated | **about      |
-| (radiative | luminous   |              | million  | (2018) <https://arxiv.org/abs/1809.10187>`__, | projected,   |            | 57,000 x     |
-| IC)        | blue       |              | CPU      | model T9L6.2                                  | one node     |            | faster**     |
-|            | variable   |              | hours on |                                               | (the run is  |            |              |
-|            | (T9L6.2)   |              | Mira for |                                               | still going) |            |              |
+| M56 LBV    | 56 Msun,   | 31 d (745 h) | 60       | `Jiang et al.                                 | 21.99 h =    | not stated | **about      |
+| (radiative | luminous   |              | million  | (2018) <https://arxiv.org/abs/1809.10187>`__, | 21.99 node-h |            | 56,800 x     |
+| IC)        | blue       |              | CPU      | model T9L6.2                                  |              |            | faster**     |
+|            | variable   |              | hours on |                                               |              |            |              |
+|            | (T9L6.2)   |              | Mira for |                                               |              |            |              |
 |            |            |              | three    |                                               |              |            |              |
 |            |            |              | stars;   |                                               |              |            |              |
 |            |            |              | an equal |                                               |              |            |              |
@@ -121,7 +120,7 @@ Sources of the Athena++ numbers:
 - M56 LBV (radiative IC): Jiang et al. (2018) state 60 million CPU hours on Mira (INCITE award at Argonne), besides NASA and NERSC
   resources, for their three simulations (T9L6.2, T19L6.4, T19L6) together. We assume an equal third, 20 million
   CPU hours, for T9L6.2 and leave out the NASA and NERSC share; Mira nodes have 16 cores. Their T9L6.2 run reaches
-  about 745 h (Fig. 4), like our 31 d. The wall time is not stated. Our 22 h is projected. M56 LBV: no published cost found.
+  about 745 h (Fig. 4), like our 31 d. The wall time is not stated. Our run took 21.99 h for 31.04 d. M56 LBV: no published cost found.
 
 This is not like for like:
 

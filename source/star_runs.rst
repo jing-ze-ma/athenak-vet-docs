@@ -37,7 +37,7 @@ the photosphere; this was not examined. The M56 LBV (radiative IC) map shows mos
    :width: 100%
 
    The five stars at their newest dumps: :math:`v_r` (top) and :math:`T_{\rm eff}` (bottom). M20 BSG at 57.0 d, M35 MMS at
-   10.0 d, M35 ZAMS at 10.0 d, M56 LBV (radiative IC) at 27.75 d, M56 LBV at 22.25 d. The wedges have different widths (see the axes), and
+   10.0 d, M35 ZAMS at 10.0 d, M56 LBV (radiative IC) at 31.04 d, M56 LBV at 22.25 d. The wedges have different widths (see the axes), and
    each panel has its own colour limits.
 
 Figures
@@ -71,7 +71,8 @@ Figures
    :alt: 2-D maps of the M56 LBV (radiative IC) run
    :width: 100%
 
-   M56 LBV (radiative IC) at 27.75 d: 67.1 million cells, **18.6 h** up to 26.5 d (two builds, one restart; the run continues).
+   M56 LBV (radiative IC) at its last dump, 31.04 d: 67.1 million cells, 31.04 d of model time in **22.0 h** (two builds,
+   one restart).
    :math:`v_r` at :math:`\tau_R = 2/3` in each column; slice from 0.42 to 7.0 :math:`R_{\rm ph,IC}` in the
    equatorial plane. Surface and envelope only; the velocity of the deep stable layer is not shown.
 
@@ -88,7 +89,7 @@ Movies
 ------
 
 The same three maps in time, from the start of the run to the day given, every dump, with fixed colour limits. No
-sound. Press play; the M20 BSG, M56 LBV (radiative IC) and M56 LBV movies last 10 s, the M35 movies 40 s.
+sound. Press play; the M20 BSG, M56 LBV (radiative IC) and M56 LBV movies last about 10 s, the M35 movies 40 s.
 
 .. raw:: html
 
@@ -124,8 +125,8 @@ h** on one node. Frames interpolated: cross-faded between dumps.
           poster="_static/star_runs/mov_t9l62_poster.png" src="_static/star_runs/mov_t9l62.mp4">
    </video>
 
-M56 LBV (radiative IC), 0 to 27.75 d (the run continues): all 223 dumps, 3 h apart, at 24 frames per second. **18.6 h** on one
-node up to 26.5 d. The colour limits of :math:`T_{\rm eff}` are 4.9 to 10.0 :math:`\times 10^3` K, so the
+M56 LBV (radiative IC), 0 to 31.04 d: all 250 dumps, 3 h apart, at 24 frames per second. **22.0 h** on one
+node. The colour limits of :math:`T_{\rm eff}` are 4.9 to 10.0 :math:`\times 10^3` K, so the
 first, hotter days are saturated. Surface and envelope only; the velocity of the deep stable layer is not
 shown.
 
@@ -179,7 +180,7 @@ M35 ZAMS. Frames interpolated: cross-faded between dumps. The cut faces start at
           poster="_static/star_runs/mov3d_t9l62_poster.png" src="_static/star_runs/mov3d_t9l62.mp4">
    </video>
 
-M56 LBV (radiative IC). The movie starts at 9.5 d, and its first five days are saturated (:math:`T_{\rm eff}` limits 4.9 to
+M56 LBV (radiative IC). The movie shows 9.5 to 31.04 d, and its first five days are saturated (:math:`T_{\rm eff}` limits 4.9 to
 10.0 :math:`\times 10^3` K). The cut faces start at 0.42 :math:`R_{\rm ph,IC}`. The surface has softer
 lighting.
 
