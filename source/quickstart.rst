@@ -24,7 +24,7 @@ It must print a ``PASS`` line with the drifts ``dE``, ``dM``, ``dLz`` at round-o
    PASS conservation_sp       6 s  dE 1e-15 dM 6.74e-16 dLz 1.47e-16 dLz_gr 5.92e-07
    1 passed, 0 failed, 14 s
 
-Then run the quick suite, 23 tests (50 s on 48 cores). By default the suite runs one test
+Then run the quick suite, 25 tests (50 s on 48 cores). By default the suite runs one test
 per 4 cores of the machine; on a shared login node cap it with ``--jobs`` (12 jobs x 4
 threads = 48 cores):
 
@@ -32,8 +32,8 @@ threads = 48 cores):
 
    tests/vet_clean/run_tests.sh --exe build_tests/src/athena --quick --jobs 12
 
-It ends with ``23 passed, 0 failed``. Each line reads ``PASS|FAIL  test  wall-time  measured values``; a ``FAIL`` line names the failed criterion after ``<-`` and keeps the run directory in
-``vet_clean_runs/<test>/`` (its ``run.log`` has the details). The full suite (55 tests, 5 min on
+It ends with ``24 passed, 0 failed``. Each line reads ``PASS|FAIL  test  wall-time  measured values``; a ``FAIL`` line names the failed criterion after ``<-`` and keeps the run directory in
+``vet_clean_runs/<test>/`` (its ``run.log`` has the details). The full suite (60 tests, 5 min on
 48 cores) runs without ``--quick``. What each test checks: :doc:`tests`.
 
 On a GPU, run the same suite with the GPU ``build_tests`` binary, one test at a time (2 min

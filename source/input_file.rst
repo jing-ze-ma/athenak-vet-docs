@@ -32,10 +32,10 @@ parameters are put together in this order (``main.cpp``):
 
 1. the input block **stored in the restart file**;
 2. the ``-i`` deck, if given: every key it names replaces the stored value;
-3. the command line: every ``block/key=value`` replaces the value so far. On a restart a key
-   that is not in the stored block is added (the code prints a ``### NOTE``). On a **fresh**
-   start a command-line key that is not in the deck is FATAL (typo guard), so put every key
-   of a fresh run in the deck.
+3. the command line: every ``block/key=value`` replaces the value so far. A key that
+   is not in the deck (or the stored block) is added, and the code prints a ``### NOTE``. On a
+   **fresh** start such a key that the code never reads (a typo) stops the run after the
+   first cycle (FATAL); a block that does not exist stops it at once.
 
 **On a restart, a key that is not given in the deck or on the command line takes the value
 stored in the restart file, not the code default.** If the file does not hold the key either,
@@ -45,8 +45,8 @@ a key that corrects the scheme takes the fresh default, with a ``### NOTE: ... t
 ``time2_gtime_pos`` or ``mlt_src_time`` prints a ``### NOTE`` with the name to switch; the other keys take their restart default. For a
 file of an older scheme use ``restart_old_files.txt`` (below).
 
-Example: a restart file had stored ``time2_k1_stiff = 1.0`` from an earlier deck. The code
-default is 0 (off), but the restart ran with 1.0, because the new deck did not name the key.
+Example: a restart file had stored ``clean_maxit = 800`` from an earlier deck. The fresh default
+is 200, but the restart runs with 800 when the new deck does not name the key.
 
 Rules:
 
@@ -86,19 +86,21 @@ on the star); use it as the ``-i`` file:
 | ``clean_layout``, ``clean_rays``    | ``sc``                       | were removed: FATAL without  |
 |                                     |                              | them                         |
 +-------------------------------------+------------------------------+------------------------------+
-| ``<rad_vet>/time2_k1_stiff``,       | ``0``                        | older files store 1.0, 0.1   |
-| ``time2_k1_redist``                 |                              |                              |
+| ``<rad_vet>/time2_k1_stiff``,       | ``0``                        | removed keys; older files    |
+| ``time2_k1_redist``                 |                              | store 1.0, 0.1 (FATAL)       |
 +-------------------------------------+------------------------------+------------------------------+
-| ``<rad_vet>/clean_stag_fwb_stage``, | ``false``                    | early files of this scheme   |
-| ``clean_stag_fwb_t2``               |                              | store true                   |
+| ``<rad_vet>/clean_stag_fwb_stage``, | ``false``                    | removed keys; early files of |
+| ``clean_stag_fwb_t2``               |                              | this scheme store true       |
+|                                     |                              | (FATAL)                      |
 +-------------------------------------+------------------------------+------------------------------+
-| ``<rad_vet>/clean_w_fse_tau``,      | ``true``                     | early files may store false  |
-| ``time2_gtime_mom``                 |                              |                              |
+| ``<rad_vet>/clean_w_fse_tau``,      | ``true``                     | removed keys; early files    |
+| ``time2_gtime_mom``                 |                              | may store false (FATAL)      |
 +-------------------------------------+------------------------------+------------------------------+
 | ``<rad_vet>/clean_stag_mg_levels``  | ``2``                        | early files may store 4      |
 +-------------------------------------+------------------------------+------------------------------+
-| ``<rad_vet>/clean_wb_exch_local``,  | ``true``, ``200``, ``rb``    | not stored, production is    |
-| ``clean_maxit``, ``clean_pc_sweep`` |                              | not the default              |
+| ``<rad_vet>/clean_maxit``,          | ``200``, ``rb``              | not stored; a restart keeps  |
+| ``clean_pc_sweep``                  |                              | 800, and ``sym`` is the      |
+|                                     |                              | default                      |
 +-------------------------------------+------------------------------+------------------------------+
 | ``<rad_vet>/vet_gd_wall_interp``,   | ``true``                     | spherical-polar wedges with  |
 | ``vet_gd_wall_sym``,                |                              | fixed rays (commented out in |
@@ -109,23 +111,13 @@ on the star); use it as the ``-i`` file:
 |                                     |                              | false (HG, RSG, R136 store   |
 |                                     |                              | true)                        |
 +-------------------------------------+------------------------------+------------------------------+
-| ``<hydro>/fofc_retest``,            | ``true``, ``rad_column``,    | not stored, restart default  |
-| ``floor_pay``, ``floor_pay_skip``,  | ``true``, ``true``,          | off                          |
-| ``dfloor_flux_limit``,              | ``true``, ``true``           |                              |
-| ``rad_signal_speed_diff``,          |                              |                              |
-| ``rad_signal_speed_phase``          |                              |                              |
-+-------------------------------------+------------------------------+------------------------------+
-| ``<hydro>/dt_floor_courant``        | ``0.6``                      | commented out: FATAL without |
-|                                     |                              | ``floorcap_rho`` (HG, RSG    |
-|                                     |                              | files hold none)             |
-+-------------------------------------+------------------------------+------------------------------+
 | ``<hydro>/merge_lat_mom``,          | ``radial``, ``exchange``     | commented out, a choice of   |
 | ``merge_lat_blockend``              |                              | physics: a stored ``rigid``  |
 |                                     |                              | (RSG) or ``flat`` stays      |
 |                                     |                              | (NOTE)                       |
 +-------------------------------------+------------------------------+------------------------------+
 | ``<rad_vet>/vet_rotate_avg_ema``,   | ``128``, ``linear``,         | commented out: stars with    |
-| ``_change_form``, ``_wb``,          | ``true``, ``live``           | rotating rays (HG, RSG, R136 |
+| ``_change_form``,                   | ``live``                     | rotating rays (HG, RSG, R136 |
 | ``clean_rot_ring``                  |                              | continuations)               |
 +-------------------------------------+------------------------------+------------------------------+
 | ``<problem>/mlt_src_time``          | ``stage``                    | files of the release         |

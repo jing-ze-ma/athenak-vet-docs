@@ -70,7 +70,7 @@ takes exactly the energy the radiation gives up in each cell, including the kine
 the radiation force, and any later correction to :math:`E` is moved to the gas with the opposite
 sign. The positivity limiters scale a face's flux on both sides at once. The density,
 pressure and radiation floors take the energy they need from the radiation of the same cell
-or its radial column (``<hydro>/floor_pay = rad_column``, ``implicit_pos_floor_cons``).
+or its radial column (``<hydro>/floor_pay = rad_column``, ``implicit_pos_floor``).
 With ``floor_pay_skip = true`` (production) the energy changed by the density floor and the
 velocity ceiling is paid as well. The initial conversion's floors are paid before the t = 0 output.
 With ``<hydro>/floor_from_ekin`` (general EOS) a fast cell pays its floor deficit from its own
@@ -141,9 +141,8 @@ test output).
   removes momentum the gas does not take, and its :math:`L_z` goes into the ledger. On the test shell
   this happens on the first cycles of a fresh start and amounts to about 6e-7 of the gas
   :math:`L_z`; the ledger is constant afterwards.
-  With ``clean_stag_fcone_gas = true``, or with ``clean_stag_fcone_lz`` and ``clean_lz_spin``
-  (test ``conservation_lz``), the gas takes the cut's :math:`L_z`, which is then exact without a
-  ledger (1e-15); neither is the production setting.
+  With ``clean_stag_fcone_lz`` and ``clean_lz_spin`` (test ``conservation_lz``) the gas takes the
+  cut's :math:`L_z`, which is then exact without a ledger (1e-15); not the production setting.
 - Cubed sphere: the ledger stays at round-off (1e-17), so gas + radiation :math:`L_z` is conserved
   without one. Here the radiation's :math:`L_z` is that of the face momenta; the larger ``dLz_gr``
   the test prints (6e-5) uses the cell-centred flux vector and is a diagnostic mismatch, not
@@ -164,10 +163,8 @@ change of the radiation momentum of that face, shared between the two cells, and
 radiation stress is in flux form. Gravity and the open boundaries change the momentum as
 physical sources. Three things change gas + radiation momentum without being given to the gas:
 
-- the realisability cut of the face flux (``clean_stag_fcone``)
-  unless ``clean_stag_fcone_gas = true``, which makes the cut momentum-neutral;
-- the well-balancing residual of ``clean_stag_fwb`` (on a uniform Cartesian mesh
-  ``clean_stag_fwb_cart = true`` removes its line mean: no net momentum);
+- the realisability cut of the face flux (``clean_stag_fcone``);
+- the residual of the well-balanced face rows;
 - the floor-gas momentum removal (``floorcap``, ``dfloor_keep_velocity``, the velocity ceiling).
 
 Their sizes are printed (``CLEAN FCONE``, ``CLEAN FWB``, the ``floorcap`` line; what the primitive
@@ -205,7 +202,7 @@ described in :doc:`scheme`, under **Positivity**.
   or its column and is counted. The cone limit keeps :math:`|\mathbf F|\le cE`.
 - **Gas internal energy** is not positive by construction. A step that would make it
   negative is rejected and repeated (backward Euler, then a smaller dt), or the missing energy
-  is taken from the radiation of the same cell (``implicit_pos_gas``, energy-conserving).
+  is taken from the radiation of the same cell or its radial column (energy-conserving).
 
 All such events are counted in the end-of-run ``vet-positivity`` line. Test: every suite deck
 runs with no floor raise, no energy created and no ``CLEAN WARNING`` (``floor_pay`` raises the gas
@@ -231,7 +228,7 @@ EMA ring takes up the pattern change of a turn in its offsets (the boundary's sa
 Delta, weight a = a_ch alone, a_ch the change test of one set at two times): a set change
 then moves the closure only where the state moved, so a static state keeps its closure, its
 force and its equilibrium for any turn and cross-fade weight. On the cubed sphere the ring
-also carries the cells' face half ranges (``CleanCellHalf``). The K-set
+also carries the cells' face half ranges. The K-set
 window (``vet_rotate_avg`` without the EMA) has no such form: its window changes the closure of
 a static state at every turn.
 
@@ -583,10 +580,17 @@ following. The properties of this section are not verified there.
 | \|B|^2/2 out of the gas energy)     | tested on small boxes and    |                              |
 |                                     | shells of the three          |                              |
 |                                     | geometries with Ohmic and    |                              |
-|                                     | ambipolar diffusion          |                              |
+|                                     | ambipolar diffusion, ideal   |                              |
+|                                     | and general EOS              |                              |
 |                                     | (``mhd_vet``,                |                              |
-|                                     | ``mhd_equil``), not on a     |                              |
-|                                     | star and not with            |                              |
+|                                     | ``mhd_geneos``,              |                              |
+|                                     | ``mhd_equil``), linear waves |                              |
+|                                     | (``mhd_radwave``) and        |                              |
+|                                     | well-balanced envelopes      |                              |
+|                                     | (``mhd_wb``: a field's own J |                              |
+|                                     | x B truncation is not        |                              |
+|                                     | withheld), not on a star and |                              |
+|                                     | not with                     |                              |
 |                                     | super-time-stepping;         |                              |
 |                                     | ``sdirk2``, the tableau of   |                              |
 |                                     | the star decks, is FATAL     |                              |

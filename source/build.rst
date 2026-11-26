@@ -150,8 +150,8 @@ test suite on a GPU).
 Build time
 ----------
 
-The longest translation units are ``rad_vet_vetgd.cpp`` (about 12 min with nvcc, mostly one
-``ptxas`` process), then ``rad_vet_init.cpp`` and ``hydro_fluxes.cpp``. With Ninja (``-G Ninja``) and
+The longest translation units are ``rays/sc_sph_sweep.cpp`` (about 12 min with nvcc, mostly one
+``ptxas`` process), then ``rad_vet_params_implicit.cpp`` and ``hydro_fluxes.cpp``. With Ninja (``-G Ninja``) and
 ``ccache`` (``-D CMAKE_CXX_COMPILER_LAUNCHER=ccache``), a rebuild after a one-file change takes
 1-2 min on A100 and well under a minute on CPU. A cold CPU build takes 1.5 min on 72 cores.
 

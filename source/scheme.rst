@@ -12,6 +12,14 @@ exact criteria).
 The method in brief
 -------------------
 
+One time step: the hydrodynamics is explicit, the radiation and its exchange with the gas are implicit in two
+stages. A step whose stage fails is done again with one implicit solve, and a step that still fails is taken
+again at a smaller size.
+
+|One time step|
+
+The radiation solve, the closure and the files are drawn on :doc:`code_layout` (code layout).
+
 Features
 ~~~~~~~~
 
@@ -138,7 +146,7 @@ exchange is stiff.
 **Implicit stage solve.** In each stage the face momentum equation is eliminated face by face,
 which leaves a scalar system for :math:`E`. It is solved by Newton passes: each pass is a
 right-preconditioned BiCGStab with a line-relaxation multigrid preconditioner, followed by an
-exact per-cell root for the gas temperature (any EOS; with the secant root option (:doc:`Keys <keys>`)
+exact per-cell root for the gas temperature (any EOS; in the stage-2 solves
 the secant chord replaces the tangent only where it is better by more than a derived round-off
 bound, 16 eps of the terms of :math:`e(T) - e(T_p)`), then a line solve that recovers the face
 fluxes. Convergence is measured in each cell's own energy budget of the stage, with the
@@ -160,7 +168,7 @@ to a first-order positive form only locally, where it is needed; every such even
 - time: a failed implicit stage is redone with backward Euler (first order, L-stable), and a
   step that still fails is taken again with a smaller dt (``time/dt_retry``);
 - last: floors, which take their energy from the cell's gas or radiation (``implicit_pos_floor``,
-  ``implicit_pos_gas``, ``hydro/floor_pay = rad_column``) and are counted.
+  the gas positivity rule, ``hydro/floor_pay = rad_column``) and are counted.
 
 In the four finished star runs no stage fell back and no step was redone or retried; the only
 backward-Euler step of each run was the first step of its fresh start. Every suite deck runs
@@ -177,38 +185,10 @@ discrete steady solution in the given gas.
 Code map
 --------
 
-Paths relative to ``src/``.
-
-+--------------------------------------+------------------------------------------------------+
-| part                                 | files                                                |
-+======================================+======================================================+
-| key parsing, defaults, FATAL checks  | ``rad_vet/rad_vet.cpp``,                             |
-|                                      | ``rad_vet/rad_vet_clean.cpp`` (``CleanPreflight``,   |
-|                                      | ``CleanInit``)                                       |
-+--------------------------------------+------------------------------------------------------+
-| stage solve, face fluxes, write-back | ``rad_vet/rad_vet_clean.cpp``,                       |
-|                                      | ``rad_vet/rad_vet_clean.hpp`` (``CleanSolve``,       |
-|                                      | ``CleanFaceFlux``, ``CleanWriteBack``)               |
-+--------------------------------------+------------------------------------------------------+
-| linear solver and preconditioner     | ``rad_vet/rad_vet_clean_solver.cpp``                 |
-|                                      | (``CleanBiCGStab``, ``CleanStagVCycle``)             |
-+--------------------------------------+------------------------------------------------------+
-| closure from the rays                | ``rad_vet/rad_vet_clean_closure.cpp``                |
-+--------------------------------------+------------------------------------------------------+
-| ray sweeps and direction sets        | ``rad_vet/rad_vet_vetgd.cpp`` (spherical polar),     |
-|                                      | ``rad_vet/rad_vet_vetgd_cs.cpp`` (cubed sphere),     |
-|                                      | ``rad_vet/rad_vet_vet.cpp`` (Cartesian)              |
-+--------------------------------------+------------------------------------------------------+
-| IMEX stages, restart state           | ``rad_vet/rad_vet_time2.cpp``,                       |
-|                                      | ``utils/imex_sdirk2.hpp``                            |
-+--------------------------------------+------------------------------------------------------+
-| task lists                           | ``rad_vet/rad_vet_tasks.cpp``, ``driver/driver.cpp`` |
-+--------------------------------------+------------------------------------------------------+
-| dt retry checkpoint                  | ``driver/dt_retry.cpp``                              |
-+--------------------------------------+------------------------------------------------------+
-| layout-invariant sums                | ``utils/repro_sum.hpp``,                             |
-|                                      | ``rad_vet/rad_vet_clean_solver.cpp``                 |
-+--------------------------------------+------------------------------------------------------+
+:doc:`code_layout`: flow charts of a step, a stage, the closure and the linear solve, and the list of files.
+Start in ``src/rad_vet/rad_vet_tasks.cpp``. Outside ``src/rad_vet``: ``driver/driver.cpp`` (the step), ``driver/dt_retry.cpp``
+(checkpoint), ``utils/imex_sdirk2.hpp`` (tableaux), ``utils/repro_sum.hpp`` (layout-invariant sums),
+``bvals/physics/rad_vet_bcs.cpp``.
 
 How to cite
 -----------
@@ -225,3 +205,5 @@ How to cite
   characteristics); Krumholz et al. (2007), ApJ 667, 626 (mixed-frame sources); Alexander
   (1977), SIAM J. Numer. Anal. 14, 1006 (SDIRK2); Zalesak (1979), J. Comput. Phys. 31, 335
   (flux-corrected transport).
+
+.. |One time step| image:: figures/flow/step.svg

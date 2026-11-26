@@ -10,155 +10,155 @@ The keys a user sets, by topic. How keys combine on a restart:
 Scheme selection
 ----------------
 
-+----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
-| key                        | meaning                         | default               | production        | read in                 |
-+============================+=================================+=======================+===================+=========================+
-| ``rad_vet/transport``      | Radiation transport; the        | ``implicit`` on a     | all: ``implicit`` | ``rad_vet/rad_vet.cpp`` |
-|                            | scheme needs ``implicit``.      | fresh run with a      |                   | (constructor)           |
-|                            |                                 | ``<rad_vet>`` block   |                   |                         |
-+----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
-| ``rad_vet/scheme``         | Radiation solver. Only          | ``clean`` with        | all: ``clean``    | ``rad_vet/rad_vet.cpp`` |
-|                            | ``clean`` exists; any other     | implicit transport    |                   | (constructor)           |
-|                            | value is FATAL.                 |                       |                   |                         |
-+----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
-| ``rad_vet/closure``        | Closure. ``vet_col`` with       | ``vet_col`` with      | all: ``vet_col``  | ``rad_vet/rad_vet.cpp`` |
-|                            | ``vet_gd = true``: variable     | ``vet_gd`` on a fresh |                   | (constructor)           |
-|                            | Eddington tensor from the       | sp/cs run; ``m1``     |                   |                         |
-|                            | global ray sweep (required on   | otherwise             |                   |                         |
-|                            | spherical polar and the cubed   |                       |                   |                         |
-|                            | sphere).                        |                       |                   |                         |
-+----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
-| ``rad_vet/vet_gd``         | Use the global ray sweep for    | true with             | all: ``true``     | ``rad_vet/rad_vet.cpp`` |
-|                            | the Eddington tensor.           | ``closure = vet_col`` |                   | (constructor)           |
-|                            |                                 | on a fresh sp/cs run  |                   |                         |
-+----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
-| ``rad_vet/vet_gd_replace`` | The global sweep replaces the   | true with ``vet_gd``, | all: ``true``     | ``rad_vet/rad_vet.cpp`` |
-|                            | per-column sweep.               | also on a restart     |                   | (constructor)           |
-|                            |                                 | whose file lacks it   |                   |                         |
-|                            |                                 | (NOTE)                |                   |                         |
-+----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
-| ``rad_vet/clean_closure``  | How the closure follows the     | ``extrap1``           | all: ``extrap1``  | ``rad_vet/rad_vet.cpp`` |
-|                            | solution in time: ``extrap1``   |                       |                   | (constructor)           |
-|                            | (one ray sweep per step;        |                       |                   |                         |
-|                            | recommended), ``iterate``,      |                       |                   |                         |
-|                            | ``predict``, ``eddington`` (D = |                       |                   |                         |
-|                            | I/3, no rays, with or without   |                       |                   |                         |
-|                            | ``vet_gd`` (without:            |                       |                   |                         |
-|                            | ``clean_consistency = false``); |                       |                   |                         |
-|                            | for tests).                     |                       |                   |                         |
-+----------------------------+---------------------------------+-----------------------+-------------------+-------------------------+
++---------------------------+-----------------------+-----------------+-------------------+----------------------------------------+
+| key                       | meaning               | default         | production        | read in                                |
++===========================+=======================+=================+===================+========================================+
+| ``rad_vet/transport``     | Radiation transport;  | ``implicit`` on | all: ``implicit`` | ``rad_vet/rad_vet.cpp`` (constructor)  |
+|                           | the scheme needs      | a fresh run     |                   |                                        |
+|                           | ``implicit``.         | with a          |                   |                                        |
+|                           |                       | ``<rad_vet>``   |                   |                                        |
+|                           |                       | block           |                   |                                        |
++---------------------------+-----------------------+-----------------+-------------------+----------------------------------------+
+| ``rad_vet/closure``       | Only ``sc``: the      | ``sc``          | -                 | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                           | Eddington tensor from |                 |                   | (constructor)                          |
+|                           | the                   |                 |                   |                                        |
+|                           | short-characteristics |                 |                   |                                        |
+|                           | rays, on Cartesian    |                 |                   |                                        |
+|                           | meshes and by the     |                 |                   |                                        |
+|                           | global sweep on       |                 |                   |                                        |
+|                           | spherical polar and   |                 |                   |                                        |
+|                           | the cubed sphere. An  |                 |                   |                                        |
+|                           | older name is read as |                 |                   |                                        |
+|                           | ``sc`` (NOTE) only    |                 |                   |                                        |
+|                           | where it ran the same |                 |                   |                                        |
+|                           | closure: ``vet_sc``   |                 |                   |                                        |
+|                           | on a Cartesian mesh,  |                 |                   |                                        |
+|                           | ``vet_col`` with      |                 |                   |                                        |
+|                           | ``vet_gd = true`` on  |                 |                   |                                        |
+|                           | a curved one; every   |                 |                   |                                        |
+|                           | other value stops the |                 |                   |                                        |
+|                           | run.                  |                 |                   |                                        |
++---------------------------+-----------------------+-----------------+-------------------+----------------------------------------+
+| ``rad_vet/clean_closure`` | How the closure       | ``extrap1``     | all: ``extrap1``  | ``rad_vet/rad_vet_params.cpp``         |
+|                           | follows the solution  |                 |                   | (constructor)                          |
+|                           | in time: ``extrap1``  |                 |                   |                                        |
+|                           | (one ray sweep per    |                 |                   |                                        |
+|                           | step; recommended),   |                 |                   |                                        |
+|                           | ``iterate``,          |                 |                   |                                        |
+|                           | ``predict``,          |                 |                   |                                        |
+|                           | ``eddington`` (D =    |                 |                   |                                        |
+|                           | I/3, no rays; for     |                 |                   |                                        |
+|                           | tests).               |                 |                   |                                        |
++---------------------------+-----------------------+-----------------+-------------------+----------------------------------------+
 
 Rays
 ----
 
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| key                               | meaning                        | default            | production      | read in                       |
-+===================================+================================+====================+=================+===============================+
-| ``rad_vet/vet_gd_gl_nmu``,        | Product direction set: nmu     | 7, 18, ``true`` on | all: 7, 18,     | ``rad_vet/rad_vet.cpp``       |
-| ``vet_gd_gl_nphi``,               | Gauss-Legendre polar nodes     | a fresh 3-D        | ``true`` (126   | (constructor)                 |
-| ``vet_gd_gl_stagger``             | times nphi azimuths, alternate | spherical-polar    | directions)     |                               |
-|                                   | rings shifted with             | run; else          |                 |                               |
-|                                   | ``stagger``. 2 pi/nphi must    | ``vet_gd_geo = 3`` |                 |                               |
-|                                   | divide the phi extent (FATAL   | (3-D)              |                 |                               |
-|                                   | otherwise). Takes precedence   |                    |                 |                               |
-|                                   | over the other sets.           |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_gd_ls``             | Level-symmetric set LQ_N, N =  | 0 (off)            | not named       | ``rad_vet/rad_vet.cpp``       |
-|                                   | 6, 8, 10, 12 (N = 10: 120      |                    |                 | (constructor)                 |
-|                                   | directions). Naming it         |                    |                 |                               |
-|                                   | together with the product set  |                    |                 |                               |
-|                                   | (``vet_gd_gl_nmu`` > 0) is     |                    |                 |                               |
-|                                   | FATAL: name one set (0 = off). |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_gd_geo``            | Geodesic set, 10 n^2 + 2       | 3 when no set is   | not named       | ``rad_vet/rad_vet.cpp``       |
-|                                   | directions.                    | named              |                 | (constructor)                 |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_gd_rotate_dt``      | Rotate the direction set every | ``0`` on spherical | all: ``0``      | ``rad_vet/rad_vet.cpp``       |
-|                                   | dt_rot of physical time        | polar, else        |                 | (constructor)                 |
-|                                   | (``auto`` = 20 x the first dt; | ``auto`` (fresh    |                 |                               |
-|                                   | 0 = fixed set).                | runs that name no  |                 |                               |
-|                                   |                                | rotation key)      |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_rotate_avg``        | With rotation: average the     | 4 with a rotating  | all: ``0``      | ``rad_vet/rad_vet.cpp``       |
-|                                   | closure over the last K sets   | set on a fresh run |                 | (``RotAvgParse``)             |
-|                                   | (0 = off).                     |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_rotate_avg_ema``    | With rotation: the closure is  | 128 on a fresh run | RSG, HG:        | ``rad_vet/rad_vet.cpp``       |
-|                                   | an exponential moving average  | with a rotating    | ``128``; all:   | (``RotAvgParse``)             |
-|                                   | over the rotated sets, weight  | set; read only     | ``0`` (fixed    |                               |
-|                                   | 1/N per block (0 = off; then   | when named on a    | rays)           |                               |
-|                                   | ``vet_rotate_avg`` is the      | restart            |                 |                               |
-|                                   | K-set window).                 |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_rotate_avg_ema_wb`` | Well-balanced EMA: a block     | false (recorded)   | recommended on  | ``rad_vet/rad_vet.cpp``       |
-|                                   | boundary refreshes the average |                    | rotating decks: | (``RotAvgParse``,             |
-|                                   | only by the change test's      |                    | ``true``        | constructor)                  |
-|                                   | weight, so a set change keeps  |                    |                 |                               |
-|                                   | a static state's closure (and  |                    |                 |                               |
-|                                   | on the cubed sphere, with      |                    |                 |                               |
-|                                   | ``clean_rays = sc``, the ring  |                    |                 |                               |
-|                                   | carries the face half ranges). |                    |                 |                               |
-|                                   | Needs                          |                    |                 |                               |
-|                                   | ``vet_rotate_avg_ema >= 1``    |                    |                 |                               |
-|                                   | (FATAL otherwise); a restart   |                    |                 |                               |
-|                                   | must keep the value it was     |                    |                 |                               |
-|                                   | written with on the cubed      |                    |                 |                               |
-|                                   | sphere (FATAL otherwise).      |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/clean_rot_ring``        | Rotating ray ring of the       | read only when     | all: ``off``    | ``rad_vet/rad_vet.cpp``       |
-|                                   | scheme: ``off``, ``live``,     | named              |                 | (constructor)                 |
-|                                   | ``jump``.                      |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_scatter``,          | Split the opacity into         | true on a fresh    | all: ``true``,  | ``rad_vet/rad_vet.cpp``       |
-| ``vet_scatter_form``              | absorption and electron        | run with table     | ``ma``          | (constructor)                 |
-|                                   | scattering in the ray source   | opacity and the    |                 |                               |
-|                                   | (``ma``: Ma et al. 2026, eq.   | rays; ``ma``       |                 |                               |
-|                                   | 7). Changes only the rays'     |                    |                 |                               |
-|                                   | source function.               |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_scatter_kappa_e``   | Electron-scattering opacity:   | ``eos`` with a     | all: ``const``  | ``rad_vet/rad_vet.cpp``       |
-|                                   | ``const`` or ``eos`` (from the | tabulated EOS;     |                 | (constructor)                 |
-|                                   | EOS ionisation).               | ``const``          |                 |                               |
-|                                   |                                | otherwise          |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/clean_ray_cut_r``       | Adaptive ray depth cut on 3-D  | 0.01 where the cut | all: ``0.01``   | ``rad_vet/rad_vet.cpp``       |
-|                                   | sp/cs meshes with one          | applies            |                 | (constructor)                 |
-|                                   | MeshBlock along x1: below the  |                    |                 |                               |
-|                                   | cut the closure is the         |                    |                 |                               |
-|                                   | diffusion limit.               |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_gd_wall_sym``       | Phi-periodic wedges: centre    | false (recorded)   | all: ``true``   | ``rad_vet/rad_vet.cpp``       |
-|                                   | the set on the wedge,          |                    |                 | (constructor),                |
-|                                   | mirror-paired phi-wall maps,   |                    |                 | ``rad_vet/rad_vet_vetgd.cpp`` |
-|                                   | the seam face from both sides. |                    |                 |                               |
-|                                   | Needs                          |                    |                 |                               |
-|                                   | ``vet_gd_wall_interp = true``. |                    |                 |                               |
-|                                   | Identical results on wedges    |                    |                 |                               |
-|                                   | that are whole azimuthal       |                    |                 |                               |
-|                                   | periods; required on narrower  |                    |                 |                               |
-|                                   | ones. With a set turning about |                    |                 |                               |
-|                                   | z it needs a wedge of whole    |                    |                 |                               |
-|                                   | periods (exact wall maps for   |                    |                 |                               |
-|                                   | every turn) and does nothing;  |                    |                 |                               |
-|                                   | FATAL otherwise. No effect     |                    |                 |                               |
-|                                   | without a phi wall (cubed      |                    |                 |                               |
-|                                   | sphere, full 2 pi, 2-D).       |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
-| ``rad_vet/vet_gd_theta_seam_sym`` | Theta-periodic wedges: the     | false (recorded)   | all: ``true``   | ``rad_vet/rad_vet.cpp``       |
-|                                   | theta seam face's other side   |                    |                 | (constructor),                |
-|                                   | is its exact equatorial mirror |                    |                 | ``rad_vet/rad_vet_vetgd.cpp`` |
-|                                   | (both frames, as the phi       |                    |                 |                               |
-|                                   | seam). Required on a           |                    |                 |                               |
-|                                   | theta-periodic mesh (FATAL     |                    |                 |                               |
-|                                   | otherwise); the ray set must   |                    |                 |                               |
-|                                   | be mirror-symmetric about the  |                    |                 |                               |
-|                                   | equator (FATAL otherwise; e.g. |                    |                 |                               |
-|                                   | GL with even nmu and stagger   |                    |                 |                               |
-|                                   | is not; GL with odd nmu is); a |                    |                 |                               |
-|                                   | set turning about z keeps its  |                    |                 |                               |
-|                                   | mirror at every turn. No       |                    |                 |                               |
-|                                   | effect without a theta seam.   |                    |                 |                               |
-+-----------------------------------+--------------------------------+--------------------+-----------------+-------------------------------+
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| key                               | meaning                        | default            | production      | read in                                |
++===================================+================================+====================+=================+========================================+
+| ``rad_vet/vet_gd_gl_nmu``,        | Product direction set: nmu     | 7, 18, ``true`` on | all: 7, 18,     | ``rad_vet/rad_vet_params_closure.cpp`` |
+| ``vet_gd_gl_nphi``,               | Gauss-Legendre polar nodes     | a fresh 3-D        | ``true`` (126   | (constructor)                          |
+| ``vet_gd_gl_stagger``             | times nphi azimuths, alternate | spherical-polar    | directions)     |                                        |
+|                                   | rings shifted with             | run; else          |                 |                                        |
+|                                   | ``stagger``. 2 pi/nphi must    | ``vet_gd_geo = 3`` |                 |                                        |
+|                                   | divide the phi extent (FATAL   | (3-D)              |                 |                                        |
+|                                   | otherwise). Takes precedence   |                    |                 |                                        |
+|                                   | over the other sets.           |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_gd_ls``             | Level-symmetric set LQ_N, N =  | 0 (off)            | not named       | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | 6, 8, 10, 12 (N = 10: 120      |                    |                 | (constructor)                          |
+|                                   | directions). Naming it         |                    |                 |                                        |
+|                                   | together with the product set  |                    |                 |                                        |
+|                                   | (``vet_gd_gl_nmu`` > 0) is     |                    |                 |                                        |
+|                                   | FATAL: name one set (0 = off). |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_gd_geo``            | Geodesic set, 10 n^2 + 2       | 3 when no set is   | not named       | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | directions.                    | named              |                 | (constructor)                          |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_sc_set``            | Cartesian meshes: ``gd``       | double-Gauss set   | not named       | ``rad_vet/rays/sc_cart_setup.cpp``     |
+|                                   | sweeps the global direction    | about x1           |                 | (constructor)                          |
+|                                   | set of the curved meshes       |                    |                 |                                        |
+|                                   | (``vet_gd_gl_nmu``,            |                    |                 |                                        |
+|                                   | ``vet_gd_gl_nphi``,            |                    |                 |                                        |
+|                                   | ``vet_gd_gl_stagger``,         |                    |                 |                                        |
+|                                   | ``vet_gd_ls`` or               |                    |                 |                                        |
+|                                   | ``vet_gd_geo``; with none      |                    |                 |                                        |
+|                                   | named the geodesic set 4, 162  |                    |                 |                                        |
+|                                   | directions) with its pole on   |                    |                 |                                        |
+|                                   | x1, instead of the             |                    |                 |                                        |
+|                                   | double-Gauss set about x1.     |                    |                 |                                        |
+|                                   | Replaces ``vet_ring`` (FATAL   |                    |                 |                                        |
+|                                   | with it); a mirrored x1 end    |                    |                 |                                        |
+|                                   | needs a set with x1 mirror     |                    |                 |                                        |
+|                                   | pairs (FATAL otherwise). Read  |                    |                 |                                        |
+|                                   | only when named.               |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_gd_rotate_dt``      | Rotate the direction set every | ``0`` on spherical | all: ``0``      | ``rad_vet/rad_vet_params.cpp``         |
+|                                   | dt_rot of physical time        | polar, else        |                 | (constructor)                          |
+|                                   | (``auto`` = 20 x the first dt; | ``auto`` (fresh    |                 |                                        |
+|                                   | 0 = fixed set).                | runs that name no  |                 |                                        |
+|                                   |                                | rotation key)      |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_rotate_avg``        | With rotation: average the     | 4 with a rotating  | all: ``0``      | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | closure over the last K sets   | set on a fresh run |                 | (``RotAvgParse``)                      |
+|                                   | (0 = off).                     |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_rotate_avg_ema``    | With rotation: the closure is  | 128 on a fresh run | RSG, HG:        | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | an exponential moving average  | with a rotating    | ``128``; all:   | (``RotAvgParse``)                      |
+|                                   | over the rotated sets, weight  | set; read only     | ``0`` (fixed    |                                        |
+|                                   | 1/N per block (0 = off; then   | when named on a    | rays)           |                                        |
+|                                   | ``vet_rotate_avg`` is the      | restart            |                 |                                        |
+|                                   | K-set window).                 |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/clean_rot_ring``        | Rotating ray ring of the       | read only when     | all: ``off``    | ``rad_vet/rad_vet_params.cpp``         |
+|                                   | scheme: ``off``, ``live``,     | named              |                 | (constructor)                          |
+|                                   | ``jump``.                      |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_scatter``           | Split the opacity into         | true on a fresh    | all: ``true``   | ``rad_vet/rad_vet_params_matter.cpp``  |
+|                                   | absorption and electron        | run with table     |                 | (constructor)                          |
+|                                   | scattering in the ray source   | opacity and the    |                 |                                        |
+|                                   | (Ma et al. 2026, eq. 7).       | rays               |                 |                                        |
+|                                   | Changes only the rays' source  |                    |                 |                                        |
+|                                   | function.                      |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_scatter_kappa_e``   | Electron-scattering opacity:   | ``eos`` with a     | all: ``const``  | ``rad_vet/rad_vet_params_matter.cpp``  |
+|                                   | ``const`` or ``eos`` (from the | tabulated EOS;     |                 | (constructor)                          |
+|                                   | EOS ionisation).               | ``const``          |                 |                                        |
+|                                   |                                | otherwise          |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_gd_wall_sym``       | Phi-periodic wedges: centre    | false (recorded)   | all: ``true``   | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | the set on the wedge,          |                    |                 | (constructor),                         |
+|                                   | mirror-paired phi-wall maps,   |                    |                 | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | the seam face from both sides. |                    |                 |                                        |
+|                                   | Needs                          |                    |                 |                                        |
+|                                   | ``vet_gd_wall_interp = true``. |                    |                 |                                        |
+|                                   | Identical results on wedges    |                    |                 |                                        |
+|                                   | that are whole azimuthal       |                    |                 |                                        |
+|                                   | periods; required on narrower  |                    |                 |                                        |
+|                                   | ones. With a set turning about |                    |                 |                                        |
+|                                   | z it needs a wedge of whole    |                    |                 |                                        |
+|                                   | periods (exact wall maps for   |                    |                 |                                        |
+|                                   | every turn) and does nothing;  |                    |                 |                                        |
+|                                   | FATAL otherwise. No effect     |                    |                 |                                        |
+|                                   | without a phi wall (cubed      |                    |                 |                                        |
+|                                   | sphere, full 2 pi, 2-D).       |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_gd_theta_seam_sym`` | Theta-periodic wedges: the     | false (recorded)   | all: ``true``   | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | theta seam face's other side   |                    |                 | (constructor),                         |
+|                                   | is its exact equatorial mirror |                    |                 | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                   | (both frames, as the phi       |                    |                 |                                        |
+|                                   | seam). Required on a           |                    |                 |                                        |
+|                                   | theta-periodic mesh (FATAL     |                    |                 |                                        |
+|                                   | otherwise); the ray set must   |                    |                 |                                        |
+|                                   | be mirror-symmetric about the  |                    |                 |                                        |
+|                                   | equator (FATAL otherwise; e.g. |                    |                 |                                        |
+|                                   | GL with even nmu and stagger   |                    |                 |                                        |
+|                                   | is not; GL with odd nmu is); a |                    |                 |                                        |
+|                                   | set turning about z keeps its  |                    |                 |                                        |
+|                                   | mirror at every turn. No       |                    |                 |                                        |
+|                                   | effect without a theta seam.   |                    |                 |                                        |
++-----------------------------------+--------------------------------+--------------------+-----------------+----------------------------------------+
 
 The wedge rule: on a phi-periodic spherical-polar wedge the width must be a multiple of the
 ray set's azimuthal period (Gauss-Legendre: 360 deg / nphi, 20 deg for nphi = 18; LQ10: 90
@@ -171,484 +171,473 @@ from a file written before these keys must name both on the command line.
 Time integration, time step and retries
 ---------------------------------------
 
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| key                              | meaning                           | default                 | production      | read in                       |
-+==================================+===================================+=========================+=================+===============================+
-| ``time/integrator``              | Hydro integrator; must be ``rk2`` | ``rk2``                 | all: ``rk2``    | ``driver/driver.cpp``         |
-|                                  | (the explicit part of the IMEX    |                         |                 | (constructor)                 |
-|                                  | scheme).                          |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``time/cfl_number``              | Courant number of the hydro step  | 0.3 on a fresh          | all: ``0.3``    | ``mesh/build_tree.cpp``       |
-|                                  | (per direction); the radiation    | VET run                 |                 |                               |
-|                                  | enters dt by ``rad_signal_speed`` |                         |                 |                               |
-|                                  | where it is trapped.              |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``hydro/merge_lat_mom``          | (hydro only.) Group value of the  | ``radial``, also on a   | bsg, RSG cs:    | ``hydro/hydro_mergelat.cpp``  |
-|                                  | merged lateral cells              | restart whose file      | not set         |                               |
-|                                  | (``merge_lat_rc``): ``radial``    | lacks it (a NOTE in the |                 |                               |
-|                                  | keeps M, E, sum V m_r and L_x,    | log; name               |                 |                               |
-|                                  | L_y, L_z of every group to        | ``merge_lat_mom=rigid`` |                 |                               |
-|                                  | round-off and a spherically       | to keep the old)        |                 |                               |
-|                                  | symmetric state unchanged; where  |                         |                 |                               |
-|                                  | uniform density would cost more   |                         |                 |                               |
-|                                  | kinetic energy than the group     |                         |                 |                               |
-|                                  | has, part of the density contrast |                         |                 |                               |
-|                                  | stays (no momentum is dropped,    |                         |                 |                               |
-|                                  | thermal energy > 0 if it was      |                         |                 |                               |
-|                                  | before). ``rigid``: the old       |                         |                 |                               |
-|                                  | Cartesian rigid field, which      |                         |                 |                               |
-|                                  | drops the group's rotation (L     |                         |                 |                               |
-|                                  | lost) where it exceeds half of    |                         |                 |                               |
-|                                  | the thermal energy.               |                         |                 |                               |
-|                                  | ``merge_lat_blockend``            |                         |                 |                               |
-|                                  | (``exchange``, also on a restart  |                         |                 |                               |
-|                                  | whose file lacks it, NOTE;        |                         |                 |                               |
-|                                  | ``flat``: the old rule, which     |                         |                 |                               |
-|                                  | depends on the MeshBlock layout). |                         |                 |                               |
-|                                  | ``MLATDIAG``: ``nfb`` (radial:    |                         |                 |                               |
-|                                  | groups without thermal energy     |                         |                 |                               |
-|                                  | before the merge, left to the C2P |                         |                 |                               |
-|                                  | floors), ``amin`` (smallest       |                         |                 |                               |
-|                                  | merged share). ``radial`` records |                         |                 |                               |
-|                                  | ``merge_lat_state`` in the        |                         |                 |                               |
-|                                  | restart file. A running ``rigid`` |                         |                 |                               |
-|                                  | star restarted as ``radial``      |                         |                 |                               |
-|                                  | re-averages its groups in the     |                         |                 |                               |
-|                                  | first step: its kinetic energy    |                         |                 |                               |
-|                                  | changes there once.               |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``hydro/dt_floor_courant``       | (hydro only.) Floor gas (rho <    | 0 = off (recorded)      | all: ``0.6``    | ``hydro/hydro.cpp``           |
-|                                  | ``rad_vet/floorcap_rho``) takes   |                         |                 |                               |
-|                                  | dt <= C / sum_d (abs(v_d) +       |                         |                 |                               |
-|                                  | c_d)/h_d (one Courant bound on    |                         |                 |                               |
-|                                  | the sum of the directions)        |                         |                 |                               |
-|                                  | instead of ``cfl_number`` per     |                         |                 |                               |
-|                                  | direction, so a floor atmosphere  |                         |                 |                               |
-|                                  | does not set dt; FATAL without    |                         |                 |                               |
-|                                  | ``floorcap_rho``. ``DTREP``       |                         |                 |                               |
-|                                  | prints ``floor=1`` for such a     |                         |                 |                               |
-|                                  | binder. Time step only.           |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``hydro/rad_signal_speed_diff``  | (hydro only.) With                | false (recorded)        | all: ``true``   | ``hydro/hydro.cpp``           |
-|                                  | ``rad_signal_speed = true``: the  |                         |                 |                               |
-|                                  | radiation term of the signal      |                         |                 |                               |
-|                                  | speed weighted by 1 - exp(-x), x  |                         |                 |                               |
-|                                  | = tau_d c_eq / c the grid-scale   |                         |                 |                               |
-|                                  | trapping parameter; untrapped     |                         |                 |                               |
-|                                  | radiation (x << 1) does not limit |                         |                 |                               |
-|                                  | dt. Time step only (accuracy; at  |                         |                 |                               |
-|                                  | cfl 0.3 stability does not need   |                         |                 |                               |
-|                                  | the radiation term).              |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``hydro/rad_signal_speed_phase`` | (hydro only.) With                | false (recorded)        | all: ``true``   | ``hydro/hydro.cpp``           |
-|                                  | ``rad_signal_speed_diff = true``: |                         |                 |                               |
-|                                  | that weight is 1 - exp(-x^2), the |                         |                 |                               |
-|                                  | in-phase (restoring) part of the  |                         |                 |                               |
-|                                  | radiation-pressure perturbation;  |                         |                 |                               |
-|                                  | the linear weight also counts its |                         |                 |                               |
-|                                  | damping part, which grows as      |                         |                 |                               |
-|                                  | rho^-1/2 in thin gas. Same weight |                         |                 |                               |
-|                                  | at x = 1, larger for x > 1. Time  |                         |                 |                               |
-|                                  | step only. Needs                  |                         |                 |                               |
-|                                  | ``rad_signal_speed`` and          |                         |                 |                               |
-|                                  | ``rad_signal_speed_diff`` (FATAL  |                         |                 |                               |
-|                                  | otherwise).                       |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``problem/mlt_src_time``         | Time of the MLT source            | ``stage`` (a restart    | none of the     | ``pgen/star_vet.cpp``         |
-|                                  | (``mlt_flux_frozen``: the ramp    | file without the key    | templates has   |                               |
-|                                  | w(t), the ``adaptive`` /          | too, NOTE)              | an MLT flux     |                               |
-|                                  | ``pressure`` closure's F_sub):    |                         |                 |                               |
-|                                  | ``stage`` takes it at the time of |                         |                 |                               |
-|                                  | each implicit stage (second       |                         |                 |                               |
-|                                  | order), ``start`` at t^n for the  |                         |                 |                               |
-|                                  | whole step (first order; under    |                         |                 |                               |
-|                                  | ``sdirk2`` dt/2 late). A frozen   |                         |                 |                               |
-|                                  | flux without a ramp is the same   |                         |                 |                               |
-|                                  | either way. A restart file that   |                         |                 |                               |
-|                                  | stores ``start`` keeps it unless  |                         |                 |                               |
-|                                  | ``stage`` is named; the first     |                         |                 |                               |
-|                                  | step after the switch of an       |                         |                 |                               |
-|                                  | ``adaptive`` or ``pressure`` run  |                         |                 |                               |
-|                                  | takes the target of t^n for both  |                         |                 |                               |
-|                                  | ends (NOTE).                      |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/time_scheme``          | ``hesdirk2``: two implicit stages | ``hesdirk2`` on a fresh | all:            | ``rad_vet/rad_vet_init.cpp``  |
-|                                  | per step with the Heun hydro      | run that supports it;   | ``hesdirk2``    | (``ImplicitInit``)            |
-|                                  | (second order with                | ``be`` otherwise        |                 |                               |
-|                                  | ``time2_tableau = hesdirk2``;     |                         |                 |                               |
-|                                  | with the production ``sdirk2`` by |                         |                 |                               |
-|                                  | ``time2_gtime_slope`` where the   |                         |                 |                               |
-|                                  | gas-radiation exchange is stiff); |                         |                 |                               |
-|                                  | ``be``: one backward-Euler solve  |                         |                 |                               |
-|                                  | per step (first order).           |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/time2_tableau``        | Tableau of the two stages:        | ``sdirk2`` without      | all: ``sdirk2`` | ``rad_vet/rad_vet_time2.cpp`` |
-|                                  | ``sdirk2`` (Alexander's L-stable  | ``<mhd>``, also on a    |                 | (``Time2Init``)               |
-|                                  | SDIRK2, recommended; FATAL with   | restart whose file      |                 |                               |
-|                                  | ``<mhd>`` and matter coupling),   | lacks it (NOTE)         |                 |                               |
-|                                  | ``hesdirk2``, ``trbdf2``.         |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/time2_gtime_slope``    | sdirk2: the gas eint of the       | true, also on a restart | all: default    | ``rad_vet/rad_vet_time2.cpp`` |
-|                                  | hydro's stage-2 flux state is     | whose file lacks it     |                 | (``Time2GasTime``)            |
-|                                  | that of U\* + d plus (1 - g) dt   | (NOTE)                  |                 |                               |
-|                                  | minmod(K1, K2), K1 the last       |                         |                 |                               |
-|                                  | step's stage-2 slope of the       |                         |                 |                               |
-|                                  | exchange, K2 = d/(g dt), added to |                         |                 |                               |
-|                                  | the gas the caps and floors left  |                         |                 |                               |
-|                                  | (Patankar form where negative;    |                         |                 |                               |
-|                                  | its floors act on the primitives  |                         |                 |                               |
-|                                  | only, nothing is booked). Without |                         |                 |                               |
-|                                  | it the exchange is first order in |                         |                 |                               |
-|                                  | time where it is stiff (wave p    |                         |                 |                               |
-|                                  | 1.0-1.5 instead of 2, M5 shock    |                         |                 |                               |
-|                                  | rho L1 +27 % over hesdirk2).      |                         |                 |                               |
-|                                  | Helps where gas is trapped or in  |                         |                 |                               |
-|                                  | fast exchange; no effect where    |                         |                 |                               |
-|                                  | the exchange is slow. Limit: the  |                         |                 |                               |
-|                                  | flux state of cold floor gas can  |                         |                 |                               |
-|                                  | move by a factor 3 (toward        |                         |                 |                               |
-|                                  | T_rad). Needs                     |                         |                 |                               |
-|                                  | ``time2_gtime_mom = true`` (FATAL |                         |                 |                               |
-|                                  | otherwise; the default is false   |                         |                 |                               |
-|                                  | with                              |                         |                 |                               |
-|                                  | ``time2_gtime_mom = false``).     |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/time2_gtime_pos``      | sdirk2: the flux state is formed  | true, also on a restart | all: default    | ``rad_vet/rad_vet_time2.cpp`` |
-|                                  | from the gas the caps and floors  | whose file lacks it     |                 | (``Time2GasTime``)            |
-|                                  | left, stays positive (Patankar)   | (NOTE)                  |                 |                               |
-|                                  | and books nothing; ``false`` =    |                         |                 |                               |
-|                                  | the older form. Must be true with |                         |                 |                               |
-|                                  | ``time2_gtime_slope`` (FATAL      |                         |                 |                               |
-|                                  | otherwise).                       |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/time2_auto_be``        | After a step whose stages fell    | 16                      | all: ``16``     | ``rad_vet/rad_vet_time2.cpp`` |
-|                                  | back to backward Euler, the next  |                         |                 | (``Time2Init``)               |
-|                                  | 1, 2, 4, ... N steps take         |                         |                 |                               |
-|                                  | backward Euler at once (0 = off). |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/clean_init``           | ``steady``: before step 1 the     | ``given`` (star_vet:    | all: ``steady`` | ``rad_vet/rad_vet.cpp``       |
-|                                  | radiation is relaxed to the       | ``steady``)             |                 | (constructor)                 |
-|                                  | scheme's steady solution in the   |                         |                 |                               |
-|                                  | given gas; ``given``: start from  |                         |                 |                               |
-|                                  | the given field.                  |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/clean_init_dtfac``,    | Pseudo time step (in units of the | 1e6, 1e-8, 40 or 50     | all: ``1.0e6``, | ``rad_vet/rad_vet.cpp``       |
-| ``clean_init_tol``,              | first dt), tolerance and pass     | (problem dependent)     | not named, not  | (constructor)                 |
-| ``clean_init_n``                 | limit of the steady start.        |                         | named           |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``time/dt_retry``                | A cycle whose implicit solve      | true                    | all: ``true``   | ``driver/dt_retry.cpp``       |
-|                                  | fails (not converged, non-finite, |                         |                 | (``DtRetry``)                 |
-|                                  | rejected stage, unpaid floor      |                         |                 |                               |
-|                                  | energy) is undone and taken again |                         |                 |                               |
-|                                  | with a smaller dt. Bitwise: a     |                         |                 |                               |
-|                                  | retry restores the full cycle.    |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``time/dt_retry_fac``,           | dt factor of a retry; of a retry  | 0.5; = ``dt_retry_fac`` | all: ``0.5``,   | ``driver/dt_retry.cpp``       |
-| ``dt_retry_fac_t2``              | caused by a rejected stage.       |                         | ``0.9``         | (``DtRetry``)                 |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``time/dt_retry_grow``,          | After a cut, dt grows back by     | 1.25, 10                | all: ``1.1``,   | ``driver/dt_retry.cpp``       |
-| ``dt_retry_ngood``               | this factor per good cycle,       |                         | ``20``          | (``DtRetry``)                 |
-|                                  | starting after this many good     |                         |                 |                               |
-|                                  | cycles.                           |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``time/dt_retry_t2_be``          | After this many stage-rejection   | 0                       | all: ``0``      | ``driver/dt_retry.cpp``       |
-|                                  | cuts in one cycle, a rejected     |                         |                 | (``DtRetry``)                 |
-|                                  | stage is redone with backward     |                         |                 |                               |
-|                                  | Euler (0 = at once, < 0 = never). |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``time/dt_retry_force_cycle``,   | Testing: force one retry at this  | off                     | not named       | ``driver/dt_retry.cpp``       |
-| ``dt_retry_force_fac``           | cycle with this factor (the       |                         |                 | (``DtRetry``)                 |
-|                                  | ``dt_retry`` test).               |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
-| ``rad_vet/clean_dbg_inf``        | Testing: the first stage-1        | off                     | not named       | ``rad_vet/rad_vet.cpp``       |
-|                                  | write-back of this cycle gives    |                         |                 | (constructor)                 |
-|                                  | one cell a non-finite E iterate.  |                         |                 |                               |
-|                                  | ``implicit_pos_floor`` never      |                         |                 |                               |
-|                                  | raises a non-finite E; the stage  |                         |                 |                               |
-|                                  | is rejected and redone (the       |                         |                 |                               |
-|                                  | ``inf_reject`` test).             |                         |                 |                               |
-+----------------------------------+-----------------------------------+-------------------------+-----------------+-------------------------------+
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| key                              | meaning                           | default                   | production      | read in                                 |
++==================================+===================================+===========================+=================+=========================================+
+| ``time/integrator``              | Hydro integrator; must be ``rk2`` | ``rk2``                   | all: ``rk2``    | ``driver/driver.cpp`` (constructor)     |
+|                                  | (the explicit part of the IMEX    |                           |                 |                                         |
+|                                  | scheme).                          |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``time/cfl_number``              | Courant number of the hydro step  | 0.3 on a fresh VET run    | all: ``0.3``    | ``mesh/build_tree.cpp``                 |
+|                                  | (per direction); the radiation    |                           |                 |                                         |
+|                                  | enters dt by ``rad_signal_speed`` |                           |                 |                                         |
+|                                  | where it is trapped.              |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``hydro/merge_lat_mom``          | (hydro only.) Group value of the  | ``radial``, also on a     | bsg, RSG cs:    | ``hydro/hydro_mergelat.cpp``            |
+|                                  | merged lateral cells              | restart whose file lacks  | not set         |                                         |
+|                                  | (``merge_lat_rc``): ``radial``    | it (a NOTE in the log;    |                 |                                         |
+|                                  | keeps M, E, sum V m_r and L_x,    | name                      |                 |                                         |
+|                                  | L_y, L_z of every group to        | ``merge_lat_mom=rigid``   |                 |                                         |
+|                                  | round-off and a spherically       | to keep the old)          |                 |                                         |
+|                                  | symmetric state unchanged; where  |                           |                 |                                         |
+|                                  | uniform density would cost more   |                           |                 |                                         |
+|                                  | kinetic energy than the group     |                           |                 |                                         |
+|                                  | has, part of the density contrast |                           |                 |                                         |
+|                                  | stays (no momentum is dropped,    |                           |                 |                                         |
+|                                  | thermal energy > 0 if it was      |                           |                 |                                         |
+|                                  | before). ``rigid``: the old       |                           |                 |                                         |
+|                                  | Cartesian rigid field, which      |                           |                 |                                         |
+|                                  | drops the group's rotation (L     |                           |                 |                                         |
+|                                  | lost) where it exceeds half of    |                           |                 |                                         |
+|                                  | the thermal energy.               |                           |                 |                                         |
+|                                  | ``merge_lat_blockend``            |                           |                 |                                         |
+|                                  | (``exchange``, also on a restart  |                           |                 |                                         |
+|                                  | whose file lacks it, NOTE;        |                           |                 |                                         |
+|                                  | ``flat``: the old rule, which     |                           |                 |                                         |
+|                                  | depends on the MeshBlock layout). |                           |                 |                                         |
+|                                  | ``MLATDIAG``: ``nfb`` (radial:    |                           |                 |                                         |
+|                                  | groups without thermal energy     |                           |                 |                                         |
+|                                  | before the merge, left to the C2P |                           |                 |                                         |
+|                                  | floors), ``amin`` (smallest       |                           |                 |                                         |
+|                                  | merged share). ``radial`` records |                           |                 |                                         |
+|                                  | ``merge_lat_state`` in the        |                           |                 |                                         |
+|                                  | restart file. A running ``rigid`` |                           |                 |                                         |
+|                                  | star restarted as ``radial``      |                           |                 |                                         |
+|                                  | re-averages its groups in the     |                           |                 |                                         |
+|                                  | first step: its kinetic energy    |                           |                 |                                         |
+|                                  | changes there once.               |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``hydro/dt_floor_courant``       | (hydro only.) Floor gas (rho <    | 0.6 with                  | all: ``0.6``    | ``hydro/hydro.cpp``                     |
+|                                  | ``rad_vet/floorcap_rho``) takes   | ``floorcap_rho``, else 0  |                 |                                         |
+|                                  | dt <= C / sum_d (abs(v_d) +       | (off)                     |                 |                                         |
+|                                  | c_d)/h_d (one Courant bound on    |                           |                 |                                         |
+|                                  | the sum of the directions)        |                           |                 |                                         |
+|                                  | instead of ``cfl_number`` per     |                           |                 |                                         |
+|                                  | direction, so a floor atmosphere  |                           |                 |                                         |
+|                                  | does not set dt; FATAL without    |                           |                 |                                         |
+|                                  | ``floorcap_rho``. ``DTREP``       |                           |                 |                                         |
+|                                  | prints ``floor=1`` for such a     |                           |                 |                                         |
+|                                  | binder. Time step only.           |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``hydro/rad_signal_speed_diff``  | (hydro only.) With                | true with ``<rad_vet>``   | all: ``true``   | ``hydro/hydro.cpp``                     |
+|                                  | ``rad_signal_speed = true``: the  | and ``rad_signal_speed``  |                 |                                         |
+|                                  | radiation term of the signal      |                           |                 |                                         |
+|                                  | speed weighted by 1 - exp(-x), x  |                           |                 |                                         |
+|                                  | = tau_d c_eq / c the grid-scale   |                           |                 |                                         |
+|                                  | trapping parameter; untrapped     |                           |                 |                                         |
+|                                  | radiation (x << 1) does not limit |                           |                 |                                         |
+|                                  | dt. Time step only (accuracy; at  |                           |                 |                                         |
+|                                  | cfl 0.3 stability does not need   |                           |                 |                                         |
+|                                  | the radiation term).              |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``hydro/rad_signal_speed_phase`` | (hydro only.) With                | true with                 | all: ``true``   | ``hydro/hydro.cpp``                     |
+|                                  | ``rad_signal_speed_diff = true``: | ``rad_signal_speed_diff`` |                 |                                         |
+|                                  | that weight is 1 - exp(-x^2), the |                           |                 |                                         |
+|                                  | in-phase (restoring) part of the  |                           |                 |                                         |
+|                                  | radiation-pressure perturbation;  |                           |                 |                                         |
+|                                  | the linear weight also counts its |                           |                 |                                         |
+|                                  | damping part, which grows as      |                           |                 |                                         |
+|                                  | rho^-1/2 in thin gas. Same weight |                           |                 |                                         |
+|                                  | at x = 1, larger for x > 1. Time  |                           |                 |                                         |
+|                                  | step only. Needs                  |                           |                 |                                         |
+|                                  | ``rad_signal_speed`` and          |                           |                 |                                         |
+|                                  | ``rad_signal_speed_diff`` (FATAL  |                           |                 |                                         |
+|                                  | otherwise).                       |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``problem/mlt_src_time``         | Time of the MLT source            | ``stage`` (a restart file | none of the     | ``pgen/star_vet.cpp``                   |
+|                                  | (``mlt_flux_frozen``: the ramp    | without the key too,      | templates has   |                                         |
+|                                  | w(t), the ``adaptive`` /          | NOTE)                     | an MLT flux     |                                         |
+|                                  | ``pressure`` closure's F_sub):    |                           |                 |                                         |
+|                                  | ``stage`` takes it at the time of |                           |                 |                                         |
+|                                  | each implicit stage (second       |                           |                 |                                         |
+|                                  | order), ``start`` at t^n for the  |                           |                 |                                         |
+|                                  | whole step (first order; under    |                           |                 |                                         |
+|                                  | ``sdirk2`` dt/2 late). A frozen   |                           |                 |                                         |
+|                                  | flux without a ramp is the same   |                           |                 |                                         |
+|                                  | either way. A restart file that   |                           |                 |                                         |
+|                                  | stores ``start`` keeps it unless  |                           |                 |                                         |
+|                                  | ``stage`` is named; the first     |                           |                 |                                         |
+|                                  | step after the switch of an       |                           |                 |                                         |
+|                                  | ``adaptive`` or ``pressure`` run  |                           |                 |                                         |
+|                                  | takes the target of t^n for both  |                           |                 |                                         |
+|                                  | ends (NOTE).                      |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/time_scheme``          | ``hesdirk2``: two implicit stages | ``hesdirk2`` on a fresh   | all:            | ``rad_vet/rad_vet_params_implicit.cpp`` |
+|                                  | per step with the Heun hydro      | run that supports it;     | ``hesdirk2``    | (``ImplicitInit``)                      |
+|                                  | (second order with                | ``be`` otherwise          |                 |                                         |
+|                                  | ``time2_tableau = hesdirk2``;     |                           |                 |                                         |
+|                                  | with the production ``sdirk2`` by |                           |                 |                                         |
+|                                  | ``time2_gtime_slope`` where the   |                           |                 |                                         |
+|                                  | gas-radiation exchange is stiff); |                           |                 |                                         |
+|                                  | ``be``: one backward-Euler solve  |                           |                 |                                         |
+|                                  | per step (first order).           |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/time2_tableau``        | Tableau of the two stages:        | ``sdirk2`` without        | all: ``sdirk2`` | ``rad_vet/rad_vet_params_implicit.cpp`` |
+|                                  | ``sdirk2`` (Alexander's L-stable  | ``<mhd>``, also on a      |                 | (``Time2Init``)                         |
+|                                  | SDIRK2, recommended; FATAL with   | restart whose file lacks  |                 |                                         |
+|                                  | ``<mhd>`` and matter coupling),   | it (NOTE)                 |                 |                                         |
+|                                  | ``hesdirk2``, ``trbdf2``.         |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/time2_gtime_slope``    | sdirk2: the gas eint of the       | true, also on a restart   | all: default    | ``rad_vet/rad_vet_imex.cpp``            |
+|                                  | hydro's stage-2 flux state is     | whose file lacks it       |                 | (``Time2GasTime``)                      |
+|                                  | that of U\* + d plus (1 - g) dt   | (NOTE)                    |                 |                                         |
+|                                  | minmod(K1, K2), K1 the last       |                           |                 |                                         |
+|                                  | step's stage-2 slope of the       |                           |                 |                                         |
+|                                  | exchange, K2 = d/(g dt), added to |                           |                 |                                         |
+|                                  | the gas the caps and floors left  |                           |                 |                                         |
+|                                  | (Patankar form where negative;    |                           |                 |                                         |
+|                                  | its floors act on the primitives  |                           |                 |                                         |
+|                                  | only, nothing is booked). Without |                           |                 |                                         |
+|                                  | it the exchange is first order in |                           |                 |                                         |
+|                                  | time where it is stiff (wave p    |                           |                 |                                         |
+|                                  | 1.0-1.5 instead of 2, M5 shock    |                           |                 |                                         |
+|                                  | rho L1 +27 % over hesdirk2).      |                           |                 |                                         |
+|                                  | Helps where gas is trapped or in  |                           |                 |                                         |
+|                                  | fast exchange; no effect where    |                           |                 |                                         |
+|                                  | the exchange is slow. Limit: the  |                           |                 |                                         |
+|                                  | flux state of cold floor gas can  |                           |                 |                                         |
+|                                  | move by a factor 3 (toward        |                           |                 |                                         |
+|                                  | T_rad). Needs                     |                           |                 |                                         |
+|                                  | ``time2_gtime_mom = true`` (FATAL |                           |                 |                                         |
+|                                  | otherwise; the default is false   |                           |                 |                                         |
+|                                  | with                              |                           |                 |                                         |
+|                                  | ``time2_gtime_mom = false``).     |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/time2_gtime_pos``      | sdirk2: the flux state is formed  | true, also on a restart   | all: default    | ``rad_vet/rad_vet_imex.cpp``            |
+|                                  | from the gas the caps and floors  | whose file lacks it       |                 | (``Time2GasTime``)                      |
+|                                  | left, stays positive (Patankar)   | (NOTE)                    |                 |                                         |
+|                                  | and books nothing; ``false`` =    |                           |                 |                                         |
+|                                  | the older form. Must be true with |                           |                 |                                         |
+|                                  | ``time2_gtime_slope`` (FATAL      |                           |                 |                                         |
+|                                  | otherwise).                       |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/time2_auto_be``        | After a step whose stages fell    | 16                        | all: ``16``     | ``rad_vet/rad_vet_params_implicit.cpp`` |
+|                                  | back to backward Euler, the next  |                           |                 | (``Time2Init``)                         |
+|                                  | 1, 2, 4, ... N steps take         |                           |                 |                                         |
+|                                  | backward Euler at once (0 = off). |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/clean_init``           | ``steady``: before step 1 the     | ``given`` (star_vet:      | all: ``steady`` | ``rad_vet/rad_vet_params.cpp``          |
+|                                  | radiation is relaxed to the       | ``steady``)               |                 | (constructor)                           |
+|                                  | scheme's steady solution in the   |                           |                 |                                         |
+|                                  | given gas; ``given``: start from  |                           |                 |                                         |
+|                                  | the given field.                  |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/clean_init_dtfac``,    | Pseudo time step (in units of the | 1e6, 1e-8, 40 or 50       | all: ``1.0e6``, | ``rad_vet/rad_vet_params.cpp``          |
+| ``clean_init_tol``,              | first dt), tolerance and pass     | (problem dependent)       | not named, not  | (constructor)                           |
+| ``clean_init_n``                 | limit of the steady start.        |                           | named           |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``time/dt_retry``                | A cycle whose implicit solve      | true                      | all: ``true``   | ``driver/dt_retry.cpp`` (``DtRetry``)   |
+|                                  | fails (not converged, non-finite, |                           |                 |                                         |
+|                                  | unpaid floor energy) is undone    |                           |                 |                                         |
+|                                  | and taken again with a smaller    |                           |                 |                                         |
+|                                  | dt. Bitwise: a retry restores the |                           |                 |                                         |
+|                                  | full cycle.                       |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``time/dt_retry_fac``            | dt factor of a retry.             | 0.5                       | all: ``0.5``    | ``driver/dt_retry.cpp`` (``DtRetry``)   |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``time/dt_retry_grow``,          | After a cut, dt grows back by     | 1.1, 20                   | all: ``1.1``,   | ``driver/dt_retry.cpp`` (``DtRetry``)   |
+| ``dt_retry_ngood``               | this factor per good cycle,       |                           | ``20``          |                                         |
+|                                  | starting after this many good     |                           |                 |                                         |
+|                                  | cycles.                           |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``time/dt_retry_force_cycle``,   | Testing: force one retry at this  | off                       | not named       | ``driver/dt_retry.cpp`` (``DtRetry``)   |
+| ``dt_retry_force_fac``           | cycle with this factor (the       |                           |                 |                                         |
+|                                  | ``dt_retry`` test).               |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/clean_dbg_inf``        | Testing: the first stage-1        | off                       | not named       | ``rad_vet/rad_vet_params.cpp``          |
+|                                  | write-back of this cycle gives    |                           |                 | (constructor)                           |
+|                                  | one cell a non-finite E iterate.  |                           |                 |                                         |
+|                                  | ``implicit_pos_floor`` never      |                           |                 |                                         |
+|                                  | raises a non-finite E; the stage  |                           |                 |                                         |
+|                                  | is rejected and redone (the       |                           |                 |                                         |
+|                                  | ``inf_reject`` test).             |                           |                 |                                         |
++----------------------------------+-----------------------------------+---------------------------+-----------------+-----------------------------------------+
 
 Boundaries
 ----------
 
-+---------------------------------+------------------------------+--------------------------+-----------------+------------------------------+
-| key                             | meaning                      | default                  | production      | read in                      |
-+=================================+==============================+==========================+=================+==============================+
-| ``rad_vet/implicit_bc_x1min``,  | Radiation x1 boundaries:     | ``auto`` (from the mesh  | all: ``flux``,  | ``rad_vet/rad_vet_init.cpp`` |
-| ``implicit_bc_x1max``           | ``marshak``, ``outflow``,    | boundary); star_vet with | ``marshak``     | (``ImplicitInit``)           |
-|                                 | ``reflect``, ``periodic``,   | ``implicit_flux_x1min``: |                 |                              |
-|                                 | and on x1 an imposed         | x1min ``flux``           |                 |                              |
-|                                 | ``flux``. The ray sweep      |                          |                 |                              |
-|                                 | needs ``x1max = marshak`` or |                          |                 |                              |
-|                                 | ``reflect``.                 |                          |                 |                              |
-+---------------------------------+------------------------------+--------------------------+-----------------+------------------------------+
-| ``rad_vet/implicit_flux_x1min`` | Flux through the inner face  | 0                        | per deck        | ``rad_vet/rad_vet_init.cpp`` |
-|                                 | (= L/(4 pi r_in^2) for a     |                          |                 | (``ImplicitInit``)           |
-|                                 | star).                       |                          |                 |                              |
-+---------------------------------+------------------------------+--------------------------+-----------------+------------------------------+
-| ``rad_vet/implicit_flux_x1max`` | Incoming bath at the outer   | 0                        | all: ``0.0``    | ``rad_vet/rad_vet_init.cpp`` |
-|                                 | Marshak face (0 = vacuum).   |                          |                 | (``ImplicitInit``)           |
-+---------------------------------+------------------------------+--------------------------+-----------------+------------------------------+
-| ``rad_vet/clean_bc``            | Open x1 end: ``halfrange``   | ``halfrange``            | all:            | ``rad_vet/rad_vet.cpp``      |
-|                                 | (the end cell's ray          |                          | ``halfrange``   | (constructor)                |
-|                                 | half-range flux) or          |                          |                 |                              |
-|                                 | ``marshak``.                 |                          |                 |                              |
-+---------------------------------+------------------------------+--------------------------+-----------------+------------------------------+
-| ``mesh/ix1_bc`` ... ``ox3_bc``  | Hydro boundaries (the        | required                 | see the decks   | ``mesh/mesh.cpp``            |
-|                                 | templates: ``user`` in x1,   |                          |                 |                              |
-|                                 | ``periodic`` in theta and    |                          |                 |                              |
-|                                 | phi).                        |                          |                 |                              |
-+---------------------------------+------------------------------+--------------------------+-----------------+------------------------------+
-| ``problem/star_wall_zero_flux`` | star_vet (hydro): the inner  | true                     | all: ``true``   | ``pgen/star_vet.cpp``        |
-|                                 | x1 wall's mass,              |                          |                 | (``StarWallFlux``)           |
-|                                 | transverse-momentum, energy  |                          |                 |                              |
-|                                 | and scalar fluxes are 0      |                          |                 |                              |
-|                                 | before the update (not with  |                          |                 |                              |
-|                                 | ``star_bc_inner = inflow``); |                          |                 |                              |
-|                                 | so are the top's where the   |                          |                 |                              |
-|                                 | mass flux is inflow or       |                          |                 |                              |
-|                                 | exactly 0 at that point.     |                          |                 |                              |
-|                                 | ``dfloor_flux_limit`` acts   |                          |                 |                              |
-|                                 | later: a top face that it    |                          |                 |                              |
-|                                 | makes massless stays open to |                          |                 |                              |
-|                                 | FOFC's diffusive L_z and E   |                          |                 |                              |
-|                                 | (booked, conserved).         |                          |                 |                              |
-+---------------------------------+------------------------------+--------------------------+-----------------+------------------------------+
++---------------------------------+------------------------------+--------------------------+-----------------+-----------------------------------------+
+| key                             | meaning                      | default                  | production      | read in                                 |
++=================================+==============================+==========================+=================+=========================================+
+| ``rad_vet/implicit_bc_x1min``,  | Radiation x1 boundaries:     | ``auto`` (from the mesh  | all: ``flux``,  | ``rad_vet/rad_vet_params_implicit.cpp`` |
+| ``implicit_bc_x1max``           | ``marshak``, ``outflow``,    | boundary); star_vet with | ``marshak``     | (``ImplicitInit``)                      |
+|                                 | ``reflect``, ``periodic``,   | ``implicit_flux_x1min``: |                 |                                         |
+|                                 | and on x1 an imposed         | x1min ``flux``           |                 |                                         |
+|                                 | ``flux``. The ray sweep      |                          |                 |                                         |
+|                                 | needs ``x1max = marshak`` or |                          |                 |                                         |
+|                                 | ``reflect``.                 |                          |                 |                                         |
++---------------------------------+------------------------------+--------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/implicit_flux_x1min`` | Flux through the inner face  | 0                        | per deck        | ``rad_vet/rad_vet_params_implicit.cpp`` |
+|                                 | (= L/(4 pi r_in^2) for a     |                          |                 | (``ImplicitInit``)                      |
+|                                 | star).                       |                          |                 |                                         |
++---------------------------------+------------------------------+--------------------------+-----------------+-----------------------------------------+
+| ``rad_vet/implicit_flux_x1max`` | Incoming bath at the outer   | 0                        | all: ``0.0``    | ``rad_vet/rad_vet_params_implicit.cpp`` |
+|                                 | Marshak face (0 = vacuum).   |                          |                 | (``ImplicitInit``)                      |
++---------------------------------+------------------------------+--------------------------+-----------------+-----------------------------------------+
+| ``mesh/ix1_bc`` ... ``ox3_bc``  | Hydro boundaries (the        | required                 | see the decks   | ``mesh/mesh.cpp``                       |
+|                                 | templates: ``user`` in x1,   |                          |                 |                                         |
+|                                 | ``periodic`` in theta and    |                          |                 |                                         |
+|                                 | phi).                        |                          |                 |                                         |
++---------------------------------+------------------------------+--------------------------+-----------------+-----------------------------------------+
+| ``problem/star_wall_zero_flux`` | star_vet (hydro): the inner  | true                     | all: ``true``   | ``pgen/star_vet.cpp``                   |
+|                                 | x1 wall's mass,              |                          |                 | (``StarWallFlux``)                      |
+|                                 | transverse-momentum, energy  |                          |                 |                                         |
+|                                 | and scalar fluxes are 0      |                          |                 |                                         |
+|                                 | before the update (not with  |                          |                 |                                         |
+|                                 | ``star_bc_inner = inflow``); |                          |                 |                                         |
+|                                 | so are the top's where the   |                          |                 |                                         |
+|                                 | mass flux is inflow or       |                          |                 |                                         |
+|                                 | exactly 0 at that point.     |                          |                 |                                         |
+|                                 | ``dfloor_flux_limit`` acts   |                          |                 |                                         |
+|                                 | later: a top face that it    |                          |                 |                                         |
+|                                 | makes massless stays open to |                          |                 |                                         |
+|                                 | FOFC's diffusive L_z and E   |                          |                 |                                         |
+|                                 | (booked, conserved).         |                          |                 |                                         |
++---------------------------------+------------------------------+--------------------------+-----------------+-----------------------------------------+
 
 Transverse Marshak faces are not supported by the ray sweep (FATAL).
 
 Opacity, units and coupling
 ---------------------------
 
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| key                           | meaning                            | default                      | production                   | read in                       |
-+===============================+====================================+==============================+==============================+===============================+
-| ``rad_vet/opacity``           | ``const``, ``powerlaw``, ``user``  | ``const``                    | all: ``table``               | ``rad_vet/rad_vet.cpp``       |
-|                               | or ``table`` (Rosseland and Planck |                              |                              | (constructor)                 |
-|                               | tables named in ``<problem>``).    |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/kappa_p``,          | Constant opacities per unit mass:  | 0, = kappa_p, = kappa_p, 0   | not named                    | ``rad_vet/rad_vet.cpp``       |
-| ``kappa_e``, ``kappa_f``,     | Planck (emission), energy mean     |                              |                              | (constructor)                 |
-| ``kappa_s``                   | (absorption), flux mean,           |                              |                              |                               |
-|                               | scattering.                        |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/c_light``, ``arad`` | Speed of light and radiation       | required                     | per deck                     | ``rad_vet/rad_vet.cpp``       |
-|                               | constant in code units. The        |                              |                              | (constructor)                 |
-|                               | start-up log compares them with    |                              |                              |                               |
-|                               | the values ``<units>`` implies.    |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/chat_over_c``       | Reduced speed of light; the        | 1.0                          | all: ``1.0``                 | ``rad_vet/rad_vet.cpp``       |
-|                               | scheme needs 1 (FATAL otherwise).  |                              |                              | (constructor)                 |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/temp_unit_kelvin``, | Unit conversions for the table     | 1.0                          | per deck                     | ``rad_vet/rad_vet.cpp``       |
-| ``rho_unit_cgs``,             | lookup: K per code temperature,    |                              |                              | (constructor)                 |
-| ``kappa_unit``                | g/cm^3 per code density, code      |                              |                              |                               |
-|                               | opacity per cm^2/g.                |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/coupling``,         | Gas-radiation exchange on;         | true                         | all: ``true``                | ``rad_vet/rad_vet.cpp``       |
-| ``gas_feedback``              | exchange acts back on the gas.     |                              |                              | (constructor)                 |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/force_reference``,  | ``wb_arad``: well-balanced         | ``none`` (star_vet:          | all: ``wb_arad``, ``split``  | ``rad_vet/rad_vet.cpp``       |
-| ``force_reference_work``      | radiative envelope; the problem    | ``wb_arad``); ``auto`` (=    |                              | (constructor)                 |
-|                               | generator supplies the reference   | ``split`` there)             |                              |                               |
-|                               | radiative acceleration, the gas    |                              |                              |                               |
-|                               | receives only the residual force;  |                              |                              |                               |
-|                               | its work is paid as ``split``      |                              |                              |                               |
-|                               | (required by the scheme).          |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/e_floor``           | Floor of E (code units).           | FLT_MIN                      | all: ``1.0e-4``              | ``rad_vet/rad_vet.cpp``       |
-|                               |                                    |                              |                              | (constructor)                 |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/floorcap_rho``,     | (hydro only.) Floor-gas cap: in    | v                            | is capped at ``floorcap_v``  | off                           |
-| ``floorcap_v``                | cells with rho below               |                              | and T at max(T_rad, floor);  |                               |
-|                               | ``floorcap_rho``,                  |                              | the removed energy goes to E |                               |
-|                               |                                    |                              | (momentum is removed and     |                               |
-|                               |                                    |                              | reported).                   |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/floorcap_lz``       | The floor-gas velocity cap scales  | false (recorded)             | all: ``true``                | ``rad_vet/rad_vet.cpp``       |
-|                               | only the momentum without L_z:     |                              |                              | (constructor)                 |
-|                               | spherical polar r / theta,         |                              |                              |                               |
-|                               | Cartesian the part off phi_hat =   |                              |                              |                               |
-|                               | (-y, x)/R, the cubed sphere the    |                              |                              |                               |
-|                               | part off phi_hat in the metric of  |                              |                              |                               |
-|                               | the covariant momentum             |                              |                              |                               |
-|                               | (``GnomonicPhiHat``, p_phi = m_a   |                              |                              |                               |
-|                               | phi^a). The phi part is kept, also |                              |                              |                               |
-|                               | where it alone exceeds             |                              |                              |                               |
-|                               | ``floorcap_v``, so L_z is exact.   |                              |                              |                               |
-|                               | (The cap itself measures \|v\| in  |                              |                              |                               |
-|                               | the metric norm on the cubed       |                              |                              |                               |
-|                               | sphere.)                           |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``rad_vet/floorcap_lz_spin``  | With ``floorcap_lz``: the          | false (recorded)             | all: ``true``, with          | ``rad_vet/rad_vet.cpp``       |
-|                               | floor-gas cap scales the whole     |                              | ``floorcap_lz`` and          | (constructor),                |
-|                               | velocity (so \|v\| <=              |                              | ``floorcap_mesh_vol = true`` | ``rad_vet/rad_vet_fluid.cpp`` |
-|                               | ``floorcap_v`` in floor gas, which |                              |                              | (``FloorGasCap``)             |
-|                               | then cannot set dt through a kept  |                              |                              |                               |
-|                               | v_phi), and the L_z X it removes   |                              |                              |                               |
-|                               | goes to the gas at or above        |                              |                              |                               |
-|                               | ``floorcap_rho`` as one rigid      |                              |                              |                               |
-|                               | rotation dOmega = X/I, I = sum rho |                              |                              |                               |
-|                               | V R^2 (per cell, then in a fixed   |                              |                              |                               |
-|                               | order: layout-invariant in tile    |                              |                              |                               |
-|                               | mode); E_rad of each receiving     |                              |                              |                               |
-|                               | cell pays its kinetic-energy       |                              |                              |                               |
-|                               | change. L_z and E exact, no        |                              |                              |                               |
-|                               | ledger. FATAL without              |                              |                              |                               |
-|                               | ``floorcap_lz`` and                |                              |                              |                               |
-|                               | ``floorcap_mesh_vol``, or when the |                              |                              |                               |
-|                               | cap removes L_z and no gas is at   |                              |                              |                               |
-|                               | or above ``floorcap_rho``.         |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``hydro/dfloor``, ``pfloor``, | Hydro floors.                      | FLT_MIN                      | per deck                     | ``eos/eos.cpp``,              |
-| ``tfloor``                    | ``hydro/floor_pay = rad_column``   |                              |                              | ``hydro/dual_energy.cpp``     |
-|                               | pays the internal energy they      |                              |                              |                               |
-|                               | create from the radiation (needs   |                              |                              |                               |
-|                               | ``hydro/eos = general``).          |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``hydro/floor_pay_skip``      | Pay also the energy that the       | false (recorded)             | all: ``true``                | ``hydro/dual_energy.cpp``     |
-|                               | density floor and the velocity     |                              |                              |                               |
-|                               | ceiling change. Needs              |                              |                              |                               |
-|                               | ``floor_pay``.                     |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``hydro/floor_from_ekin``     | (hydro only.) General-EOS hydro:   | v                            | =                            | v_phi                         |
-|                               | the primitive recovery keeps E;    |                              |                              |                               |
-|                               | the velocity ceiling's kinetic     |                              |                              |                               |
-|                               | energy becomes heat, and a         |                              |                              |                               |
-|                               | kinetic-energy-dominated cell      |                              |                              |                               |
-|                               | below e(rho, tfloor) pays the      |                              |                              |                               |
-|                               | deficit from its own r and theta   |                              |                              |                               |
-|                               | kinetic energy where that covers   |                              |                              |                               |
-|                               | it. The phi momentum (L_z) is      |                              |                              |                               |
-|                               | never scaled (where the phi part   |                              |                              |                               |
-|                               | alone exceeds ``vceil``, the r /   |                              |                              |                               |
-|                               | theta part goes to 0 and           |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``hydro/dfloor_flux_limit``   | (hydro only.) Scale back the       | false (recorded)             | all: ``true``                | ``hydro/hydro.cpp``           |
-|                               | outflow of a nearly empty cell so  |                              |                              |                               |
-|                               | its density stays above the floor  |                              |                              |                               |
-|                               | (both neighbours see the same      |                              |                              |                               |
-|                               | flux); the cell's momentum but its |                              |                              |                               |
-|                               | L_z part is scaled by the same     |                              |                              |                               |
-|                               | factor, E fixed (the kinetic       |                              |                              |                               |
-|                               | energy becomes heat).              |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``hydro/fofc``,               | First-order flux correction: a     | false / false                | all: ``true`` / ``true``     | ``hydro/hydro_fofc.cpp``      |
-| ``fofc_retest``               | trial update from the fluxes flags |                              |                              |                               |
-|                               | every cell where a floor or the    |                              |                              |                               |
-|                               | velocity ceiling would act, and    |                              |                              |                               |
-|                               | its faces take the first-order LLF |                              |                              |                               |
-|                               | flux (both neighbours see the same |                              |                              |                               |
-|                               | flux: E, mass, momentum and L_z    |                              |                              |                               |
-|                               | exact). ``fofc_retest`` re-tests   |                              |                              |                               |
-|                               | the flagged cells with the         |                              |                              |                               |
-|                               | metric-correct internal energy     |                              |                              |                               |
-|                               | (needs ``eos = general``). Needs   |                              |                              |                               |
-|                               | ``nghost >= 3`` with ``plm``. The  |                              |                              |                               |
-|                               | cell-stages replaced are counted   |                              |                              |                               |
-|                               | (``FOFC first-order cell-stages``, |                              |                              |                               |
-|                               | the run total).                    |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``hydro/fofc_flag_exchange``, | Every mesh with more than one      | true, also on a restart      | -                            | ``hydro/hydro_fofc.cpp``      |
-| ``mhd/fofc_flag_exchange``    | MeshBlock (cubed sphere: per       | whose file lacks it (a NOTE  |                              |                               |
-|                               | panel) and a periodic wrap of      | in the log; name             |                              |                               |
-|                               | spherical polar, no refinement, no | ``fofc_flag_exchange=false`` |                              |                               |
-|                               | shearing box: the FOFC flags of    | to keep the old)             |                              |                               |
-|                               | the face ghosts (block edge,       |                              |                              |                               |
-|                               | periodic wrap) are the owner's, so |                              |                              |                               |
-|                               | the two sides of a face carry the  |                              |                              |                               |
-|                               | same replaced flux (mass and       |                              |                              |                               |
-|                               | energy exact) (one exchange per    |                              |                              |                               |
-|                               | stage), so the answer does not     |                              |                              |                               |
-|                               | depend on the MeshBlock layout     |                              |                              |                               |
-|                               | where a panel seam meets a         |                              |                              |                               |
-|                               | MeshBlock edge.                    |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
-| ``mhd/cs_seam_emf_exchange``  | Cubed sphere, GS07 corner EMF      | true (a restart file without | -                            | ``mhd/mhd_cs_seam.cpp``       |
-|                               | (``emf_scheme = gs07``, the only   | it: true, with the NOTE)     |                              |                               |
-|                               | one with ``fofc``), more than one  |                              |                              |                               |
-|                               | MeshBlock per panel: the upwind    |                              |                              |                               |
-|                               | sides of the corner EMF read the   |                              |                              |                               |
-|                               | shared seam mass flux in the       |                              |                              |                               |
-|                               | same-panel ghost rows too (one     |                              |                              |                               |
-|                               | exchange per stage), so the answer |                              |                              |                               |
-|                               | does not depend on the MeshBlock   |                              |                              |                               |
-|                               | layout (round-off instead of 1e-6  |                              |                              |                               |
-|                               | ... 2e-3); conservation and div B  |                              |                              |                               |
-|                               | are exact either way.              |                              |                              |                               |
-+-------------------------------+------------------------------------+------------------------------+------------------------------+-------------------------------+
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| key                           | meaning                            | default                      | production                   | read in                               |
++===============================+====================================+==============================+==============================+=======================================+
+| ``rad_vet/opacity``           | ``const``, ``powerlaw``, ``user``  | ``table`` with               | all: ``table``               | ``rad_vet/rad_vet_params_matter.cpp`` |
+|                               | or ``table`` (Rosseland and Planck | ``problem/star_opac_table``, |                              | (constructor)                         |
+|                               | tables named in ``<problem>``).    | else ``const``               |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/kappa_p``,          | Constant opacities per unit mass:  | 0, = kappa_p, = kappa_p, 0   | not named                    | ``rad_vet/rad_vet_params_matter.cpp`` |
+| ``kappa_e``, ``kappa_f``,     | Planck (emission), energy mean     |                              |                              | (constructor)                         |
+| ``kappa_s``                   | (absorption), flux mean,           |                              |                              |                                       |
+|                               | scattering.                        |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/c_light``, ``arad`` | Speed of light and radiation       | required                     | per deck                     | ``rad_vet/rad_vet.cpp`` (constructor) |
+|                               | constant in code units. The        |                              |                              |                                       |
+|                               | start-up log compares them with    |                              |                              |                                       |
+|                               | the values ``<units>`` implies.    |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/chat_over_c``       | Reduced speed of light; the scheme | 1.0                          | all: ``1.0``                 | ``rad_vet/rad_vet.cpp`` (constructor) |
+|                               | needs 1 (FATAL otherwise).         |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/temp_unit_kelvin``, | Unit conversions for the table     | 1.0                          | per deck                     | ``rad_vet/rad_vet_params_matter.cpp`` |
+| ``rho_unit_cgs``,             | lookup: K per code temperature,    |                              |                              | (constructor)                         |
+| ``kappa_unit``                | g/cm^3 per code density, code      |                              |                              |                                       |
+|                               | opacity per cm^2/g.                |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/coupling``,         | Gas-radiation exchange on;         | true                         | all: ``true``                | ``rad_vet/rad_vet_params_matter.cpp`` |
+| ``gas_feedback``              | exchange acts back on the gas.     |                              |                              | (constructor)                         |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/force_reference``,  | ``wb_arad``: well-balanced         | ``none`` (star_vet:          | all: ``wb_arad``, ``split``  | ``rad_vet/rad_vet_params_matter.cpp`` |
+| ``force_reference_work``      | radiative envelope; the problem    | ``wb_arad``); ``auto`` (=    |                              | (constructor)                         |
+|                               | generator supplies the reference   | ``split`` there)             |                              |                                       |
+|                               | radiative acceleration, the gas    |                              |                              |                                       |
+|                               | receives only the residual force;  |                              |                              |                                       |
+|                               | its work is paid as ``split``      |                              |                              |                                       |
+|                               | (required by the scheme).          |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/e_floor``           | Floor of E (code units).           | FLT_MIN                      | all: ``1.0e-4``              | ``rad_vet/rad_vet_geometry.cpp``      |
+|                               |                                    |                              |                              | (constructor)                         |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/floorcap_rho``,     | (hydro only.) Floor-gas cap: in    | v                            | is capped at ``floorcap_v``  | off                                   |
+| ``floorcap_v``                | cells with rho below               |                              | and T at max(T_rad, floor);  |                                       |
+|                               | ``floorcap_rho``,                  |                              | the removed energy goes to E |                                       |
+|                               |                                    |                              | (momentum is removed and     |                                       |
+|                               |                                    |                              | reported).                   |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/floorcap_lz``       | The floor-gas velocity cap scales  | false (recorded)             | all: ``true``                | ``rad_vet/rad_vet_params_matter.cpp`` |
+|                               | only the momentum without L_z:     |                              |                              | (constructor)                         |
+|                               | spherical polar r / theta,         |                              |                              |                                       |
+|                               | Cartesian the part off phi_hat =   |                              |                              |                                       |
+|                               | (-y, x)/R, the cubed sphere the    |                              |                              |                                       |
+|                               | part off phi_hat in the metric of  |                              |                              |                                       |
+|                               | the covariant momentum             |                              |                              |                                       |
+|                               | (``GnomonicPhiHat``, p_phi = m_a   |                              |                              |                                       |
+|                               | phi^a). The phi part is kept, also |                              |                              |                                       |
+|                               | where it alone exceeds             |                              |                              |                                       |
+|                               | ``floorcap_v``, so L_z is exact.   |                              |                              |                                       |
+|                               | (The cap itself measures \|v\| in  |                              |                              |                                       |
+|                               | the metric norm on the cubed       |                              |                              |                                       |
+|                               | sphere.)                           |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``rad_vet/floorcap_lz_spin``  | With ``floorcap_lz``: the          | false (recorded)             | all: ``true``, with          | ``rad_vet/rad_vet_params_matter.cpp`` |
+|                               | floor-gas cap scales the whole     |                              | ``floorcap_lz`` and          | (constructor),                        |
+|                               | velocity (so \|v\| <=              |                              | ``floorcap_mesh_vol = true`` | ``rad_vet/rad_vet_gas.cpp``           |
+|                               | ``floorcap_v`` in floor gas, which |                              |                              | (``FloorGasCap``)                     |
+|                               | then cannot set dt through a kept  |                              |                              |                                       |
+|                               | v_phi), and the L_z X it removes   |                              |                              |                                       |
+|                               | goes to the gas at or above        |                              |                              |                                       |
+|                               | ``floorcap_rho`` as one rigid      |                              |                              |                                       |
+|                               | rotation dOmega = X/I, I = sum rho |                              |                              |                                       |
+|                               | V R^2 (per cell, then in a fixed   |                              |                              |                                       |
+|                               | order: layout-invariant in tile    |                              |                              |                                       |
+|                               | mode); E_rad of each receiving     |                              |                              |                                       |
+|                               | cell pays its kinetic-energy       |                              |                              |                                       |
+|                               | change. L_z and E exact, no        |                              |                              |                                       |
+|                               | ledger. FATAL without              |                              |                              |                                       |
+|                               | ``floorcap_lz`` and                |                              |                              |                                       |
+|                               | ``floorcap_mesh_vol``, or when the |                              |                              |                                       |
+|                               | cap removes L_z and no gas is at   |                              |                              |                                       |
+|                               | or above ``floorcap_rho``.         |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``hydro/dfloor``, ``pfloor``, | Hydro floors.                      | FLT_MIN                      | per deck                     | ``eos/eos.cpp``,                      |
+| ``tfloor``                    | ``hydro/floor_pay = rad_column``   |                              |                              | ``hydro/dual_energy.cpp``             |
+|                               | pays the internal energy they      |                              |                              |                                       |
+|                               | create from the radiation (needs   |                              |                              |                                       |
+|                               | ``hydro/eos = general``).          |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``hydro/floor_pay_skip``      | Pay also the energy that the       | true (general EOS with       | all: ``true``                | ``hydro/dual_energy.cpp``             |
+|                               | density floor and the velocity     | ``<rad_vet>``)               |                              |                                       |
+|                               | ceiling change. Needs              |                              |                              |                                       |
+|                               | ``floor_pay``.                     |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``hydro/floor_from_ekin``     | (hydro only.) General-EOS hydro:   | v                            | =                            | v_phi                                 |
+|                               | the primitive recovery keeps E;    |                              |                              |                                       |
+|                               | the velocity ceiling's kinetic     |                              |                              |                                       |
+|                               | energy becomes heat, and a         |                              |                              |                                       |
+|                               | kinetic-energy-dominated cell      |                              |                              |                                       |
+|                               | below e(rho, tfloor) pays the      |                              |                              |                                       |
+|                               | deficit from its own r and theta   |                              |                              |                                       |
+|                               | kinetic energy where that covers   |                              |                              |                                       |
+|                               | it. The phi momentum (L_z) is      |                              |                              |                                       |
+|                               | never scaled (where the phi part   |                              |                              |                                       |
+|                               | alone exceeds ``vceil``, the r /   |                              |                              |                                       |
+|                               | theta part goes to 0 and           |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``hydro/dfloor_flux_limit``   | (hydro only.) Scale back the       | true with ``<rad_vet>``      | all: ``true``                | ``hydro/hydro.cpp``                   |
+|                               | outflow of a nearly empty cell so  | (adiabatic, uniform mesh)    |                              |                                       |
+|                               | its density stays above the floor  |                              |                              |                                       |
+|                               | (both neighbours see the same      |                              |                              |                                       |
+|                               | flux); the cell's momentum but its |                              |                              |                                       |
+|                               | L_z part is scaled by the same     |                              |                              |                                       |
+|                               | factor, E fixed (the kinetic       |                              |                              |                                       |
+|                               | energy becomes heat).              |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``hydro/fofc``,               | First-order flux correction: a     | false / false                | all: ``true`` / ``true``     | ``hydro/hydro_fofc.cpp``              |
+| ``fofc_retest``               | trial update from the fluxes flags |                              |                              |                                       |
+|                               | every cell where a floor or the    |                              |                              |                                       |
+|                               | velocity ceiling would act, and    |                              |                              |                                       |
+|                               | its faces take the first-order LLF |                              |                              |                                       |
+|                               | flux (both neighbours see the same |                              |                              |                                       |
+|                               | flux: E, mass, momentum and L_z    |                              |                              |                                       |
+|                               | exact). ``fofc_retest`` re-tests   |                              |                              |                                       |
+|                               | the flagged cells with the         |                              |                              |                                       |
+|                               | metric-correct internal energy     |                              |                              |                                       |
+|                               | (needs ``eos = general``). Needs   |                              |                              |                                       |
+|                               | ``nghost >= 3`` with ``plm``. The  |                              |                              |                                       |
+|                               | cell-stages replaced are counted   |                              |                              |                                       |
+|                               | (``FOFC first-order cell-stages``, |                              |                              |                                       |
+|                               | the run total).                    |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``hydro/fofc_flag_exchange``, | Every mesh with more than one      | true, also on a restart      | -                            | ``hydro/hydro_fofc.cpp``              |
+| ``mhd/fofc_flag_exchange``    | MeshBlock (cubed sphere: per       | whose file lacks it (a NOTE  |                              |                                       |
+|                               | panel) and a periodic wrap of      | in the log; name             |                              |                                       |
+|                               | spherical polar, no refinement, no | ``fofc_flag_exchange=false`` |                              |                                       |
+|                               | shearing box: the FOFC flags of    | to keep the old)             |                              |                                       |
+|                               | the face ghosts (block edge,       |                              |                              |                                       |
+|                               | periodic wrap) are the owner's, so |                              |                              |                                       |
+|                               | the two sides of a face carry the  |                              |                              |                                       |
+|                               | same replaced flux (mass and       |                              |                              |                                       |
+|                               | energy exact) (one exchange per    |                              |                              |                                       |
+|                               | stage), so the answer does not     |                              |                              |                                       |
+|                               | depend on the MeshBlock layout     |                              |                              |                                       |
+|                               | where a panel seam meets a         |                              |                              |                                       |
+|                               | MeshBlock edge.                    |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
+| ``mhd/cs_seam_emf_exchange``  | Cubed sphere, GS07 corner EMF      | true (a restart file without | -                            | ``mhd/mhd_cs_seam.cpp``               |
+|                               | (``emf_scheme = gs07``, the only   | it: true, with the NOTE)     |                              |                                       |
+|                               | one with ``fofc``), more than one  |                              |                              |                                       |
+|                               | MeshBlock per panel: the upwind    |                              |                              |                                       |
+|                               | sides of the corner EMF read the   |                              |                              |                                       |
+|                               | shared seam mass flux in the       |                              |                              |                                       |
+|                               | same-panel ghost rows too (one     |                              |                              |                                       |
+|                               | exchange per stage), so the answer |                              |                              |                                       |
+|                               | does not depend on the MeshBlock   |                              |                              |                                       |
+|                               | layout (round-off instead of 1e-6  |                              |                              |                                       |
+|                               | ... 2e-3); conservation and div B  |                              |                              |                                       |
+|                               | are exact either way.              |                              |                              |                                       |
++-------------------------------+------------------------------------+------------------------------+------------------------------+---------------------------------------+
 
 Layout and reproducibility
 --------------------------
 
-+--------------------------------+-------------------+-----------------+-----------------+-------------------------+
-| key                            | meaning           | default         | production      | read in                 |
-+================================+===================+=================+=================+=========================+
-| ``mesh/layout_invariant``      | Global and shell  | true            | all: ``true``   | ``mesh/mesh.cpp``       |
-|                                | sums in exact,    |                 |                 | (constructor)           |
-|                                | order-independent |                 |                 |                         |
-|                                | form: results     |                 |                 |                         |
-|                                | independent of    |                 |                 |                         |
-|                                | the MPI rank      |                 |                 |                         |
-|                                | count.            |                 |                 |                         |
-+--------------------------------+-------------------+-----------------+-----------------+-------------------------+
-| ``mesh/layout_invariant_mode`` | ``block``: sums   | ``block``       | ``tile``        | ``mesh/mesh.cpp``       |
-|                                | per MeshBlock     |                 | (recommended)   | (constructor)           |
-|                                | (independent of   |                 |                 |                         |
-|                                | the rank count    |                 |                 |                         |
-|                                | for fixed         |                 |                 |                         |
-|                                | MeshBlocks);      |                 |                 |                         |
-|                                | ``exact``: every  |                 |                 |                         |
-|                                | cell term exact   |                 |                 |                         |
-|                                | (about +8 %       |                 |                 |                         |
-|                                | cost); ``tile``:  |                 |                 |                         |
-|                                | fixed N x N       |                 |                 |                         |
-|                                | lateral tiles as  |                 |                 |                         |
-|                                | the summation and |                 |                 |                         |
-|                                | multigrid units,  |                 |                 |                         |
-|                                | so results do not |                 |                 |                         |
-|                                | depend on the     |                 |                 |                         |
-|                                | MeshBlock layout  |                 |                 |                         |
-|                                | either (with ray  |                 |                 |                         |
-|                                | walls in theta:   |                 |                 |                         |
-|                                | one MeshBlock     |                 |                 |                         |
-|                                | along x2).        |                 |                 |                         |
-+--------------------------------+-------------------+-----------------+-----------------+-------------------------+
-| ``rad_vet/vet_gd_band_ring``   | Lend the band     | on where it     | A100 sp wedges: | ``rad_vet/rad_vet.cpp`` |
-|                                | intensities per   | applies, off on | ``true``        | (constructor)           |
-|                                | shell from a few  | the raw sp band |                 |                         |
-|                                | slabs: same       | (read only when |                 |                         |
-|                                | results, less GPU | named)          |                 |                         |
-|                                | memory (Running   |                 |                 |                         |
-|                                | the code: GPU     |                 |                 |                         |
-|                                | memory).          |                 |                 |                         |
-+--------------------------------+-------------------+-----------------+-----------------+-------------------------+
-| ``mesh/layout_tile``           | Tile size N for   | none            | ``128``         | ``mesh/mesh.cpp``       |
-|                                | ``tile`` mode;    |                 |                 | (constructor)           |
-|                                | required with it. |                 |                 |                         |
-|                                | Needs one         |                 |                 |                         |
-|                                | MeshBlock along   |                 |                 |                         |
-|                                | x1 and N dividing |                 |                 |                         |
-|                                | ``<meshblock>``   |                 |                 |                         |
-|                                | nx2 and nx3.      |                 |                 |                         |
-+--------------------------------+-------------------+-----------------+-----------------+-------------------------+
-| ``mesh/nghost``                | Ghost cells; the  | 3 on a fresh    | all: ``3``      | ``mesh/mesh.cpp``       |
-|                                | face line solves  | VET run         |                 | (constructor)           |
-|                                | across MeshBlocks |                 |                 |                         |
-|                                | need >= 3.        |                 |                 |                         |
-+--------------------------------+-------------------+-----------------+-----------------+-------------------------+
-| ``meshblock/nx1``, ``nx2``,    | MeshBlock size.   | = mesh          | per deck        | ``mesh/mesh.cpp``       |
-| ``nx3``                        | On spherical      |                 |                 | (constructor)           |
-|                                | polar and the     |                 |                 |                         |
-|                                | cubed sphere nx1  |                 |                 |                         |
-|                                | must equal        |                 |                 |                         |
-|                                | ``<mesh>/nx1``    |                 |                 |                         |
-|                                | (FATAL            |                 |                 |                         |
-|                                | otherwise); tile  |                 |                 |                         |
-|                                | mode needs it on  |                 |                 |                         |
-|                                | every mesh.       |                 |                 |                         |
-+--------------------------------+-------------------+-----------------+-----------------+-------------------------+
++--------------------------------+-------------------+-----------------+-----------------+----------------------------------------+
+| key                            | meaning           | default         | production      | read in                                |
++================================+===================+=================+=================+========================================+
+| ``mesh/layout_invariant``      | Global and shell  | true            | all: ``true``   | ``mesh/mesh.cpp`` (constructor)        |
+|                                | sums in exact,    |                 |                 |                                        |
+|                                | order-independent |                 |                 |                                        |
+|                                | form: results     |                 |                 |                                        |
+|                                | independent of    |                 |                 |                                        |
+|                                | the MPI rank      |                 |                 |                                        |
+|                                | count.            |                 |                 |                                        |
++--------------------------------+-------------------+-----------------+-----------------+----------------------------------------+
+| ``mesh/layout_invariant_mode`` | ``block``: sums   | ``block``       | ``tile``        | ``mesh/mesh.cpp`` (constructor)        |
+|                                | per MeshBlock     |                 | (recommended)   |                                        |
+|                                | (independent of   |                 |                 |                                        |
+|                                | the rank count    |                 |                 |                                        |
+|                                | for fixed         |                 |                 |                                        |
+|                                | MeshBlocks);      |                 |                 |                                        |
+|                                | ``exact``: every  |                 |                 |                                        |
+|                                | cell term exact   |                 |                 |                                        |
+|                                | (about +8 %       |                 |                 |                                        |
+|                                | cost); ``tile``:  |                 |                 |                                        |
+|                                | fixed N x N       |                 |                 |                                        |
+|                                | lateral tiles as  |                 |                 |                                        |
+|                                | the summation and |                 |                 |                                        |
+|                                | multigrid units,  |                 |                 |                                        |
+|                                | so results do not |                 |                 |                                        |
+|                                | depend on the     |                 |                 |                                        |
+|                                | MeshBlock layout  |                 |                 |                                        |
+|                                | either (with ray  |                 |                 |                                        |
+|                                | walls in theta:   |                 |                 |                                        |
+|                                | one MeshBlock     |                 |                 |                                        |
+|                                | along x2).        |                 |                 |                                        |
++--------------------------------+-------------------+-----------------+-----------------+----------------------------------------+
+| ``rad_vet/vet_gd_band_ring``   | Lend the band     | on where it     | A100 sp wedges: | ``rad_vet/rad_vet_params_closure.cpp`` |
+|                                | intensities per   | applies         | ``true``        | (constructor)                          |
+|                                | shell from a few  |                 |                 |                                        |
+|                                | slabs: same       |                 |                 |                                        |
+|                                | results, less GPU |                 |                 |                                        |
+|                                | memory (Running   |                 |                 |                                        |
+|                                | the code: GPU     |                 |                 |                                        |
+|                                | memory).          |                 |                 |                                        |
++--------------------------------+-------------------+-----------------+-----------------+----------------------------------------+
+| ``mesh/layout_tile``           | Tile size N for   | none            | ``128``         | ``mesh/mesh.cpp`` (constructor)        |
+|                                | ``tile`` mode;    |                 |                 |                                        |
+|                                | required with it. |                 |                 |                                        |
+|                                | Needs one         |                 |                 |                                        |
+|                                | MeshBlock along   |                 |                 |                                        |
+|                                | x1 and N dividing |                 |                 |                                        |
+|                                | ``<meshblock>``   |                 |                 |                                        |
+|                                | nx2 and nx3.      |                 |                 |                                        |
++--------------------------------+-------------------+-----------------+-----------------+----------------------------------------+
+| ``mesh/nghost``                | Ghost cells; the  | 3 on a fresh    | all: ``3``      | ``mesh/mesh.cpp`` (constructor)        |
+|                                | face line solves  | VET run         |                 |                                        |
+|                                | across MeshBlocks |                 |                 |                                        |
+|                                | need >= 3.        |                 |                 |                                        |
++--------------------------------+-------------------+-----------------+-----------------+----------------------------------------+
+| ``meshblock/nx1``, ``nx2``,    | MeshBlock size.   | = mesh          | per deck        | ``mesh/mesh.cpp`` (constructor)        |
+| ``nx3``                        | On spherical      |                 |                 |                                        |
+|                                | polar and the     |                 |                 |                                        |
+|                                | cubed sphere nx1  |                 |                 |                                        |
+|                                | must equal        |                 |                 |                                        |
+|                                | ``<mesh>/nx1``    |                 |                 |                                        |
+|                                | (FATAL            |                 |                 |                                        |
+|                                | otherwise); tile  |                 |                 |                                        |
+|                                | mode needs it on  |                 |                 |                                        |
+|                                | every mesh.       |                 |                 |                                        |
++--------------------------------+-------------------+-----------------+-----------------+----------------------------------------+
 
 Changing the mode changes the round-off of the sums: switch at a fresh start, or accept a
 round-off change at the restart.
@@ -656,88 +645,264 @@ round-off change at the restart.
 Output and verbosity
 --------------------
 
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
-| key                         | meaning                | default         | production      | read in                   |
-+=============================+========================+=================+=================+===========================+
-| ``rad_vet/clean_verbose``   | 0: the ``CLEAN cycle`` | 0 (read only    | all: ``1``      | ``rad_vet/rad_vet.cpp``   |
-|                             | lines,                 | when named)     |                 | (constructor)             |
-|                             | ``CLEAN WARNING``      |                 |                 |                           |
-|                             | lines and event lines  |                 |                 |                           |
-|                             | (``CLEAN WORST``,      |                 |                 |                           |
-|                             | ``GNSW``,              |                 |                 |                           |
-|                             | ``BICGSTAB``, ``KPOS`` |                 |                 |                           |
-|                             | without a face slope); |                 |                 |                           |
-|                             | 1: also the per-solve  |                 |                 |                           |
-|                             | diagnostics            |                 |                 |                           |
-|                             | (``CLEAN MCAP``,       |                 |                 |                           |
-|                             | ``OLDVEC``, ``FWB``,   |                 |                 |                           |
-|                             | ``FCONE``,             |                 |                 |                           |
-|                             | ``LZ``/``LZB``,        |                 |                 |                           |
-|                             | ``WBFCT``, ``KPOS``,   |                 |                 |                           |
-|                             | ``KREAL``, ``XPAT``,   |                 |                 |                           |
-|                             | the ``XT`` write-back  |                 |                 |                           |
-|                             | closure, the ray cut); |                 |                 |                           |
-|                             | 2: also a              |                 |                 |                           |
-|                             | ``CLEAN PASS`` line    |                 |                 |                           |
-|                             | per pass of every      |                 |                 |                           |
-|                             | solve (Krylov its, the |                 |                 |                           |
-|                             | changes de / dv, the   |                 |                 |                           |
-|                             | tolerance they are     |                 |                 |                           |
-|                             | tested against, the    |                 |                 |                           |
-|                             | round-off levels fe /  |                 |                 |                           |
-|                             | fv, ``clos`` /         |                 |                 |                           |
-|                             | ``opac`` where the     |                 |                 |                           |
-|                             | pass took a closure /  |                 |                 |                           |
-|                             | opacity refresh).      |                 |                 |                           |
-|                             | ``CLEAN WARNING``      |                 |                 |                           |
-|                             | lines always print.    |                 |                 |                           |
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
-| ``rad_vet/floorcap_report`` | Print the cumulative   | 0 = never       | all: ``25``     | ``rad_vet/rad_vet.cpp``   |
-|                             | floor-gas cap counters |                 |                 | (constructor)             |
-|                             | every N cycles.        |                 |                 |                           |
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
-| ``time/ndiag``              | Print the cycle line   | 1               | all: ``50``     | ``driver/driver.cpp``     |
-|                             | every N cycles.        |                 |                 |                           |
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
-| ``hydro/floor_audit``       | Print the floor events | 0               | all: ``1``      | ``hydro/dual_energy.cpp`` |
-|                             | and their payment      |                 |                 |                           |
-|                             | every N cycles         |                 |                 |                           |
-|                             | (``floor_audit cycle`` |                 |                 |                           |
-|                             | lines). Needs          |                 |                 |                           |
-|                             | ``eos = general``.     |                 |                 |                           |
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
-| ``hydro/floor_audit_worst`` | With each              | false (read     | not named       | ``hydro/dual_energy.cpp`` |
-|                             | ``floor_audit``        | only when       | (diagnosis)     |                           |
-|                             | report, every rank     | named)          |                 |                           |
-|                             | prints its cell of the |                 |                 |                           |
-|                             | largest energy the     |                 |                 |                           |
-|                             | inversion created      |                 |                 |                           |
-|                             | ((E_after - E_before)  |                 |                 |                           |
-|                             | x vol): its place and  |                 |                 |                           |
-|                             | its density, total /   |                 |                 |                           |
-|                             | internal energy,       |                 |                 |                           |
-|                             | kinetic energy by      |                 |                 |                           |
-|                             | component and          |                 |                 |                           |
-|                             | potential before and   |                 |                 |                           |
-|                             | after                  |                 |                 |                           |
-|                             | (``floor_audit_worst`` |                 |                 |                           |
-|                             | lines). No effect on   |                 |                 |                           |
-|                             | the state. Needs       |                 |                 |                           |
-|                             | ``floor_audit``.       |                 |                 |                           |
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
-| ``hydro/dt_report``         | Print every N cycles   | 0 (read only    | not named       | ``hydro/hydro.cpp``       |
-|                             | which cell and term    | when named)     |                 |                           |
-|                             | set dt (``DTREP``,     |                 |                 |                           |
-|                             | ``DTREG``; Running the |                 |                 |                           |
-|                             | code: the time-step    |                 |                 |                           |
-|                             | report). No effect on  |                 |                 |                           |
-|                             | the state.             |                 |                 |                           |
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
-| ``time/nan_check_cycles``   | Check the state for    | 100             | all: ``100``    | ``driver/driver.cpp``     |
-|                             | NaN every N cycles and |                 |                 |                           |
-|                             | stop if found (0 =     |                 |                 |                           |
-|                             | off).                  |                 |                 |                           |
-+-----------------------------+------------------------+-----------------+-----------------+---------------------------+
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+| key                         | meaning                | default         | production      | read in                               |
++=============================+========================+=================+=================+=======================================+
+| ``rad_vet/clean_verbose``   | 0: the ``CLEAN cycle`` | 0 (read only    | all: ``1``      | ``rad_vet/rad_vet_params.cpp``        |
+|                             | lines,                 | when named)     |                 | (constructor)                         |
+|                             | ``CLEAN WARNING``      |                 |                 |                                       |
+|                             | lines and event lines  |                 |                 |                                       |
+|                             | (``CLEAN WORST``,      |                 |                 |                                       |
+|                             | ``GNSW``, ``KPOS``     |                 |                 |                                       |
+|                             | without a face slope); |                 |                 |                                       |
+|                             | 1: also the per-solve  |                 |                 |                                       |
+|                             | diagnostics            |                 |                 |                                       |
+|                             | (``CLEAN MCAP``,       |                 |                 |                                       |
+|                             | ``OLDVEC``, ``FWB``,   |                 |                 |                                       |
+|                             | ``FCONE``,             |                 |                 |                                       |
+|                             | ``LZ``/``LZB``,        |                 |                 |                                       |
+|                             | ``WBFCT``, ``KPOS``,   |                 |                 |                                       |
+|                             | ``KREAL``, ``XPAT``,   |                 |                 |                                       |
+|                             | the ``XT`` write-back  |                 |                 |                                       |
+|                             | closure, the ray cut); |                 |                 |                                       |
+|                             | 2: also a              |                 |                 |                                       |
+|                             | ``CLEAN PASS`` line    |                 |                 |                                       |
+|                             | per pass of every      |                 |                 |                                       |
+|                             | solve (Krylov its, the |                 |                 |                                       |
+|                             | changes de / dv, the   |                 |                 |                                       |
+|                             | tolerance they are     |                 |                 |                                       |
+|                             | tested against, the    |                 |                 |                                       |
+|                             | round-off levels fe /  |                 |                 |                                       |
+|                             | fv, ``clos`` /         |                 |                 |                                       |
+|                             | ``opac`` where the     |                 |                 |                                       |
+|                             | pass took a closure /  |                 |                 |                                       |
+|                             | opacity refresh).      |                 |                 |                                       |
+|                             | ``CLEAN WARNING``      |                 |                 |                                       |
+|                             | lines always print.    |                 |                 |                                       |
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+| ``rad_vet/floorcap_report`` | Print the cumulative   | 0 = never       | all: ``25``     | ``rad_vet/rad_vet_params_matter.cpp`` |
+|                             | floor-gas cap counters |                 |                 | (constructor)                         |
+|                             | every N cycles.        |                 |                 |                                       |
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+| ``time/ndiag``              | Print the cycle line   | 1               | all: ``50``     | ``driver/driver.cpp``                 |
+|                             | every N cycles.        |                 |                 |                                       |
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+| ``hydro/floor_audit``       | Print the floor events | 0               | all: ``1``      | ``hydro/dual_energy.cpp``             |
+|                             | and their payment      |                 |                 |                                       |
+|                             | every N cycles         |                 |                 |                                       |
+|                             | (``floor_audit cycle`` |                 |                 |                                       |
+|                             | lines). Needs          |                 |                 |                                       |
+|                             | ``eos = general``.     |                 |                 |                                       |
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+| ``hydro/floor_audit_worst`` | With each              | false (read     | not named       | ``hydro/dual_energy.cpp``             |
+|                             | ``floor_audit``        | only when       | (diagnosis)     |                                       |
+|                             | report, every rank     | named)          |                 |                                       |
+|                             | prints its cell of the |                 |                 |                                       |
+|                             | largest energy the     |                 |                 |                                       |
+|                             | inversion created      |                 |                 |                                       |
+|                             | ((E_after - E_before)  |                 |                 |                                       |
+|                             | x vol): its place and  |                 |                 |                                       |
+|                             | its density, total /   |                 |                 |                                       |
+|                             | internal energy,       |                 |                 |                                       |
+|                             | kinetic energy by      |                 |                 |                                       |
+|                             | component and          |                 |                 |                                       |
+|                             | potential before and   |                 |                 |                                       |
+|                             | after                  |                 |                 |                                       |
+|                             | (``floor_audit_worst`` |                 |                 |                                       |
+|                             | lines). No effect on   |                 |                 |                                       |
+|                             | the state. Needs       |                 |                 |                                       |
+|                             | ``floor_audit``.       |                 |                 |                                       |
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+| ``hydro/dt_report``         | Print every N cycles   | 0 (read only    | not named       | ``hydro/hydro.cpp``                   |
+|                             | which cell and term    | when named)     |                 |                                       |
+|                             | set dt (``DTREP``,     |                 |                 |                                       |
+|                             | ``DTREG``; Running the |                 |                 |                                       |
+|                             | code: the time-step    |                 |                 |                                       |
+|                             | report). No effect on  |                 |                 |                                       |
+|                             | the state.             |                 |                 |                                       |
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+| ``time/nan_check_cycles``   | Check the state for    | 100             | all: ``100``    | ``driver/driver.cpp``                 |
+|                             | NaN every N cycles and |                 |                 |                                       |
+|                             | stop if found (0 =     |                 |                 |                                       |
+|                             | off).                  |                 |                 |                                       |
++-----------------------------+------------------------+-----------------+-----------------+---------------------------------------+
+
+Removed keys
+------------
+
+These keys were removed: the code runs the value given here (the production value, one code path).
+**Naming a removed key with that value is accepted; another value stops the run (FATAL), with
+the name of the value the code runs.** This holds for decks, the command line and values
+stored in restart files (also defaults an older code recorded). It is also the only protection
+of decks this list was not checked against: the proof that nothing used another value covers the
+test suite, the star templates, the RSG / HG / HG262 / R136 continuations and the IA123 decks,
+not every deck of a user. A restart file of an older code that does not hold such a key
+prints one NOTE with the keys and values the code runs (where an older restart default was
+another value: FATAL with the key to name).
+
++---------------------------------+---------------------------------+------------------------------+
+| removed key = value             |                                 |                              |
++=================================+=================================+==============================+
+| ``be_legacy`` = ``false``       | ``clean_bc_area`` = ``true``    | ``clean_bc`` = ``halfrange`` |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_bicg_stall_fac`` =      | ``clean_bicg_stall_its`` =      | ``clean_conv_est_f`` =       |
+| ``0.99``                        | ``0``                           | ``false``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_cs_lz_abs`` = ``2``     | ``clean_cs_lz_bnd_free`` =      | ``clean_face_area`` =        |
+|                                 | ``true``                        | ``false``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_face_hctau`` = ``true`` | ``clean_face_jse_cell`` =       | ``clean_face_jse`` =         |
+|                                 | ``false``                       | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_face_opac`` =           | ``clean_fill_cs_remap`` =       | ``clean_fill_passes`` =      |
+| ``harmonic``                    | ``false``                       | ``8``                        |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_gas_newton_switch_min`` | ``clean_gas_newton_switch`` =   | ``clean_gas_secant`` =       |
+| = ``6``                         | ``4``                           | ``max_stage2``               |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_gas_tfloor`` = ``true`` | ``clean_halo_direct`` =         | ``clean_init_cnorm`` =       |
+|                                 | ``true``                        | ``1e-10``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_layout`` =              | ``clean_lin_cnorm`` = ``1e-10`` | ``clean_lin_pass`` =         |
+| ``staggered``                   |                                 | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_maxpic`` = ``12``       | ``clean_nl_norm`` = ``global``  | ``clean_pass_damp`` = ``0``  |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_pred_stage`` =          | ``clean_pred_xch`` = ``true``   | ``clean_predict`` = ``true`` |
+| ``false``                       |                                 |                              |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_ray_cut_margin`` =      | ``clean_ray_cut_r`` = ``0.01``  | ``clean_ray_cut_taumin`` =   |
+| ``10``                          |                                 | ``0``                        |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_rays`` = ``sc``         | ``clean_retry_budget`` =        | ``clean_ring_jmin`` =        |
+|                                 | ``false``                       | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_rot_ring_fill_rst`` =   | ``clean_rst_mshare`` = ``true`` | ``clean_source_convex`` =    |
+| ``true``                        |                                 | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_central`` =        | ``clean_stag_colflux`` =        | ``clean_stag_csvec_radial``  |
+| ``true``                        | ``false``                       | = ``true``                   |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_eicarry`` =        | ``clean_stag_fcone_gas`` =      | ``clean_stag_flim`` =        |
+| ``true``                        | ``false``                       | ``false``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_fs_line`` =        | ``clean_stag_fs_pcr_cs`` =      | ``clean_stag_fs_pcr`` =      |
+| ``pcr``                         | ``true``                        | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_fwb_cart`` =       | ``clean_stag_fwb_line`` =       | ``clean_stag_fwb_stage`` =   |
+| ``false``                       | ``false``                       | ``false``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_fwb_t2`` =         | ``clean_stag_lat_sums`` =       | ``clean_stag_mg_color`` =    |
+| ``false``                       | ``true``                        | ``mirror``                   |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_opac_drag`` =      | ``clean_stag_opac_update`` =    | ``clean_stag_pcr`` =         |
+| ``true``                        | ``true``                        | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_rayratio`` =       | ``clean_stag_tie_gid`` =        | ``clean_stag_vimp_cs`` =     |
+| ``false``                       | ``true``                        | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stag_vimp`` = ``true``  | ``clean_stag_xdonor`` = ``lag`` | ``clean_stag_xsrc`` =        |
+|                                 |                                 | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_stall_fac`` = ``0.5``   | ``clean_troot_rtol`` =          | ``clean_vel_settled`` =      |
+|                                 | ``1e-13``                       | ``false``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_w_face_min`` =          | ``clean_w_fse_tau`` = ``true``  | ``clean_w_fse`` = ``true``   |
+| ``false``                       |                                 |                              |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_wb_fct`` = ``true``     | ``clean_wb_floor_fail`` =       | ``clean_xt_cons`` =          |
+|                                 | ``false``                       | ``false``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``clean_xt_exact`` = ``cons``   | ``clean_xt_norm`` = ``false``   | ``dbg_energy_tally`` =       |
+|                                 |                                 | ``false``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``doppler_face`` = ``donor``    | ``implicit_am_cs`` = ``true``   | ``implicit_enthalpy`` =      |
+|                                 |                                 | ``plm``                      |
++---------------------------------+---------------------------------+------------------------------+
+| ``implicit_pos_floor_cons`` =   | ``implicit_pos_floor_gas_keep`` | ``implicit_pos_gas_cons`` =  |
+| ``true``                        | = ``1``                         | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``implicit_pos_gas_frac`` =     | ``implicit_pos_gas`` = ``true`` | ``implicit_predictor_tcap``  |
+| ``1e-3``                        |                                 | = ``1.1``                    |
++---------------------------------+---------------------------------+------------------------------+
+| ``implicit_predictor`` =        | ``polar_ring_avg`` = ``false``  | ``restart_pack_per_mb`` =    |
+| ``step``                        |                                 | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``scheme`` = ``clean``          | ``time2_cfl_post`` = ``true``   | ``time2_face_fct`` =         |
+|                                 |                                 | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``time2_fref_wacc`` = ``true``  | ``time2_gtime_mom`` = ``true``  | ``time2_k1_redist`` = ``0``  |
++---------------------------------+---------------------------------+------------------------------+
+| ``time2_k1_stiff`` = ``0``      | ``vet_col_lat_cut_thin`` =      | ``vet_gd_halo_compact`` =    |
+|                                 | ``1``                           | ``2``                        |
++---------------------------------+---------------------------------+------------------------------+
+| ``vet_gd_rotate_align`` =       | ``vet_gd_rotate_stretch`` =     | ``vet_gd_rotate_t0`` = ``0`` |
+| ``true``                        | ``0.02``                        |                              |
++---------------------------------+---------------------------------+------------------------------+
+| ``vet_gd_rotate_xfade_m`` =     | ``vet_gd_twin`` = ``false``     | ``vet_interp`` = ``auto``    |
+| ``0``                           |                                 |                              |
++---------------------------------+---------------------------------+------------------------------+
+| ``vet_rotate_avg_ema_change_j`` | ``vet_rotate_avg_ema_change`` = | ``vet_rotate_avg_ema_dema``  |
+| = ``true``                      | ``0.05``                        | = ``false``                  |
++---------------------------------+---------------------------------+------------------------------+
+| ``vet_rotate_avg_ema_diag`` =   | ``vet_rotate_avg_ema_lc`` =     | ``vet_rotate_avg_ema_tau`` = |
+| ``0``                           | ``0``                           | ``0``                        |
++---------------------------------+---------------------------------+------------------------------+
+| ``vet_rotate_avg_weight`` =     | ``vet_scatter_form`` = ``ma``   | ``vet_scatter_j`` =          |
+| ``j``                           |                                 | ``relaxed``                  |
++---------------------------------+---------------------------------+------------------------------+
+| ``vet_seg_plateau`` = ``false`` | ``vet_seg`` = ``jump``          | ``vet_source_noesrc_h2be`` = |
+|                                 |                                 | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+| ``vet_tensor`` = ``full``       | ``zalesak_active`` = ``true``   | ``zalesak_halo_skip`` =      |
+|                                 |                                 | ``true``                     |
++---------------------------------+---------------------------------+------------------------------+
+
+Removed keys whose value follows from the run (FATAL when named otherwise):
+
++----------------------------------------------+----------------------------------------------+
+| key                                          | the rule                                     |
++==============================================+==============================================+
+| ``clean_stag_fwb``, ``clean_stag_freal``     | as ``clean_consistency``                     |
++----------------------------------------------+----------------------------------------------+
+| ``clean_stag_fschur``                        | true where the mesh allows it (nghost >= 3,  |
+|                                              | MeshBlocks long enough), else the cubed      |
+|                                              | sphere iterates its seams and any other      |
+|                                              | multi-block line is FATAL                    |
++----------------------------------------------+----------------------------------------------+
+| ``clean_stag_fsweeps``                       | 1; 64 on a cubed sphere without fschur       |
++----------------------------------------------+----------------------------------------------+
+| ``clean_stag_fwb_ring``                      | true on 3-D spherical polar with a periodic  |
+|                                              | phi and the rays                             |
++----------------------------------------------+----------------------------------------------+
+| ``vet_gd_rotate_axis``                       | ``3d`` on the cubed sphere, ``z`` on         |
+|                                              | spherical polar                              |
++----------------------------------------------+----------------------------------------------+
+| ``vet_gd_rotate_xfade``                      | true with a mean of sets rotating in time,   |
+|                                              | not with ``clean_rot_ring = jump``; on a     |
+|                                              | Cartesian mesh with                          |
+|                                              | ``clean_rot_ring = live`` only               |
++----------------------------------------------+----------------------------------------------+
+| ``vet_rotate_advance``                       | true on the curved meshes and with           |
+|                                              | ``clean_rot_ring``, else false               |
++----------------------------------------------+----------------------------------------------+
+| ``vet_rotate_avg_ema_wb``                    | true on the curved meshes, else false        |
++----------------------------------------------+----------------------------------------------+
+| ``vet_gd_band_global``                       | true on a full sphere                        |
++----------------------------------------------+----------------------------------------------+
+| ``vet_gd_rotate_slope``,                     | ``correct``, 1 - 1/sqrt 2 for a Cartesian    |
+| ``vet_gd_rotate_slope_frac``                 | rotating set without the ring (no effect     |
+|                                              | elsewhere)                                   |
++----------------------------------------------+----------------------------------------------+
+| ``implicit_predictor_order``                 | 2; an older restart file's value is read as  |
+|                                              | the layout of its records                    |
++----------------------------------------------+----------------------------------------------+
+
+Removed without effect (named: listed at the start, any value): ``advect_split``, ``implicit_gas_src``,
+``implicit_cs2_vimp_npass``, ``implicit_vimp*``, ``implicit_recon``, ``implicit_solver``, ``implicit_offdiag``,
+``implicit_trans_limit``, ``clean_stag_upwind_central``, ``time2_enth_be``, ``time2_accept_fallback``, ``time2_adm_poslim``,
+``time2_one_pass_safety``, ``time2_pred_cap``, ``time2_vet*``, ``cs_seam_avg``, and ``vet_gd_twin_*``.
+Removed choices: ``vet_sc_kernel`` (FATAL when named).
 
 Appendix: advanced and internal keys
 ------------------------------------
@@ -748,50 +913,40 @@ bitwise restart check, and a comparison with the templates).
 
 Scheme options (in brackets the templates' values):
 
-- ``clean_stag_upwind_central`` (true), ``clean_stag_central`` (true): central advective flux within the TVD bound.
-- ``clean_face_hctau`` (true), ``clean_face_jse`` (true), ``clean_face_opac`` (``harmonic``): face values of the rays' flux, half ranges and opacity.
-- ``clean_stag_thinf`` (true), ``clean_consistency`` (true): forms of the thin-limit correction and flux bound.
-- ``clean_stag_fwb`` (true), ``clean_stag_fcone`` (true), ``clean_stag_fwb_ring`` (1: 3-D spherical polar with periodic phi only): well-balanced face rows, cone limit \|F\| <= cE, ring projection.
-- ``clean_stag_fcone_gas`` (false): the cone cut's momentum is not given to the gas.
+- ``clean_consistency`` (true with the rays), ``clean_stag_thinf`` (true), ``clean_stag_fcone`` (true): the flux bound by the rays, the thin-limit correction, the cone limit \|F\| <= cE.
 - ``clean_cs_lat_wb`` (default true on the cubed sphere, also on a restart whose file lacks it, with a NOTE in the log: name ``clean_cs_lat_wb=false`` to keep the old; cubed sphere only, else FATAL): a spherically symmetric radiation pressure pushes the gas along r alone, the same in every cell of a shell. Lateral faces: their cells' lateral stress sums are projected perpendicular to each cell's radial direction (without it a constant lateral force of O(dtheta^2) of the radial one, at every radius, with the cube's symmetry: the interior m = 4 pattern). Radial faces: the normal stress takes the hydro's area r^2 Omega instead of the vector area r^2 \|S\| (without it a smaller panel pattern of the radial force). Test ``shell_force_cs``.
 - ``clean_stag_fcone_lz`` (read only when named): fcone takes a cell's excess from the face families without an L_z arm first (spherical polar x1, x2; cubed sphere x1; Cartesian x3); that cut is counted and printed signed per family (``CLEAN FCONE_LZ``). The faces with an arm are scaled only where they alone exceed cE, and the gas takes their cut at the face, so L_z is exact.
 - ``clean_lz_spin`` (read only when named; needs ``clean_stag_fcone_lz``; a no-op on the cubed sphere, where ``clean_cs_lz_tel`` covers it): the L_z X of the arm faces' fcone cut, the ``clean_stag_fcone_emax`` clamp and the ``clean_wb_mcap`` cap goes to the gas as one rigid rotation dOmega = X/I, I = sum rho V R^2 (no per-cell kick; E pays the kinetic energy; ``CLEAN LZSPIN``).
 - ``clean_stag_fcone_emax`` (read only when named; needs ``clean_stag_fcone``): every inner face's F within c max(E_L, E_R), an opaque face's too. L_z-exact with ``clean_stag_fcone_lz`` + ``clean_lz_spin``.
 - ``clean_wb_mcap`` (read only when named): the write-back gives the gas the face momentum terms at the Newton passes' cap h chi_f E; the withheld momentum is printed per family (``CLEAN MCAP write-back``). L_z-exact only with ``clean_lz_spin``.
-- ``clean_stag_fwb_cart`` (read only when named; uniform Cartesian meshes only, no-op elsewhere): the well-balancing residual minus its line mean along every face direction, so ``clean_stag_fwb`` gives no net linear momentum.
-- ``clean_gas_secant`` (``max_stage2``): in the stage-2 solves the gas-exchange slope is the chord through the last pass's T where it beats the tangent by more than a derived round-off bound (16 eps of the terms of e(T) - e(T_p)), else the tangent.
-- ``clean_pred_xch`` (true): the stage-2 start blends this step's stage-1 slope and the last step's stage-2 slope by the stiffness of each cell's exchange.
 - ``clean_wb_exch_local`` (true): the write-back's cell exchange is solved exactly from the transported E (E > 0 and gas >= e(rho, tfloor) by construction); needs an EOS ``tfloor`` > 0.
-- ``clean_stag_xdonor`` (``lag``), ``clean_stag_xsrc`` (true), ``clean_stag_xdonor_freeze`` (4): donor form of the off-diagonal stress.
-- ``clean_w_fse``, ``clean_w_c0``, ``clean_w_c1``: weight of the kinetic share.
-- ``clean_xt_exact`` (``cons``), ``clean_wb_fct`` (true), ``time2_face_fct`` (true): exact exchange bookkeeping and the Zalesak limiters.
-- ``clean_stag_opac_update`` (true), ``clean_stag_opac_passes`` (3): opacities at the iterate's temperature.
-- ``clean_stag_lat_sums``, ``clean_stag_opac_drag``, ``clean_stag_tie_gid`` (all true, the defaults).
-- ``implicit_pos_floor``, ``implicit_pos_floor_cons``, ``implicit_pos_gas``, ``implicit_pos_gas_cons`` (true): E floor and gas positivity paid from the radiation. A non-finite E (a diverged iterate) is never raised: the write-back rejects the solve.
-- ``vet_seg`` (``jump``), ``vet_interp`` (``auto``), ``vet_bc_inner``, ``vet_bc_diff``, ``vet_gd_tangential``, ``vet_gd_wall_interp``, ``vet_gd_halo_compact``, ``vet_gd_allow_clamp``: ray-sweep details.
+- ``clean_cs_lz_tel`` (true on the cubed sphere): L_z by telescoping of the face momenta.
+- ``clean_stag_xdonor_freeze`` (4): the pass from which the donor form of the off-diagonal stress is held.
+- ``clean_w_c0`` (0.3), ``clean_w_c1`` (0.6): thresholds of the weight of the kinetic share.
+- ``clean_stag_opac_passes`` (3): passes with opacities at the iterate's temperature.
+- ``implicit_pos_floor`` (true): the E floor, paid from the cell's gas and its radial column. A non-finite E (a diverged iterate) is never raised: the write-back rejects the solve.
+- ``time2_gtime_slope``, ``time2_gtime_pos`` (true); ``vet_rotate_avg_ema_change_form`` (``linear``; HG: ``step``); ``vet_source_noesrc``.
+- ``vet_bc_inner``, ``vet_bc_diff``, ``vet_bc_bath``, ``vet_gd_wall_interp``, ``vet_gd_allow_clamp``, ``clean_ray_min``, ``clean_ray_cut_wait``, ``clean_rot_fuse``: ray-sweep details.
 
-Solver internals (in brackets the templates' values): ``clean_conv`` (``budget``), ``clean_conv_max`` (1e-5), ``clean_conv_kappa``,
-``clean_tol``, ``clean_tol_nl``, ``clean_maxit`` (200), ``clean_maxnl`` (200), ``clean_maxpic``,
-``clean_lin_pass``, ``clean_lin_cnorm``, ``clean_init_cnorm``, ``clean_gas_newton_switch``,
-``clean_gas_newton_switch_min``, ``clean_stall_fac``, ``clean_troot_rtol``, ``clean_pc_sweep`` (``rb``; default ``sym``),
-``clean_clos1_budget``, ``clean_vel_settled``, ``clean_bud_maxnorm`` (speed keys, default false: the
-closure pass solved in the budget norm; the velocity update only in a pass that can end the
-solve, which is not well-balanced (``wb_sp``, ``wb_cs`` vmax/cs 2e-4): do not use; the budget test
-in the per-cell max norm), ``clean_stag_mg_color``, ``clean_stag_mg_levels`` (default 2, the levels
-of the staggered multigrid preconditioner), ``clean_stag_fs_line``, ``clean_stag_pcr``, ``clean_halo_direct`` (only true),
-``implicit_predictor``, ``implicit_predictor_tcap``, ``implicit_resid_fatal``, ``time/dt_retry_views``,
-``time/dt_retry_host``, ``time/restart_refill_ghosts`` (false: restarts are bitwise).
+Solver internals (in brackets the templates' values): ``clean_conv`` (``budget``), ``clean_conv_max``
+(1e-5), ``clean_conv_kappa``, ``clean_tol``, ``clean_tol_nl``, ``clean_maxit`` (200), ``clean_maxnl`` (200),
+``clean_pc_sweep`` (``rb``; default ``sym``), ``clean_stag_mg_levels`` (default 2, the levels of the
+staggered multigrid preconditioner), ``clean_clos1_budget`` (true), ``clean_bud_maxnorm`` (true)
+(false: the closure pass solved in the strict norm; the budget test in the L2 norm),
+``implicit_resid_fatal``, ``time/dt_retry_views``, ``time/dt_retry_host``, ``time/restart_refill_ghosts``
+(false: restarts are bitwise).
 
-Removed (only false / 0 accepted): ``clean_stag_kpat``, ``time2_k1_redist`` (old restart files
-may store 0.1: name it 0). Not recommended: ``time2_k1_stiff`` (keep 0).
+Tests and diagnostics: ``clean_dbg_inf``, ``time2_dbg_fail``, ``dbg_gas_force``, ``clean_wb_floor_diag``,
+``implicit_timers``. State kept in restart files: ``rst_version``, ``clean_ray_cut_now``,
+``clean_ray_cut_count``. Number of ``<rad_vet>`` keys the code reads: 137 (user 73, physics 32,
+scheme and solver 19, tests 8, pgen / state 5).
 
 Removed study and debug keys stop the run with a message when named with another value than
-their old default (``CleanPreflight`` in ``rad_vet/rad_vet_clean.cpp`` lists them); keys of the
-removed solvers that old decks and restart files carry are accepted without effect.
+their old default (``CheckKeys`` in ``rad_vet/rad_vet_params.cpp`` lists them); keys of the
+removed solvers that old decks and restart files carry are accepted without effect (listed at
+the start): also ``vet_col_*`` (``vet_col_axis`` only ``radial``, ``vet_col_every`` only 1), ``vet_every`` (only 1), ``vet_source``, ``vet_gd_replace``,
+``vet_gd_tangential``, ``vet_gd_rotate_slope_reuse``, ``time2_vet_source*`` and ``cs_vertex_mono*``.
+``vet_gd`` is read only where ``clean_closure`` is ``eddington`` or ``sphere`` (true: the rays' arrays
+are set up).
 
-Named in the templates but without effect with them (fixed rays, spherical polar): the
-rotation keys other than ``vet_gd_rotate_dt``, the cubed-sphere keys (``clean_cs_lz_tel``,
-``cs_cross_mono``, ``cs_vertex_mono``, ``mesh/cs_*``), ``vet_source``, ``vet_scatter_j`` and the other
-relaxed-source keys (``clean_ray_source_relaxed`` was removed: only false), ``vet_col_lat_taucut``,
-``implicit_maxit``, ``implicit_lin_maxit``, ``time2_enth_be``, ``time/dt_retry_max``. Keys that are
-never read are listed by the ``never read`` warning after the first cycle.
+Keys that are never read are listed by the ``never read`` warning after the first cycle.

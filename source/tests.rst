@@ -126,8 +126,8 @@ What the tests check
 |                      | panel)                     | optically thin rotating shell with       | largest lateral flux while |
 |                      |                            | turning rays, 8 cycles, one MeshBlock    | a MeshBlock's high face    |
 |                      |                            | per panel vs 2 x 2; again with           | took its last cell's ray   |
-|                      |                            | ``clean_ray_min = 1`` (most cells hold   | sum, ``CleanRayFace``);    |
-|                      |                            | no rays)                                 | dE, dM, dLz <= 1e-13; no   |
+|                      |                            | ``clean_ray_min = 1`` (most cells hold   | sum, ``RayFace``); dE, dM, |
+|                      |                            | no rays)                                 | dLz <= 1e-13; no           |
 |                      |                            |                                          | ``CLEAN WARNING``          |
 +----------------------+----------------------------+------------------------------------------+----------------------------+
 | ``fofc_layout_cs``   | ``fofc_cs``                | hydro shell on the cubed sphere whose    | identical; E, L_z drifts   |
@@ -179,6 +179,29 @@ What the tests check
 |                      |                            | second layout, 2 MPI ranks, restart, a   | <= 1e-13; no               |
 |                      |                            | forced dt_retry with factor 1 (full      | ``CLEAN WARNING``          |
 |                      |                            | only)                                    |                            |
++----------------------+----------------------------+------------------------------------------+----------------------------+
+| ``mhd_geneos``       | ``mhd_shell_cs``,          | ``mhd_vet`` with ``eos = general`` and   | as ``mhd_vet``             |
+|                      | ``mhd_shell_sp``,          | the ionizing table                       |                            |
+|                      | ``mhd_box``                | (``general_eos = table``), absorption on |                            |
+|                      |                            | (full only)                              |                            |
++----------------------+----------------------------+------------------------------------------+----------------------------+
+| ``mhd_radwave``      | ``mhd_wave``               | radiation-modified fast, slow and Alfven | phase speed <= 2e-3,       |
+|                      |                            | waves (Eddington closure, field at 45    | damping per radian <= 4e-3 |
+|                      |                            | deg to k) at two resolutions against the | at the finer grid; no      |
+|                      |                            | eigenmode of the gas + induction +       | ``CLEAN WARNING``          |
+|                      |                            | moment system (``vett.radmhd_root``):    |                            |
+|                      |                            | P_rad/P_gas 0.01 - 100, thin to trapped, |                            |
+|                      |                            | along x1, inclined 2-D and 3-D diagonal, |                            |
+|                      |                            | Ohm + ambipolar, ``eos = general`` (full |                            |
+|                      |                            | only)                                    |                            |
++----------------------+----------------------------+------------------------------------------+----------------------------+
+| ``mhd_wb``           | ``mhd_rhse_sp``,           | ``wb_sp`` / ``wb_cs`` under ``<mhd>``    | v / c_s <= 5e-8, monopole  |
+|                      | ``mhd_rhse_cs``,           | and on Cartesian: no field, force-free   | 0.1 <= 2e-5; restart       |
+|                      | ``mhd_rhse_ct``            | field, ``eos = general``; Cartesian      | identical                  |
+|                      |                            | ``wellbalance_dynamic``                  |                            |
+|                      |                            | (``wb_dirs = all``, ``wb_arad_md``); a   |                            |
+|                      |                            | strong monopole (its J x B truncation is |                            |
+|                      |                            | not withheld); restart (full only)       |                            |
 +----------------------+----------------------------+------------------------------------------+----------------------------+
 | ``wb_sp``, ``wb_cs`` | ``rhse_sp``, ``rhse_cs``   | grey scattering envelope in hydrostatic  | max over the run of max    |
 |                      |                            | and radiative equilibrium (spherical     |                            |
@@ -256,6 +279,17 @@ What the tests check
 |                      |                            | with GL 11 x 12 turning about z (EMA     |                            |
 |                      |                            | ring, cross-fade): fth_rot, and GL 10 x  |                            |
 |                      |                            | 12 staggered (no mirror)                 |                            |
++----------------------+----------------------------+------------------------------------------+----------------------------+
+| ``large_step``       | ``shell_sp``               | the closed rotating scattering shell of  | kinetic energy of v_r      |
+|                      |                            | ``conservation_sp`` at c dt/dx ~ 200 to  | ``KE_r`` within 10 % of    |
+|                      |                            | t = 60, 32 x 8 x 8 cells: the momentum a | 8.0e-4 (the value of 4 x   |
+|                      |                            | face flux gives the gas over one long    | finer radial cells and of  |
+|                      |                            | step                                     | half the step),            |
+|                      |                            |                                          | ``rho_min`` >= 75 (start   |
+|                      |                            |                                          | 100; 88 to 96 there),      |
+|                      |                            |                                          | energy change of the gas   |
+|                      |                            |                                          | ``dEgas`` <= 7e-4 (3.2e-4  |
+|                      |                            |                                          | measured)                  |
 +----------------------+----------------------------+------------------------------------------+----------------------------+
 | ``floor_pay``        | ``shell_sp``               | ``hydro/eos = general``, ``tfloor`` just | dE <= 1e-13; floor energy  |
 |                      |                            | above the gas temperature (the floor     | paid > 0, unpaid 0; ekin   |
@@ -402,11 +436,12 @@ fast-relaxation thermal equilibrium is ``thermal_eq``). L1 is sum \|q - q_exact\
 |                        |                       | in block mode                      |                      |
 +------------------------+-----------------------+------------------------------------+----------------------+
 | ``idort_shadow``,      | ``idort_shadow*``     | two beams at +-15 deg past an      | L1 within 5 % of     |
-| ``idort_shadow_gl``    |                       | opaque ellipse (128 x 64; ring of  | 0.0138 and 0.0126    |
-|                        |                       | 12 rays, or the general 8 x 32 set |                      |
-|                        |                       | with the beams snapped to its      |                      |
-|                        |                       | rays): E vs the exact attenuated   |                      |
-|                        |                       | beams                              |                      |
+| ``idort_shadow_gl``,   |                       | opaque ellipse (128 x 64; ring of  | 0.0138, 0.0126 and   |
+| ``idort_shadow_gd``    |                       | 12 rays, the general 8 x 32 set,   | 0.0123; gd: 162 rays |
+|                        |                       | or with ``vet_sc_set = gd`` the    |                      |
+|                        |                       | global geodesic set of 162 rays,   |                      |
+|                        |                       | the beams snapped to its rays): E  |                      |
+|                        |                       | vs the exact attenuated beams      |                      |
 +------------------------+-----------------------+------------------------------------+----------------------+
 | ``idort_cylinder``     | ``idort_cylinder``    | homogeneous emitting cylinder (rho | each L1 within 5 %   |
 |                        |                       | kappa = 10, a T^4 = 1) in vacuum,  | of 5.3e-4, 0.011,    |
@@ -465,7 +500,7 @@ Classic radiation tests
 
 The classic grey radiation tests (group ``radiation``; decks ``decks/rad_*.athinput``, ported from
 the former ``inputs/tests/rad_vet_*`` decks, removed because they used the explicit transport, to
-the production scheme: ``transport = implicit``, ``closure = vet_sc``, the key block of the
+the production scheme: ``transport = implicit``, ``closure = sc``, the key block of the
 other Cartesian decks, Marshak radiation faces).
 
 +----------------------+------------------------+--------------------------------+----------------------+
@@ -523,7 +558,7 @@ other Cartesian decks, Marshak radiation faces).
 +----------------------+------------------------+--------------------------------+----------------------+
 
 Not ported: ``beam``, ``pulse1d`` (free streaming of a set-up packet in vacuum: the gas is not
-initialised by the problem generator and the ``vet_sc`` formal solution has no source there, so
+initialised by the problem generator and the sc formal solution has no source there, so
 the packet does not move); ``jump``, ``advect_shear`` (no such ``vet_test`` in the problem
 generator); ``equil``, ``equil_table`` (= ``thermal_eq``), ``atmosphere`` (= ``nlte_*``);
 ``g5_pulse2d`` is part of ``diffusion``.
