@@ -13,7 +13,7 @@ import idort_style
 idort_style.use()
 COL = {'rad-vet': '#0072B2', 'rays': '#E69F00', 'hydro': '#009E73', 'others': '#CC79A7'}   # Okabe & Ito
 ORDER = ['rad-vet', 'rays', 'hydro', 'others']                                             # counter-clockwise from the top
-TITLE = {'bsg': 'bsg', 'm35mms': 'm35mms', 'm35zams': 'm35zams', 't9l62': 't9l62 *'}
+TITLE = {'bsg': 'M20 BSG', 'm35mms': 'M35 MMS', 'm35zams': 'M35 ZAMS', 't9l62': 'M56 LBV (radiative IC) *'}
 light = lambda c, f=0.55: tuple(1 - (1 - x)*f for x in to_rgb(c))
 D = {}
 for r in csv.DictReader(open(os.path.join(HERE, 'cost_modules.csv'))):

@@ -4,7 +4,7 @@ AthenaK VET radiation documentation
 .. raw:: html
 
    <div class="vet-hero">
-     <figure><video autoplay loop muted playsinline preload="auto" poster="_static/hero/hero_bsg_poster.png" src="_static/hero/hero_bsg.mp4" aria-label="3-D blue supergiant run: photosphere coloured by effective temperature, cut faces by radial velocity"></video><figcaption>Blue supergiant, spherical-polar wedge, 25-53 d</figcaption></figure>
+     <figure><video autoplay loop muted playsinline preload="auto" poster="_static/hero/hero_bsg_poster.png" src="_static/hero/hero_bsg.mp4" aria-label="3-D M20 BSG run (blue supergiant): photosphere coloured by effective temperature, cut faces by radial velocity"></video><figcaption>M20 BSG (blue supergiant), spherical-polar wedge, 25-53 d</figcaption></figure>
      <figure><video autoplay loop muted playsinline preload="auto" poster="_static/hero/hero_rsg_poster.png" src="_static/hero/hero_rsg.mp4" aria-label="3-D red supergiant run on the cubed sphere"></video><figcaption>Red supergiant, cubed sphere (production run of the earlier version of the scheme)</figcaption></figure>
    </div>
 
