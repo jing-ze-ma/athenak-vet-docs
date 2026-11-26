@@ -22,6 +22,16 @@ Two notes on the velocity maps. Thin nested contour lines and small speckled pat
 (most clearly in M35 MMS, also in M20 BSG and M56 LBV) may come from the interpolation between radial cells or the search for
 the photosphere; this was not examined. The M56 LBV (radiative IC) map shows mostly outflow at the photosphere.
 
+.. figure:: star_runs/hrd_dark.png
+   :alt: Hertzsprung-Russell diagram with the four star runs M20 BSG, M35 MMS, M35 ZAMS and M56 LBV
+   :width: 100%
+
+   The four star runs on the Hertzsprung-Russell diagram: time means of the luminosity through the top of the
+   domain (scaled to the whole sphere) and of the median effective temperature of the columns at
+   :math:`\tau_R = 2/3`. Windows: M20 BSG 30-57 d, M35 MMS and M35 ZAMS 5-10 d, M56 LBV 17.25-22.25 d (still evolving).
+   The spreads in time are smaller than the markers. Background: regions and tracks of Marchant & Bodensteiner
+   (2024, ARA&A 62, Fig. 2).
+
 .. figure:: star_runs/doc_strip.png
    :alt: radial velocity and effective temperature of the five stars
    :width: 100%
